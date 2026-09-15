@@ -1,0 +1,29 @@
+---
+import SiteNav from "../components/SiteNav.astro";
+import { siteStats } from "@blog/const/siteStats.js";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Blog Rites</title>
+	</head>
+	<body>
+	<SiteNav />
+
+		<h1>Site Stats</h1>
+		<ul>
+			{Object.entries(siteStats)
+				.map(([label, value]) => (
+				<li><strong>{label}:</strong> {value}</li>
+				))}
+		</ul>
+		<p>
+			This page is mostly for myself and development purposes.
+		</p>
+	</body>
+</html>

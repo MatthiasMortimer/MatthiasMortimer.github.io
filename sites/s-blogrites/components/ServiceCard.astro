@@ -1,0 +1,46 @@
+---
+export interface Props {
+	service: {
+		id: string;
+		category: string;
+		title: string;
+		icon: string;
+		shortDesc: string;
+		description: string;
+		deliverables: string[];
+		pricing: string;
+		popular?: boolean;
+	};
+}
+
+const { service } = Astro.props;
+const isTeaching = service.category === "Teaching";
+---
+
+<div class="card service-card">
+	<div>
+		<div class="card-header">
+			<span class="card-icon">{service.icon}</span>
+			<span class={`tag ${isTeaching ? "tag-teaching" : ""}`}>{service.category}</span>
+		</div>
+		<h3 class="card-title">{service.title}</h3>
+		<p class="card-desc">{service.description}</p>
+		
+		<h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); margin-top: 1rem; margin-bottom: 0.5rem;">Key Deliverables</h4>
+		<ul style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
+			{service.deliverables.map((item) => (
+				<li style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.35rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+					<span style="color: var(--color-accent-green);">✓</span> {item}
+				</li>
+			))}
+		</ul>
+	</div>
+
+	<div class="card-footer">
+		<div>
+			<span style="display: block; font-size: 0.8rem; color: var(--color-text-dim);">Pricing</span>
+			<strong style="font-size: 0.95rem; color: var(--color-text);">{service.pricing}</strong>
+		</div>
+		<a href={`/contact/?service=${service.id}`} class={`btn btn-sm ${isTeaching ? "btn-accent" : "btn-primary"}`}>Inquire</a>
+	</div>
+</div>

@@ -1,0 +1,91 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { identity } from "@const/identity.js";
+import { frontmatter as aboutPage } from "../content/pages/about.md";
+
+const about = aboutPage as {
+	title: string;
+	tagline: string;
+	intro: string[];
+	labels: Record<string, string>;
+	philosophy: { development: { title: string; body: string }; teaching: { title: string; body: string } };
+	stats: Record<string, string>;
+};
+const intro = about.intro.map((paragraph) => paragraph.replace("{name}", identity.name).replace("{location}", identity.location));
+---
+
+<BaseLayout title="About | RitesDev" description="Learn more about RitesDev, a freelance software developer and technical educator.">
+	<div style="margin-bottom: 2rem;">
+		<h1>{about.title}</h1>
+		<p style="font-size: 1.15rem; color: var(--color-accent); font-weight: 600;">
+			{about.tagline}
+		</p>
+	</div>
+
+	<div class="grid-2" style="align-items: start; gap: 2.5rem; margin-bottom: 3rem;">
+		<div>
+			{intro.map((paragraph) => <p style="font-size: 1.05rem; line-height: 1.7;">{paragraph}</p>)}
+		</div>
+
+		<div class="card" style="padding: 1.75rem;">
+			<div style="text-align: center; margin-bottom: 1.25rem;">
+				<img src={identity.avatar} alt={identity.name} style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--color-accent); margin-bottom: 0.75rem;" />
+				<h3 style="margin-bottom: 0.25rem;">{identity.name}</h3>
+				<span style="font-size: 0.9rem; color: var(--color-text-dim);">{identity.title}</span>
+			</div>
+
+			<div style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+				<h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--color-text-dim); margin-bottom: 0.75rem;">{about.labels.quickFacts}</h4>
+				<ul style="list-style-type: none; padding-left: 0;">
+					<li style="font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+						<span style="color: var(--color-text-dim);">{about.labels.location}</span>
+						<strong>{identity.location}</strong>
+					</li>
+					<li style="font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+						<span style="color: var(--color-text-dim);">{about.labels.status}</span>
+						<strong style="color: var(--color-accent-green);">{about.labels.availableStatus}</strong>
+					</li>
+					<li style="font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+						<span style="color: var(--color-text-dim);">{about.labels.responseTime}</span>
+						<strong>{about.stats["Response Time"]}</strong>
+					</li>
+				</ul>
+			</div>
+
+			<div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); text-align: center;">
+				<a href="/contact/" class="btn btn-primary btn-sm" style="width: 100%;">{about.labels.getInTouch}</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- Business & Teaching Statistics -->
+	<section style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
+		<h2 style="margin-top: 0; margin-bottom: 1.5rem;">{about.labels.metrics}</h2>
+		
+		<div class="grid-3">
+			{Object.entries(about.stats).map(([label, value]) => (
+				<div style="padding: 1rem; background: var(--color-bg); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+					<span style="display: block; font-size: 1.6rem; font-weight: bold; font-family: var(--font-mono); color: var(--color-accent); margin-bottom: 0.25rem;">{value}</span>
+					<span style="font-size: 0.9rem; color: var(--color-text-muted);">{label}</span>
+				</div>
+			))}
+		</div>
+	</section>
+
+	<!-- Teaching & Dev Philosophies -->
+	<section>
+		<h2>{about.labels.philosophy}</h2>
+
+		<div class="grid-2" style="margin-top: 1.5rem;">
+			<div class="card">
+				<h3 style="color: var(--color-accent);">{about.philosophy.development.title}</h3>
+				<p>{about.philosophy.development.body}</p>
+			</div>
+
+			<div class="card">
+				<h3 style="color: var(--color-accent-secondary);">{about.philosophy.teaching.title}</h3>
+				<p>{about.philosophy.teaching.body}</p>
+			</div>
+		</div>
+	</section>
+</BaseLayout>

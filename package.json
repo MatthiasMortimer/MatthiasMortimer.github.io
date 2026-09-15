@@ -1,0 +1,29 @@
+{
+  "name": "ritesdev-ecosystem",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-sites.mjs",
+    "predev": "npm run sync",
+    "prebuild": "npm run sync",
+    "dev": "fuser -k 4321/tcp 2>/dev/null || true; astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "editor": "npm --prefix devApps/content-editor start",
+    "post-manager": "python3 devApps/blog-post-manager/post_manager.py",
+    "devapps": "npm --prefix devApps/dev-master start"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.0.0",
+    "astro": "^7.3.1"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

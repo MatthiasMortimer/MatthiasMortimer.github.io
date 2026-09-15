@@ -1,0 +1,18 @@
+---
+import "../styles/global.css";
+import SiteSwitcher from "@ritesGlobal/components/SiteSwitcher.astro";
+---
+
+<nav class="site-nav" aria-label="Main navigation">
+	<a class="site-nav__brand" href="/blog/">
+		<span>Blog Rites</span>
+		<img src="/media/blog-logo.png" alt="" width="48" height="48" />
+	</a>
+	<div class="site-nav__links">
+		<a href="/blog/">Home</a>
+		<a href="/blog/about/">About</a>
+		<a href="/blog/blog/">Blog</a>
+		<a href="/blog/dev/">Dev</a>
+		<SiteSwitcher />
+	</div>
+</nav>

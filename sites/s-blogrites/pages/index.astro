@@ -1,0 +1,130 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ServiceCard from "../components/ServiceCard.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import TestimonialCard from "../components/TestimonialCard.astro";
+import { identity } from "@const/identity.js";
+import { frontmatter as home } from "../content/pages/index.md";
+import { frontmatter as portfolioPage } from "../content/pages/portfolio.md";
+
+const devServices = home.services.items.filter((service) => service.category === "Development");
+const teachingServices = home.services.items.filter((service) => service.category === "Teaching");
+const featuredDev = devServices[0];
+const featuredTeaching = teachingServices[0];
+const featuredProjects = portfolioPage.projects.slice(0, 2);
+---
+
+<BaseLayout>
+	<!-- Hero Section -->
+	<section class="hero">
+		<div class="hero__content">
+			<div style="margin-bottom: 1rem;">
+				<span class="tag tag-green">● {identity.status}</span>
+			</div>
+			<h1 class="hero__title">{identity.fullName}</h1>
+			<p class="hero__subtitle">{identity.title}</p>
+			<p class="hero__description">{identity.tagline}</p>
+			<div class="hero__actions">
+				<a href="/services/" class="btn btn-primary">{home.hero.explore}</a>
+				<a href="/portfolio/" class="btn btn-secondary">{home.hero.work}</a>
+				<a href="/contact/" class="btn btn-accent">{home.hero.mentorship}</a>
+			</div>
+		</div>
+		<div class="hero__image">
+			<img src="/media/hero-illustration.svg" alt="Workspace illustration placeholder" />
+		</div>
+	</section>
+
+	<!-- Dual Expertise Overview -->
+	<section>
+		<div class="section-header">
+			<h2>{home.overview.title}</h2>
+			<p>{home.overview.description}</p>
+		</div>
+
+		<div class="grid-2">
+			<div class="card" style="border-left: 4px solid var(--color-accent);">
+				<div class="card-header">
+					<span class="card-icon">💻</span>
+					<span class="tag">{home.overview.development.tag}</span>
+				</div>
+				<h3>{home.overview.development.title}</h3>
+				<p>{home.overview.development.body}</p>
+				<div style="margin-top: auto; padding-top: 1rem;">
+					<a href="/services/#dev" class="btn btn-secondary btn-sm">{home.overview.development.link}</a>
+				</div>
+			</div>
+
+			<div class="card" style="border-left: 4px solid var(--color-accent-secondary);">
+				<div class="card-header">
+					<span class="card-icon">🎓</span>
+					<span class="tag tag-teaching">{home.overview.teaching.tag}</span>
+				</div>
+				<h3>{home.overview.teaching.title}</h3>
+				<p>{home.overview.teaching.body}</p>
+				<div style="margin-top: auto; padding-top: 1rem;">
+					<a href="/services/#teaching" class="btn btn-secondary btn-sm">{home.overview.teaching.link}</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Featured Services -->
+	<section>
+		<div class="section-header">
+			<h2>{home.services.title}</h2>
+			<p>{home.services.description}</p>
+		</div>
+
+		<div class="grid-2">
+			<ServiceCard service={featuredDev} />
+			<ServiceCard service={featuredTeaching} />
+		</div>
+
+		<div style="text-align: center; margin-top: 1.5rem;">
+			<a href="/services/" class="btn btn-secondary">{home.services.link}</a>
+		</div>
+	</section>
+
+	<!-- Featured Projects -->
+	<section>
+		<div class="section-header">
+			<h2>{home.projects.title}</h2>
+			<p>{home.projects.description}</p>
+		</div>
+
+		<div class="grid-2">
+			{featuredProjects.map((project) => (
+				<ProjectCard project={project} />
+			))}
+		</div>
+
+		<div style="text-align: center; margin-top: 1.5rem;">
+			<a href="/portfolio/" class="btn btn-secondary">{home.projects.link}</a>
+		</div>
+	</section>
+
+	<!-- Testimonials -->
+	<section>
+		<div class="section-header">
+			<h2>{home.testimonials.title}</h2>
+			<p>{home.testimonials.description}</p>
+		</div>
+
+		<div class="grid-3">
+			{home.testimonials.items.map((t) => (
+				<TestimonialCard testimonial={t} />
+			))}
+		</div>
+	</section>
+
+	<!-- Call to Action Banner -->
+	<section style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2.5rem 2rem; text-align: center; margin-top: 4rem;">
+		<h2 style="margin-top: 0;">{home.cta.title}</h2>
+		<p style="max-width: 42rem; margin: 0.75rem auto 1.75rem;">{home.cta.description}</p>
+		<div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+			<a href="/contact/" class="btn btn-primary">{home.cta.start}</a>
+			<a href={`mailto:${identity.email}`} class="btn btn-secondary">{home.cta.email}</a>
+		</div>
+	</section>
+</BaseLayout>

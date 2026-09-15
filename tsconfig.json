@@ -1,0 +1,14 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@const/*": ["sites/s-blogrites/const/*"],
+      "@components/*": ["sites/s-blogrites/components/*"],
+      "@layouts/*": ["sites/s-blogrites/layouts/*"],
+      "@styles/*": ["sites/s-blogrites/styles/*"],
+      "@blog/*": ["sites/s-blog/*"],
+      "@ritesGlobal/*": ["ritesGlobal/*"]
+    }
+  }
+}

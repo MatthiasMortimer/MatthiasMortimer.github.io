@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=Dev Master
+Comment=Discover and launch the RitesDev devApps tools
+Exec=/run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/devApps/dev-master/launch.sh
+Icon=/run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/public/media/logo.svg
+Terminal=false
+Categories=Utility;Development;
+StartupNotify=true

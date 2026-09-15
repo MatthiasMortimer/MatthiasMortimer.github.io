@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=Blog Post Manager
+Comment=Add or edit blog posts for the Astro blog
+Exec=python3 /run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/devApps/blog-post-manager/post_manager.py
+Icon=accessories-text-editor
+Terminal=false
+Categories=Development;Utility;

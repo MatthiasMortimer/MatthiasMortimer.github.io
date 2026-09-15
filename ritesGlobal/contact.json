@@ -1,0 +1,20 @@
+{
+  "name": "RitesDev",
+  "fullName": "Rites Development & Technical Training",
+  "title": "Freelance Software Engineer & Technical Educator",
+  "tagline": "Building high-performance web applications & empowering developers through 1-on-1 mentorship.",
+  "bio": "I am a freelance developer and technical instructor with over 6 years of experience building modern web applications, designing scalable backend APIs, and teaching web development concepts to individuals and engineering teams.",
+  "email": "contact@ritesdev.dev",
+  "location": "United States (Remote Available Worldwide)",
+  "status": "Open for Freelance Projects & Teaching Inquiries",
+  "logo": "/media/logo.svg",
+  "avatar": "/media/avatar.svg",
+  "socials": {
+    "github": "https://github.com/MatthiasMortimer",
+    "linkedin": "https://linkedin.com",
+    "twitter": "https://twitter.com",
+    "discord": "https://discord.com"
+  },
+  "version": "6.2.0",
+  "gitversion": "2.4.0"
+}

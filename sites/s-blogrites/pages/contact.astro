@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ContactForm from "../components/ContactForm.astro";
+import { identity } from "@const/identity.js";
+import { frontmatter as contactPage } from "../content/pages/contact.md";
+
+const content = contactPage as { title: string; description: string; directTitle: string; emailLabel: string; locationLabel: string; statusLabel: string; faqTitle: string; faqs: Array<{ q: string; a: string }> };
+const { faqs } = content;
+---
+
+<BaseLayout title="Contact | RitesDev" description="Get in touch for freelance web development inquiries, custom software projects, or 1-on-1 coding mentorship sessions.">
+	<div style="margin-bottom: 2rem;">
+		<h1>{content.title}</h1>
+		<p style="font-size: 1.1rem; max-width: 45rem;">
+			{content.description}
+		</p>
+	</div>
+
+	<div class="grid-2" style="align-items: start; gap: 2.5rem;">
+		<!-- Contact Form -->
+		<ContactForm />
+
+		<!-- Direct Info & FAQ -->
+		<div>
+			<div class="card" style="margin-bottom: 2rem;">
+				<h3 style="margin-top: 0; margin-bottom: 0.75rem;">{content.directTitle}</h3>
+				<ul style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
+					<li style="margin-bottom: 0.75rem;">
+						<span style="display: block; font-size: 0.8rem; color: var(--color-text-dim);">{content.emailLabel}</span>
+						<a href={`mailto:${identity.email}`} style="font-size: 1rem; font-weight: 600; font-family: var(--font-mono);">{identity.email}</a>
+					</li>
+					<li style="margin-bottom: 0.75rem;">
+						<span style="display: block; font-size: 0.8rem; color: var(--color-text-dim);">{content.locationLabel}</span>
+						<span style="font-size: 0.95rem; color: var(--color-text);">{identity.location}</span>
+					</li>
+					<li>
+						<span style="display: block; font-size: 0.8rem; color: var(--color-text-dim);">{content.statusLabel}</span>
+						<span class="tag tag-green" style="margin-top: 0.25rem;">{identity.status}</span>
+					</li>
+				</ul>
+			</div>
+
+			<!-- FAQ Accordion / List -->
+			<div class="card">
+				<h3 style="margin-top: 0; margin-bottom: 1rem;">{content.faqTitle}</h3>
+				{faqs.map((faq: { q: string; a: string }) => (
+					<div style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem;">
+						<strong style="display: block; color: var(--color-text); font-size: 0.95rem; margin-bottom: 0.35rem;">{faq.q}</strong>
+						<p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 0;">{faq.a}</p>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+</BaseLayout>

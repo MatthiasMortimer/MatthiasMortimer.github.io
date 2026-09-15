@@ -1,0 +1,55 @@
+---
+export interface Props {
+	project: {
+		id: string;
+		title: string;
+		category: string;
+		tags: string[];
+		image: string;
+		summary: string;
+		highlights: string[];
+		demoUrl?: string;
+		githubUrl?: string;
+	};
+}
+
+const { project } = Astro.props;
+const isTeaching = project.category.includes("Teaching");
+---
+
+<div class="card project-card">
+	<div>
+		<div style="margin-bottom: 1rem; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--color-border); background: #0f172a;">
+			<img src={project.image} alt={project.title} style="width: 100%; height: 180px; object-fit: cover; display: block;" />
+		</div>
+		
+		<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+			<span class={`tag ${isTeaching ? "tag-teaching" : ""}`}>{project.category}</span>
+			{project.tags.map((tag) => (
+				<span class="tag" style="color: var(--color-text-dim);">{tag}</span>
+			))}
+		</div>
+
+		<h3 class="card-title">{project.title}</h3>
+		<p>{project.summary}</p>
+
+		<ul style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
+			{project.highlights.map((item) => (
+				<li style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 0.3rem;">
+					• {item}
+				</li>
+			))}
+		</ul>
+	</div>
+
+	<div class="card-footer">
+		<div style="display: flex; gap: 0.75rem; flex-wrap: wrap; width: 100%;">
+			{project.demoUrl && (
+				<a href={project.demoUrl} target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex: 1;">Live Demo</a>
+			)}
+			{project.githubUrl && (
+				<a href={project.githubUrl} target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex: 1;">Repository</a>
+			)}
+		</div>
+	</div>
+</div>

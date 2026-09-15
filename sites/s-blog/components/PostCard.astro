@@ -1,0 +1,23 @@
+---
+export interface Props {
+	title: string;
+	href: string;
+	date: string;
+	tag: string;
+	description: string;
+}
+
+const { title, href, date, tag, description } = Astro.props;
+---
+
+<article class="post-card" data-tag={tag}>
+	<a class="post-card__link" href={href}>
+		<div>
+			<p class="post-card__date">{date}</p>
+			<h2>{title}</h2>
+			<p class="post-card__tag">{tag}</p>
+			<p>{description}</p>
+		</div>
+		<span class="post-card__arrow" aria-hidden="true">-&gt;</span>
+	</a>
+</article>

@@ -1,0 +1,67 @@
+---
+import { identity } from "@const/identity.js";
+import { frontmatter as home } from "../content/pages/index.md";
+
+const devServices = home.services.items.filter((service) => service.category === "Development");
+const teachingServices = home.services.items.filter((service) => service.category === "Teaching");
+---
+
+<div class="card" style="padding: 2rem;">
+	<h2 style="margin-top: 0; margin-bottom: 0.5rem;">Send an Inquiry</h2>
+	<p style="margin-bottom: 1.5rem;">Fill out the form below for freelance project availability, custom quotes, or tutoring sessions.</p>
+
+	<form name="inquiry" method="POST" action="/contact/" data-netlify="true" netlify-honeypot="bot-field">
+		<input type="hidden" name="form-name" value="inquiry" />
+		<p hidden>
+			<label>Don't fill this out if you're human: <input name="bot-field" /></label>
+		</p>
+		<div class="grid-2">
+			<div class="form-group">
+				<label for="name">Your Name *</label>
+				<input type="text" id="name" name="name" class="form-control" placeholder="e.g. Sarah Jenkins" required />
+			</div>
+
+			<div class="form-group">
+				<label for="email">Email Address *</label>
+				<input type="email" id="email" name="email" class="form-control" placeholder="e.g. sarah@example.com" required />
+			</div>
+		</div>
+
+		<div class="grid-2">
+			<div class="form-group">
+				<label for="service">Service Category *</label>
+				<select id="service" name="service" class="form-control" required>
+					<option value="" disabled selected>Select a Service</option>
+					<optgroup label="Freelance Development">
+						{devServices.map((s) => (
+							<option value={s.id}>{s.title}</option>
+						))}
+					</optgroup>
+					<optgroup label="Freelance Teaching & Mentorship">
+						{teachingServices.map((s) => (
+							<option value={s.id}>{s.title}</option>
+						))}
+					</optgroup>
+					<option value="other">General / Custom Consultation</option>
+				</select>
+			</div>
+
+			<div class="form-group">
+				<label for="timeline">Target Timeline / Start Date</label>
+				<input type="text" id="timeline" name="timeline" class="form-control" placeholder="e.g. Immediately / Next Month" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="message">Project Details or Learning Goals *</label>
+			<textarea id="message" name="message" class="form-control" placeholder="Briefly describe your project requirements, tech stack, or what topics you'd like to learn in 1-on-1 tutoring..." required></textarea>
+		</div>
+
+		<button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; padding: 0.85rem;">Send Message</button>
+	</form>
+
+	<div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); text-align: center;">
+		<p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--color-text-dim);">Or reach out directly via email:</p>
+		<a href={`mailto:${identity.email}`} style="font-size: 1.1rem; font-weight: 600; font-family: var(--font-mono); color: var(--color-accent);">{identity.email}</a>
+	</div>
+</div>

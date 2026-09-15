@@ -1,0 +1,6 @@
+{
+  "slug": "blog",
+  "label": "Blog",
+  "basePath": "/blog",
+  "order": 2
+}

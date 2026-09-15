@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { frontmatter as portfolioPage } from "../content/pages/portfolio.md";
+
+const devProjects = portfolioPage.projects.filter((p) => p.category === "Development");
+const teachingProjects = portfolioPage.projects.filter((p) => p.category.includes("Teaching"));
+---
+
+<BaseLayout title="Portfolio | RitesDev" description="Explore showcase development projects, web applications, open-source repositories, and teaching curricula.">
+	<div style="margin-bottom: 2rem;">
+		<h1>{portfolioPage.title}</h1>
+		<p style="font-size: 1.1rem; max-width: 45rem;">
+			{portfolioPage.description}
+		</p>
+	</div>
+
+	<!-- Development Showcase -->
+	<section>
+		<div class="section-header" style="border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+			<div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+				<h2 style="margin: 0;">{portfolioPage.development.title}</h2>
+				<span class="tag">{portfolioPage.development.tag}</span>
+			</div>
+		</div>
+
+		<div class="grid-2" style="margin-top: 1.5rem;">
+			{devProjects.map((project) => (
+				<ProjectCard project={project} />
+			))}
+		</div>
+	</section>
+
+	<!-- Teaching & Open Source Showcase -->
+	<section style="margin-top: 3.5rem;">
+		<div class="section-header" style="border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+			<div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+				<h2 style="margin: 0;">{portfolioPage.teaching.title}</h2>
+				<span class="tag tag-teaching">{portfolioPage.teaching.tag}</span>
+			</div>
+		</div>
+
+		<div class="grid-2" style="margin-top: 1.5rem;">
+			{teachingProjects.map((project) => (
+				<ProjectCard project={project} />
+			))}
+		</div>
+	</section>
+
+	<!-- Github Callout -->
+	<section style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem; text-align: center; margin-top: 3rem;">
+		<h2 style="margin-top: 0;">{portfolioPage.github.title}</h2>
+		<p style="max-width: 36rem; margin: 0.5rem auto 1.5rem;">{portfolioPage.github.description}</p>
+		<a href={portfolioPage.github.url} target="_blank" rel="noopener noreferrer" class="btn btn-secondary">{portfolioPage.github.link}</a>
+	</section>
+</BaseLayout>

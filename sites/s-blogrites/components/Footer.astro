@@ -1,0 +1,16 @@
+---
+import { identity } from "@const/identity.js";
+---
+
+<footer class="site-footer">
+	<div class="site-footer__info">
+		<p>&copy; {new Date().getFullYear()} {identity.fullName}. All rights reserved.</p>
+		<p style="font-size: 0.85rem; margin-bottom: 0;">Freelance Web Development &amp; Technical Mentorship</p>
+	</div>
+	<div class="site-footer__socials">
+		{identity.socials.github && <a href={identity.socials.github} target="_blank" rel="noopener noreferrer">GitHub</a>}
+		{identity.socials.linkedin && <a href={identity.socials.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+		{identity.socials.twitter && <a href={identity.socials.twitter} target="_blank" rel="noopener noreferrer">Twitter</a>}
+		<a href={`mailto:${identity.email}`}>Email</a>
+	</div>
+</footer>

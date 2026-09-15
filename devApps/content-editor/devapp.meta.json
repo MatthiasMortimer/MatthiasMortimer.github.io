@@ -1,0 +1,8 @@
+{
+  "name": "BlogRites Content Editor",
+  "description": "Edit BlogRites page content (about, contact, portfolio, services, site settings).",
+  "type": "web",
+  "command": "./launch.sh",
+  "port": 4555,
+  "url": "http://localhost:4555"
+}

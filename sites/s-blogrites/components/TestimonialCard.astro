@@ -1,0 +1,27 @@
+---
+export interface Props {
+	testimonial: {
+		id: number;
+		quote: string;
+		author: string;
+		role: string;
+		type: string;
+	};
+}
+
+const { testimonial } = Astro.props;
+const isTeaching = testimonial.type.includes("Student") || testimonial.type.includes("Mentorship");
+---
+
+<div class="card testimonial-card">
+	<div class="card-body">
+		<span class={`tag ${isTeaching ? "tag-teaching" : "tag-green"}`} style="margin-bottom: 0.75rem;">{testimonial.type}</span>
+		<p style="font-style: italic; color: var(--color-text); font-size: 1rem; line-height: 1.6; margin-bottom: 1.25rem;">
+			"{testimonial.quote}"
+		</p>
+	</div>
+	<div style="border-top: 1px solid var(--color-border); padding-top: 0.75rem;">
+		<strong style="display: block; color: var(--color-text); font-size: 0.95rem;">{testimonial.author}</strong>
+		<span style="font-size: 0.85rem; color: var(--color-text-dim);">{testimonial.role}</span>
+	</div>
+</div>

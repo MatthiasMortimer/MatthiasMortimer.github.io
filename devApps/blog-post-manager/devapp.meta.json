@@ -1,0 +1,6 @@
+{
+  "name": "Blog Post Manager",
+  "description": "Add or edit blog posts (posts.js, tags.js, and .mdx files) via a desktop GUI.",
+  "type": "process",
+  "command": "python3 post_manager.py"
+}

@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ServiceCard from "../components/ServiceCard.astro";
+import { frontmatter as home } from "../content/pages/index.md";
+import { frontmatter as servicePage } from "../content/pages/services.md";
+
+const devServices = home.services.items.filter((service) => service.category === "Development");
+const teachingServices = home.services.items.filter((service) => service.category === "Teaching");
+const { development: developmentSkills, teaching: teachingSkills } = servicePage.skillLists;
+---
+
+<BaseLayout title="Services & Teaching | RitesDev" description="Explore freelance web development services and personalized 1-on-1 coding mentorship packages.">
+	<div style="margin-bottom: 2rem;">
+		<h1>{servicePage.title}</h1>
+		<p style="font-size: 1.1rem; max-width: 45rem;">
+			{servicePage.description}
+		</p>
+	</div>
+
+	<!-- Freelance Development Services -->
+	<section id="dev">
+		<div class="section-header" style="border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+			<div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+				<h2 style="margin: 0;">{servicePage.development.title}</h2>
+				<span class="tag">{servicePage.development.tag}</span>
+			</div>
+			<p style="margin-top: 0.5rem; margin-bottom: 0;">{servicePage.development.description}</p>
+		</div>
+
+		<div class="grid-2" style="margin-top: 1.5rem;">
+			{devServices.map((service) => (
+				<ServiceCard service={service} />
+			))}
+		</div>
+	</section>
+
+	<!-- Freelance Teaching Services -->
+	<section id="teaching">
+		<div class="section-header" style="border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+			<div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+				<h2 style="margin: 0;">{servicePage.teaching.title}</h2>
+				<span class="tag tag-teaching">{servicePage.teaching.tag}</span>
+			</div>
+			<p style="margin-top: 0.5rem; margin-bottom: 0;">{servicePage.teaching.description}</p>
+		</div>
+
+		<div class="grid-2" style="margin-top: 1.5rem;">
+			{teachingServices.map((service) => (
+				<ServiceCard service={service} />
+			))}
+		</div>
+	</section>
+
+	<!-- Skills & Technologies -->
+	<section style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem; margin-top: 3rem;">
+		<h2 style="margin-top: 0;">{servicePage.skills.title}</h2>
+		<p>{servicePage.skills.description}</p>
+
+		<div class="grid-2" style="margin-top: 1.5rem;">
+			<div>
+					<h3 style="color: var(--color-accent); font-size: 1.1rem; margin-bottom: 0.75rem;">{servicePage.skills.developmentTitle}</h3>
+				<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+					{developmentSkills.map((skill) => (
+						<span class="tag" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">{skill}</span>
+					))}
+				</div>
+			</div>
+
+			<div>
+					<h3 style="color: var(--color-accent-secondary); font-size: 1.1rem; margin-bottom: 0.75rem;">{servicePage.skills.teachingTitle}</h3>
+				<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+					{teachingSkills.map((skill) => (
+						<span class="tag tag-teaching" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">{skill}</span>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Process Section -->
+	<section>
+		<h2>{servicePage.process.title}</h2>
+		<p>{servicePage.process.description}</p>
+
+		<div class="grid-3" style="margin-top: 1.5rem;">
+			{servicePage.process.steps.map((step: { number: string; title: string; body: string }, index: number) => (
+				<div class="card">
+					<span style={`font-family: var(--font-mono); font-size: 1.5rem; font-weight: bold; color: ${index === 0 ? "var(--color-accent)" : index === 1 ? "var(--color-accent-secondary)" : "var(--color-accent-green)"};`}>{step.number}</span>
+					<h3 style="margin-top: 0.5rem;">{step.title}</h3>
+					<p style="font-size: 0.92rem;">{step.body}</p>
+				</div>
+			))}
+		</div>
+	</section>
+</BaseLayout>
