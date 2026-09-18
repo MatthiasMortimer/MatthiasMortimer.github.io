@@ -5,7 +5,7 @@ import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'ritesdev.dev',
+	site: 'https://ritesdev.dev',
     base: '/',   // Explicitly set base to '/' so all assets resolve to the root domain root
 	integrations: [mdx()],
 	// Change "static" to "server"
