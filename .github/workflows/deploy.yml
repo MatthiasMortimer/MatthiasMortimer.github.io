@@ -21,17 +21,18 @@ jobs:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
 
-      # Add this step to override the default Node.js version
+      # Setup Node here to ensure your custom prebuild sync script runs on v22
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm' # Automatically caches npm packages to speed up builds
+          cache: 'npm'
 
       - name: Install, build, and upload your site
         uses: withastro/action@v3
         with:
           path: '.' 
+          node-version: 22 # <-- This forces the Astro action runner to upgrade to Node 22
 
   deploy:
     needs: build
