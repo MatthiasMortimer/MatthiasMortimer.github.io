@@ -10,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment to avoid conflicts
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -20,13 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
-        uses: actions/checkout@v4 # v4 is the current stable version
+        uses: actions/checkout@v4
+
+      # Add this step to override the default Node.js version
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm' # Automatically caches npm packages to speed up builds
 
       - name: Install, build, and upload your site
         uses: withastro/action@v3
         with:
-          # Keep path as '.' because your Astro root (package.json) is in the root directory.
-          # The action automatically detects and uploads the 'dist/' output folder.
           path: '.' 
 
   deploy:
