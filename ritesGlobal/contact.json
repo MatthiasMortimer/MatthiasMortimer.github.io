@@ -15,6 +15,7 @@
     "twitter": "https://twitter.com",
     "discord": "https://discord.com"
   },
+  // Change these to the dev and live versions
   "version": "6.2.0",
   "gitversion": "2.4.0"
 }
