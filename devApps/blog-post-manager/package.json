@@ -1,0 +1,19 @@
+{
+  "name": "ritesdev-blog-post-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Native desktop editor for RitesDev blog posts",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "electron": "^44.4.3"
+  }
+}

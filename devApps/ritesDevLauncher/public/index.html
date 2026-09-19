@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>RitesDev Launcher</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="container">
+		<!-- Header -->
+		<header class="header">
+			<div class="header-brand">
+				<img src="/media/logo.svg" alt="" class="header-logo">
+				<div class="header-content">
+					<h1>RitesDev Launcher</h1>
+					<p class="subtitle">Manage your development apps</p>
+				</div>
+			</div>
+			<div class="header-status">
+				<span class="status-dot"></span>
+				<span class="status-text">Ready</span>
+			</div>
+		</header>
+
+		<!-- Main Content -->
+		<main class="main">
+			<!-- Apps Grid -->
+			<div class="apps-section">
+				<div class="apps-header">
+					<h2>Your Apps</h2>
+					<button class="refresh-btn" onclick="refreshApps()" title="Refresh app list">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+						</svg>
+					</button>
+				</div>
+
+				<div id="apps-grid" class="apps-grid">
+					<!-- Apps will be loaded here -->
+					<div class="loading">
+						<div class="spinner"></div>
+						<p>Discovering apps...</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Running Apps Summary -->
+			<aside class="sidebar">
+				<div class="sidebar-card">
+					<h3>Running Apps</h3>
+					<div id="running-count" class="running-count">0</div>
+					<ul id="running-list" class="running-list">
+						<!-- Running apps list -->
+					</ul>
+				</div>
+
+				<div class="sidebar-card info-card">
+					<h3>About Launcher</h3>
+					<p>This launcher automatically discovers and manages all your development apps.</p>
+					<ul class="info-list">
+						<li>🚀 One-click launch</li>
+						<li>⏹️ Easy stop</li>
+						<li>🔄 Quick restart</li>
+						<li>👀 Live status</li>
+					</ul>
+				</div>
+			</aside>
+		</main>
+	</div>
+
+	<!-- App Template (hidden) -->
+	<template id="app-card-template">
+		<div class="app-card">
+			<div class="app-header">
+				<div class="app-title">
+					<h3 class="app-name"></h3>
+					<span class="app-type"></span>
+				</div>
+				<div class="app-status">
+					<span class="status-badge"></span>
+				</div>
+			</div>
+
+			<p class="app-description"></p>
+
+			<div class="app-meta">
+				<span class="meta-item">
+					<span class="meta-label">Port:</span>
+					<span class="meta-value port"></span>
+				</span>
+				<span class="meta-item">
+					<span class="meta-label">Type:</span>
+					<span class="meta-value type"></span>
+				</span>
+			</div>
+
+			<div class="app-manages">
+				<span class="meta-label">Manages:</span>
+				<div class="manages-list"></div>
+			</div>
+
+			<div class="app-controls">
+				<button class="btn-launch" onclick="launchApp(event)">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M8 5v14l11-7z" />
+					</svg>
+					Launch
+				</button>
+				<button class="btn-stop" onclick="stopApp(event)" style="display: none;">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+						<rect x="6" y="4" width="12" height="16" rx="1" />
+					</svg>
+					Stop
+				</button>
+				<button class="btn-restart" onclick="restartApp(event)">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+					</svg>
+					Restart
+				</button>
+			</div>
+		</div>
+	</template>
+
+	<script src="app.js"></script>
+</body>
+</html>

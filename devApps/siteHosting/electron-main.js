@@ -1,0 +1,79 @@
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const path = require("node:path");
+const { HostManager, config } = require("./host-manager");
+
+const host = new HostManager();
+let mainWindow = null;
+let quitting = false;
+
+function createWindow() {
+	mainWindow = new BrowserWindow({
+		width: 1360,
+		height: 900,
+		minWidth: 1020,
+		minHeight: 680,
+		backgroundColor: "#f7f5fa",
+		title: "RitesDev Site Hosting",
+		webPreferences: {
+			preload: path.join(__dirname, "preload.js"),
+			contextIsolation: true,
+			nodeIntegration: false,
+			sandbox: true,
+		},
+	});
+
+	mainWindow.loadFile(path.join(__dirname, "public/index.html"));
+	mainWindow.removeMenu();
+	mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+		if (url.startsWith("https://")) shell.openExternal(url);
+		return { action: "deny" };
+	});
+
+	if (process.argv.includes("--dev")) mainWindow.webContents.openDevTools();
+
+	mainWindow.on("closed", () => {
+		mainWindow = null;
+	});
+}
+
+function send(channel, payload) {
+	if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, payload);
+}
+
+host.on("log", (entry) => send("host:log", entry));
+host.on("state", (state) => send("host:state", state));
+
+ipcMain.handle("host:start", () => host.start());
+ipcMain.handle("host:stop", () => host.stop());
+ipcMain.handle("host:restart", () => host.restart());
+ipcMain.handle("host:status", () => host.status());
+ipcMain.handle("host:logs", () => host.logs);
+ipcMain.handle("host:config", () => config);
+ipcMain.handle("host:openExternal", (_event, url) => {
+	if (url === config.publicUrl || url === config.localUrl) shell.openExternal(url);
+});
+
+app.whenReady().then(() => {
+	host.reapStrays(); // never inherit a duplicate tunnel from a previous session
+	createWindow();
+	app.on("activate", () => {
+		if (BrowserWindow.getAllWindows().length === 0) createWindow();
+	});
+});
+
+app.on("before-quit", (event) => {
+	if (quitting) return;
+	event.preventDefault();
+	quitting = true;
+	host.stop().finally(() => app.quit());
+});
+
+app.on("window-all-closed", () => {
+	if (process.platform !== "darwin") app.quit();
+});
+
+for (const signal of ["SIGINT", "SIGTERM"]) {
+	process.on(signal, () => {
+		host.stop().finally(() => app.exit(0));
+	});
+}

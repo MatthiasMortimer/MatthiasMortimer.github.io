@@ -1,0 +1,15 @@
+{
+  "name": "ritesdev-site-hosting",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Desktop control panel for the Astro dev server + Cloudflare tunnel",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "devDependencies": {
+    "electron": "^44.4.3"
+  }
+}

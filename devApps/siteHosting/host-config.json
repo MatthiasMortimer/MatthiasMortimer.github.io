@@ -1,0 +1,6 @@
+{
+  "tunnelName": "astro-site-tunnel",
+  "publicUrl": "https://ritesdev.dev",
+  "localUrl": "http://127.0.0.1:4321",
+  "astroPort": 4321
+}

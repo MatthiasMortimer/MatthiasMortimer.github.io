@@ -1,21 +1,29 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
-import cloudflare from '@astrojs/cloudflare';
-
+import node from '@astrojs/node';
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://ritesdev.dev',
-    base: '/',   // Explicitly set base to '/' so all assets resolve to the root domain root
-	integrations: [mdx()],
-	// Change "static" to "server"
-  output: 'server', 
+  site: 'https://ritesdev.dev',
+  base: '/',   // Explicitly set base to '/' so all assets resolve to the root domain root
+  integrations: [mdx()],
   
-  adapter: cloudflare({
-    imageService: 'cloudflare',
-    // Ensure your platformProxy matches the bindings in your logs
-    platformProxy: {
-      enabled: true,
-    },
+  // Keep output as 'server' to handle your dynamic routing layers natively
+  output: 'server', 
+  adapter: node({
+    mode: 'standalone',
   }),
+
+  vite: {
+    server: {
+      allowedHosts: ['ritesdev.dev', '.ritesdev.dev']
+    }
+  }
+,
+  // Vite block to allow incoming tunnel connections
+  vite: {
+    server: {
+      allowedHosts: ['ritesdev.dev', '.ritesdev.dev']
+    }
+  }
 });

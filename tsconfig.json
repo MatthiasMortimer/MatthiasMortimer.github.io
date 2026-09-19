@@ -3,10 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@const/*": ["sites/s-blogrites/const/*"],
-      "@components/*": ["sites/s-blogrites/components/*"],
-      "@layouts/*": ["sites/s-blogrites/layouts/*"],
-      "@styles/*": ["sites/s-blogrites/styles/*"],
+      "@const/*": ["sites/s-ritesdev/const/*"],
+      "@components/*": ["sites/s-ritesdev/components/*"],
+      "@layouts/*": ["sites/s-ritesdev/layouts/*"],
+      "@styles/*": ["sites/s-ritesdev/styles/*"],
       "@blog/*": ["sites/s-blog/*"],
       "@ritesGlobal/*": ["ritesGlobal/*"]
     }

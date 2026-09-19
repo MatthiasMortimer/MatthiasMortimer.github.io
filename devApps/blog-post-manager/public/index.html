@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; style-src 'self' file:; script-src 'self'; img-src 'self' data: https:; connect-src 'none'">
+	<title>Blog Post Manager</title>
+	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="app-shell">
+		<header class="topbar">
+			<div>
+				<p class="eyebrow">RitesDev Studio</p>
+				<h1>Blog Post Manager</h1>
+			</div>
+			<div id="save-state" class="save-state" role="status">Ready</div>
+		</header>
+
+		<main class="workspace">
+			<aside class="post-browser" aria-label="Blog posts">
+				<div class="browser-heading">
+					<div>
+						<h2>Posts</h2>
+						<span id="post-count">0 entries</span>
+					</div>
+					<button id="new-post" class="icon-button accent" type="button" title="New post" aria-label="New post">+</button>
+				</div>
+				<label class="search-field">
+					<span aria-hidden="true">⌕</span>
+					<input id="post-search" type="search" placeholder="Search posts" autocomplete="off">
+				</label>
+				<div id="post-list" class="post-list"></div>
+			</aside>
+
+			<section class="editor-panel">
+				<div id="empty-state" class="empty-state">
+					<p class="empty-mark">Aa</p>
+					<h2>Select a post to edit</h2>
+					<p>Choose an entry from the list or create a new post.</p>
+				</div>
+
+				<form id="post-form" class="post-form" hidden>
+					<div class="editor-toolbar">
+						<div>
+							<p id="editor-mode" class="eyebrow">Editing post</p>
+							<h2 id="editor-title">Untitled post</h2>
+						</div>
+						<div class="toolbar-actions">
+							<button id="delete-post" class="button danger" type="button">Delete</button>
+							<button class="button primary" type="submit">Save post</button>
+						</div>
+					</div>
+
+					<div class="form-scroll">
+						<div class="field-grid">
+							<label class="field wide">Title<input id="title" name="title" required></label>
+							<label class="field">Slug<input id="slug" name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required></label>
+							<label class="field">Publish date<input id="pubDate" name="pubDate" type="date" required></label>
+							<label class="field wide">Description<textarea id="description" name="description" rows="2" required></textarea></label>
+							<label class="field">Author<input id="author" name="author" required></label>
+							<label class="field">Tags<input id="tags" name="tags" placeholder="astro, business, updates"></label>
+							<label class="field">Image URL<input id="imageUrl" name="imageUrl" type="url"></label>
+							<label class="field">Image alt text<input id="imageAlt" name="imageAlt"></label>
+						</div>
+
+						<label class="field content-field">
+							<span>MDX content</span>
+							<textarea id="content" name="content" spellcheck="true" required></textarea>
+						</label>
+					</div>
+				</form>
+			</section>
+		</main>
+	</div>
+
+	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+	<script src="app.js"></script>
+</body>
+</html>

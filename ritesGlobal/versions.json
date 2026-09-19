@@ -1,0 +1,11 @@
+{
+  "gitversion": "2.4.0",
+  "sites": {
+    "blog": {
+      "version": "2.0.9"
+    },
+    "ritesdev": {
+      "version": "6.2.0"
+    }
+  }
+}

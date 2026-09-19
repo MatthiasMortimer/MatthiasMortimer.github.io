@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>RitesDev Site Hosting</title>
+	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<header class="header">
+		<div class="brand">
+			<img src="../../../public/media/logo.svg" alt="" class="brand-logo">
+			<div>
+				<h1>Site Hosting</h1>
+				<p class="subtitle">Astro dev server + Cloudflare tunnel</p>
+			</div>
+		</div>
+		<div class="state-pill" id="state-pill">
+			<span class="state-dot"></span>
+			<span id="state-text">Stopped</span>
+		</div>
+	</header>
+
+	<main class="layout">
+		<section class="panel">
+			<div class="controls">
+				<button id="btn-start" class="btn btn-start">Start hosting</button>
+				<button id="btn-restart" class="btn btn-restart">Restart</button>
+				<button id="btn-stop" class="btn btn-stop">Stop</button>
+			</div>
+
+			<div class="checks">
+				<div class="check" id="check-local">
+					<div class="check-head">
+						<span class="check-name">Local Astro</span>
+						<span class="check-status">—</span>
+					</div>
+					<a class="check-url" id="local-url" href="#"></a>
+				</div>
+				<div class="check" id="check-public">
+					<div class="check-head">
+						<span class="check-name">Public domain</span>
+						<span class="check-status">—</span>
+					</div>
+					<a class="check-url" id="public-url" href="#"></a>
+				</div>
+			</div>
+
+			<div class="pids">
+				<span>Astro PID: <b id="astro-pid">—</b></span>
+				<span>Tunnel PID: <b id="tunnel-pid">—</b></span>
+			</div>
+
+			<h2 class="section-title">Activity</h2>
+			<ul id="log" class="log"></ul>
+		</section>
+
+		<section class="panel preview-panel">
+			<div class="preview-head">
+				<h2 class="section-title">Live preview <span id="preview-target" class="muted"></span></h2>
+				<div class="preview-actions">
+					<button id="btn-refresh-preview" class="btn btn-ghost">Refresh</button>
+					<button id="btn-open-external" class="btn btn-ghost">Open in browser</button>
+				</div>
+			</div>
+			<div class="preview-frame">
+				<div id="preview-overlay" class="preview-overlay">
+					<p id="preview-message">Hosting is stopped — start it to preview the live site.</p>
+				</div>
+				<iframe id="preview" title="Live site preview" referrerpolicy="no-referrer"></iframe>
+			</div>
+		</section>
+	</main>
+
+	<script src="app.js"></script>
+</body>
+</html>

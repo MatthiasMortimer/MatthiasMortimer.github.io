@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=RitesDev Launcher
+Comment=Beautiful app launcher for RitesDev development apps
+Exec=/run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/devApps/ritesDevLauncher/launch.sh
+Icon=/run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/public/media/logo.svg
+Categories=Development;Utility
+Terminal=false
+StartupNotify=true

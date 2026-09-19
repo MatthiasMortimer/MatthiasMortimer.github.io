@@ -1,6 +1,14 @@
 {
   "name": "Blog Post Manager",
-  "description": "Add or edit blog posts (posts.js, tags.js, and .mdx files) via a desktop GUI.",
-  "type": "process",
-  "command": "python3 post_manager.py"
+  "slug": "blog-post-manager",
+  "description": "Create and manage posts for the RitesDev blog",
+  "type": "post_manager",
+  "runtime": "desktop",
+  "version": "1.0.0",
+  "port": 4603,
+  "command": "npm start",
+  "manages": ["s-blog"],
+  "contentTypes": ["blog_post"],
+  "author": "RitesDev",
+  "icon": "document-edit"
 }

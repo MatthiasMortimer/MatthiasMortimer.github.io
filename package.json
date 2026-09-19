@@ -16,12 +16,19 @@
     "preview": "astro preview",
     "astro": "astro",
     "editor": "npm --prefix devApps/content-editor start",
-    "post-manager": "python3 devApps/blog-post-manager/post_manager.py",
-    "devapps": "npm --prefix devApps/dev-master start"
+    "post-manager": "npm --prefix devApps/blog-post-manager start",
+    "devapps": "npm --prefix devApps/dev-master start",
+    "tunnel": "concurrently \"npm run dev -- --port 4321\" \"cloudflared tunnel run astro-site-tunnel\"",
+    "tunnel:restart": "pkill -f cloudflared || true && npm run tunnel",
+    "mgmt:status": "node scripts/management/status.mjs",
+    "mgmt:content": "node scripts/management/content-inventory.mjs",
+    "mgmt:apps": "node scripts/management/list-apps.mjs",
+    "mgmt:setup": "node scripts/management/setup-check.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.2",
     "@astrojs/mdx": "^8.0.0",
+    "@astrojs/node": "^11.1.6",
     "astro": "^7.3.1"
   },
   "allowScripts": {

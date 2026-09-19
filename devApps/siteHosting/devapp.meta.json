@@ -1,0 +1,14 @@
+{
+  "name": "Site Hosting",
+  "slug": "siteHosting",
+  "description": "Start, stop, and restart the Astro dev server + Cloudflare tunnel for ritesdev.dev",
+  "type": "hosting",
+  "runtime": "desktop",
+  "version": "1.0.0",
+  "port": 4321,
+  "command": "npm start",
+  "manages": ["s-ritesdev", "s-blog"],
+  "contentTypes": [],
+  "author": "RitesDev",
+  "icon": "/media/logo.svg"
+}

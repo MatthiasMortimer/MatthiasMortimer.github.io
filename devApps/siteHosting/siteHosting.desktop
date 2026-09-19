@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=RitesDev Site Hosting
+Comment=Start, stop, and restart the Astro dev server and Cloudflare tunnel
+Exec=/run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/devApps/siteHosting/launch.sh
+Icon=/run/media/RitesDev/LinuxStorage/Projects/websites/RitesDev-ecosystem/public/media/logo.svg
+Categories=Development;Utility
+Terminal=false
+StartupNotify=true
