@@ -2,6 +2,8 @@ let allApps = [];
 let refreshInterval;
 const cardsById = new Map();
 let lastAppsSignature = null;
+let refreshInFlight = false;
+let refreshQueued = false;
 
 /**
  * Initialize the launcher
@@ -9,14 +11,23 @@ let lastAppsSignature = null;
 document.addEventListener("DOMContentLoaded", () => {
 	refreshApps();
 
-	// Auto-refresh every 3 seconds
-	refreshInterval = setInterval(refreshApps, 3000);
+	refreshInterval = setInterval(refreshApps, 1000);
+	window.addEventListener("focus", refreshApps);
+	document.addEventListener("visibilitychange", () => {
+		if (!document.hidden) refreshApps();
+	});
 });
 
 /**
  * Fetch and display all apps
  */
 async function refreshApps() {
+	if (refreshInFlight) {
+		refreshQueued = true;
+		return;
+	}
+
+	refreshInFlight = true;
 	try {
 		const response = await fetch("/api/apps");
 		const data = await response.json();
@@ -38,6 +49,12 @@ async function refreshApps() {
 	} catch (error) {
 		console.error("Error fetching apps:", error);
 		showError("Failed to load apps");
+	} finally {
+		refreshInFlight = false;
+		if (refreshQueued) {
+			refreshQueued = false;
+			refreshApps();
+		}
 	}
 }
 
@@ -119,6 +136,7 @@ function updateCard(card, app) {
 	launchBtn.dataset.appId = app.id;
 	stopBtn.dataset.appId = app.id;
 	restartBtn.dataset.appId = app.id;
+	const isExternallyRunning = app.isRunning && app.runningSource !== "managed";
 
 	// Don't fight buttons that are mid-action (e.g. "Launching..."), only
 	// sync visibility/disabled state once we know the definitive server status
@@ -126,6 +144,14 @@ function updateCard(card, app) {
 		launchBtn.style.display = app.isRunning ? "none" : "flex";
 		stopBtn.style.display = app.isRunning ? "flex" : "none";
 		restartBtn.style.display = app.isRunning ? "flex" : "none";
+		launchBtn.disabled = false;
+		launchBtn.textContent = "Launch";
+		stopBtn.disabled = isExternallyRunning;
+		stopBtn.textContent = isExternallyRunning ? "Already Open" : "Stop";
+		restartBtn.disabled = isExternallyRunning;
+		restartBtn.title = isExternallyRunning
+			? "This app was opened outside the launcher. Close it there before restarting."
+			: "";
 	}
 
 	if (!app.folderExists) {

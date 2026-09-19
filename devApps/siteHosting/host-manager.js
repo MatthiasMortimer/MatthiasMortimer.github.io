@@ -12,7 +12,8 @@ class HostManager extends EventEmitter {
 	constructor() {
 		super();
 		this.state = "stopped";
-		this.astro = null;
+		// Astro 7 daemonizes `astro dev`, so we only ever hold its reported pid
+		this.astroPid = null;
 		this.tunnel = null;
 		this.logs = [];
 		this.transition = null;
@@ -37,7 +38,9 @@ class HostManager extends EventEmitter {
 	 */
 	reapStrays() {
 		spawnSync("pkill", ["-f", `cloudflared tunnel run ${config.tunnelName}`], { stdio: "ignore" });
+		spawnSync("npx", ["astro", "dev", "stop"], { cwd: REPO_ROOT, stdio: "ignore", timeout: 15_000 });
 		spawnSync("fuser", ["-k", `${config.astroPort}/tcp`], { stdio: "ignore" });
+		this.astroPid = null;
 	}
 
 	killChild(child) {
@@ -54,9 +57,9 @@ class HostManager extends EventEmitter {
 	}
 
 	pipeOutput(child, label) {
-		const emit = (level) => (data) => {
+		const emit = (fallback) => (data) => {
 			for (const line of data.toString().split("\n")) {
-				if (line.trim()) this.log(`[${label}] ${line}`, level);
+				if (line.trim()) this.log(`[${label}] ${line}`, levelForLine(line, fallback));
 			}
 		};
 		child.stdout?.on("data", emit("info"));
@@ -80,21 +83,8 @@ class HostManager extends EventEmitter {
 		await delay(500);
 
 		try {
-			this.astro = spawn(
-				"npm",
-				["run", "dev", "--", "--host", "127.0.0.1", "--port", String(config.astroPort), "--force"],
-				{ cwd: REPO_ROOT, detached: true, stdio: ["ignore", "pipe", "pipe"] },
-			);
-			this.pipeOutput(this.astro, "astro");
-			this.astro.on("exit", (code) => {
-				this.log(`Astro exited (code ${code})`, code ? "error" : "info");
-				this.astro = null;
-				if (this.state === "running") this.setState("error");
-			});
-			this.astro.on("error", (error) => {
-				this.log(`Could not launch npm run dev: ${error.message}`, "error");
-			});
-			this.log(`Astro dev starting on ${config.localUrl} (pid ${this.astro.pid})`);
+			this.log(`Starting Astro dev on ${config.localUrl}…`);
+			await this.launchAstro();
 
 			const ready = await this.waitForAstro();
 			if (!ready) {
@@ -103,6 +93,7 @@ class HostManager extends EventEmitter {
 				this.setState("error");
 				return { success: false, message: "Astro dev server did not start" };
 			}
+			this.log(`Astro dev ready${this.astroPid ? ` (pid ${this.astroPid})` : ""}`);
 
 			this.tunnel = spawn("cloudflared", ["tunnel", "run", config.tunnelName], {
 				cwd: REPO_ROOT,
@@ -130,12 +121,49 @@ class HostManager extends EventEmitter {
 		}
 	}
 
+	/**
+	 * `astro dev --background` daemonizes, so the npm command returns immediately;
+	 * we wait for it to finish and scrape the background server's pid from its output.
+	 */
+	launchAstro() {
+		return new Promise((resolve, reject) => {
+			const child = spawn(
+				"npm",
+				[
+					"run",
+					"dev",
+					"--",
+					"--host",
+					"127.0.0.1",
+					"--port",
+					String(config.astroPort),
+					"--force",
+					"--background",
+				],
+				{ cwd: REPO_ROOT, stdio: ["ignore", "pipe", "pipe"] },
+			);
+
+			const scrapePid = (data) => {
+				const match = /\(pid (\d+)/.exec(data.toString());
+				if (match) this.astroPid = Number(match[1]);
+			};
+			child.stdout?.on("data", scrapePid);
+			child.stderr?.on("data", scrapePid);
+			this.pipeOutput(child, "astro");
+
+			child.on("error", reject);
+			child.on("exit", (code) => {
+				if (code === 0) resolve();
+				else reject(new Error(`npm run dev exited with code ${code}`));
+			});
+		});
+	}
+
 	async waitForAstro() {
 		const deadline = Date.now() + ASTRO_READY_TIMEOUT_MS;
 		while (Date.now() < deadline) {
-			if (!this.astro) return false;
-			const probe = await probe(config.localUrl);
-			if (probe.ok) return true;
+			const result = await probe(config.localUrl);
+			if (result.ok) return true;
 			await delay(1000);
 		}
 		return false;
@@ -144,9 +172,7 @@ class HostManager extends EventEmitter {
 	async stop() {
 		this.log("Stopping hosting…");
 		this.killChild(this.tunnel);
-		this.killChild(this.astro);
 		this.tunnel = null;
-		this.astro = null;
 		await delay(400);
 		this.reapStrays();
 		this.setState("stopped");
@@ -165,7 +191,7 @@ class HostManager extends EventEmitter {
 		return {
 			state: this.state,
 			config,
-			astroPid: this.astro?.pid ?? null,
+			astroPid: local.ok ? this.astroPid : null,
 			tunnelPid: this.tunnel?.pid ?? null,
 			local,
 			public: publicSite,
@@ -189,6 +215,14 @@ async function probe(url) {
 
 function delay(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// cloudflared writes everything to stderr, so use its own level tag instead
+function levelForLine(line, fallback) {
+	if (/\bERR\b|\bFTL\b/.test(line)) return "error";
+	if (/\bWRN\b/.test(line)) return "warn";
+	if (/\bINF\b|\bDBG\b/.test(line)) return "info";
+	return fallback;
 }
 
 module.exports = { HostManager, config };

@@ -1,6 +1,7 @@
 import express from "express";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,9 +12,98 @@ const GLOBAL_STYLES_DIR = path.resolve(__dirname, "../../ritesGlobal/styles");
 const MEDIA_DIR = path.resolve(__dirname, "../../public/media");
 const DEVAPPS_DIR = path.resolve(__dirname, "..");
 const SELF_DIR_NAME = path.basename(__dirname);
+const PORT_CHECK_TIMEOUT_MS = 200;
 
 // Store running processes
 const processes = new Map();
+
+function getManagedProcess(appId) {
+	const proc = processes.get(appId);
+	if (!proc) return null;
+
+	try {
+		process.kill(proc.pid, 0);
+		return proc;
+	} catch {
+		processes.delete(appId);
+		return null;
+	}
+}
+
+function findProcessesByCwd(targetPath) {
+	if (process.platform !== "linux") return [];
+
+	const matches = [];
+	let entries;
+	try {
+		entries = fs.readdirSync("/proc", { withFileTypes: true });
+	} catch {
+		return matches;
+	}
+
+	for (const entry of entries) {
+		if (!entry.isDirectory() || !/^\d+$/.test(entry.name)) continue;
+
+		const pid = Number(entry.name);
+		if (pid === process.pid) continue;
+
+		try {
+			const cwd = fs.realpathSync(`/proc/${pid}/cwd`);
+			if (cwd !== targetPath) continue;
+
+			const cmdline = fs
+				.readFileSync(`/proc/${pid}/cmdline`, "utf8")
+				.split("\0")
+				.filter(Boolean)
+				.join(" ");
+
+			matches.push({ pid, cmdline });
+		} catch {
+			// Processes can exit or deny /proc access while we are scanning.
+		}
+	}
+
+	return matches;
+}
+
+function isPortOpen(port) {
+	if (!port) return Promise.resolve(false);
+
+	return new Promise((resolve) => {
+		const socket = net.createConnection({ host: "127.0.0.1", port });
+		let settled = false;
+
+		function finish(isOpen) {
+			if (settled) return;
+			settled = true;
+			socket.destroy();
+			resolve(isOpen);
+		}
+
+		socket.setTimeout(PORT_CHECK_TIMEOUT_MS);
+		socket.once("connect", () => finish(true));
+		socket.once("timeout", () => finish(false));
+		socket.once("error", () => finish(false));
+	});
+}
+
+async function getRuntimeStatus(appId, appPath, port) {
+	const managedProcess = getManagedProcess(appId);
+	if (managedProcess) {
+		return { isRunning: true, source: "managed", pid: managedProcess.pid };
+	}
+
+	const cwdProcesses = findProcessesByCwd(appPath);
+	if (cwdProcesses.length > 0) {
+		return { isRunning: true, source: "external", pid: cwdProcesses[0].pid };
+	}
+
+	if (await isPortOpen(port)) {
+		return { isRunning: true, source: "port", pid: null };
+	}
+
+	return { isRunning: false, source: "none", pid: null };
+}
 
 // Middleware
 app.use(express.static("public"));
@@ -57,6 +147,7 @@ async function discoverApps() {
 
 		const id = meta.slug || entry.name;
 		const pkgPath = path.join(appPath, "package.json");
+		const runtimeStatus = await getRuntimeStatus(id, appPath, meta.port || null);
 
 		apps.push({
 			id,
@@ -71,7 +162,9 @@ async function discoverApps() {
 			folderExists: true,
 			hasMeta: true,
 			hasPkg: fs.existsSync(pkgPath),
-			isRunning: processes.has(id),
+			isRunning: runtimeStatus.isRunning,
+			runningSource: runtimeStatus.source,
+			pid: runtimeStatus.pid,
 			command: meta.command || "npm start",
 			env: meta.env || {},
 		});
@@ -133,7 +226,7 @@ function startApp(appId, command, basePath) {
  * Stop an app process
  */
 function stopApp(appId) {
-	const proc = processes.get(appId);
+	const proc = getManagedProcess(appId);
 	if (!proc) {
 		return { success: false, message: "App not running" };
 	}
@@ -198,6 +291,16 @@ app.post("/api/apps/:appId/start", async (req, res) => {
  */
 app.post("/api/apps/:appId/stop", async (req, res) => {
 	const { appId } = req.params;
+	const apps = await discoverApps();
+	const app = apps.find((candidate) => candidate.id === appId);
+
+	if (app?.isRunning && app.runningSource !== "managed") {
+		return res.status(400).json({
+			success: false,
+			message: "App is already open outside the launcher",
+		});
+	}
+
 	const result = stopApp(appId);
 	res.json(result);
 });
@@ -208,17 +311,24 @@ app.post("/api/apps/:appId/stop", async (req, res) => {
 app.post("/api/apps/:appId/restart", async (req, res) => {
 	const { appId } = req.params;
 
-	stopApp(appId);
-
-	// Give it a moment to shut down
-	await new Promise((resolve) => setTimeout(resolve, 500));
-
 	const apps = await discoverApps();
 	const app = apps.find((a) => a.id === appId);
 
 	if (!app) {
 		return res.status(404).json({ success: false, message: "App not found" });
 	}
+
+	if (app.isRunning && app.runningSource !== "managed") {
+		return res.status(400).json({
+			success: false,
+			message: "App is already open outside the launcher",
+		});
+	}
+
+	stopApp(appId);
+
+	// Give it a moment to shut down
+	await new Promise((resolve) => setTimeout(resolve, 500));
 
 	const result = startApp(appId, app.command, app.basePath);
 	res.json(result);
