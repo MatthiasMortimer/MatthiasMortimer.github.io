@@ -63,17 +63,21 @@ if (showInactive && inactiveApps.length > 0) {
 console.log("\n\n🔌 PORT MAPPING");
 console.log("─".repeat(65));
 
-const ports = activeApps.sort((a, b) => a.port - b.port);
+const ports = activeApps.filter((app) => app.port).sort((a, b) => a.port - b.port);
 ports.forEach((app) => {
 	console.log(`  Port ${app.port.toString().padEnd(5)} - ${app.name.padEnd(25)} (${app.basePath})`);
 });
 
+activeApps
+	.filter((app) => !app.port)
+	.forEach((app) => {
+		console.log(`  (tab)      - ${app.name.padEnd(25)} (${app.basePath})`);
+	});
+
 // Quick start guide
 console.log("\n\n⚡ QUICK START");
 console.log("─".repeat(65));
-console.log("  npm run devapps          - Launch main app launcher");
-console.log("  npm run editor           - Launch content editor");
-console.log("  npm run post-manager     - Launch post manager (legacy)");
+console.log("  npm run app              - Open RitesDev App (all tools in tabs)");
 console.log("  npm run dev              - Start Astro dev server");
 console.log("\n  npm run mgmt:setup       - Verify all apps are set up");
 console.log("  npm run mgmt:status      - Show overall status");

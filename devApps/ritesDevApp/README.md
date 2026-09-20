@@ -1,4 +1,4 @@
-# RitesDev Launcher
+# RitesDev App
 
 A beautiful, soft-designed **native desktop application** for managing all your RitesDev development apps. Built with **Electron** to run as a proper application on Fedora Plasma (and other Linux distributions).
 
@@ -20,7 +20,7 @@ A beautiful, soft-designed **native desktop application** for managing all your 
 ### Quick Install (Recommended)
 
 ```bash
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 bash install-linux.sh
 ```
 
@@ -32,20 +32,20 @@ This will:
 
 ### Verify Installation
 
-After installation, search for "RitesDev Launcher" in your Fedora Plasma application menu. It should appear with a system icon.
+After installation, search for "RitesDev App" in your Fedora Plasma application menu. It should appear with a system icon.
 
 ## Usage
 
 ### Launch from Applications Menu
 
 1. Open your Fedora Plasma applications menu
-2. Search for "RitesDev Launcher"
+2. Search for "RitesDev App"
 3. Click to launch
 
 ### Launch from Terminal
 
 ```bash
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 npm start
 ```
 
@@ -54,6 +54,15 @@ Or use the quick launcher script:
 ```bash
 bash launch.sh
 ```
+
+### Mobile Mode
+
+1. Open the launcher on the PC and turn on **Mobile Mode**.
+2. Connect the phone to the same local network as the PC.
+3. Open the address displayed in the Mobile Mode panel on the phone.
+4. Select an app. The launcher opens its desktop window and opens the browser version in a new phone tab.
+
+Mobile mode turns off whenever the launcher exits. App browser servers listen on loopback only and are available to the local network solely through the launcher while mobile mode is enabled. If the displayed address does not connect, allow TCP port `4605` through the PC firewall for the private network.
 
 ## Launcher Interface
 
@@ -93,7 +102,7 @@ Each card shows:
 - Handles app lifecycle
 - Manages graceful shutdown
 
-### Express Server (`server.js`)
+### Express Server (`server.mjs`)
 - Provides REST API for app discovery
 - Manages launching/stopping other applications
 - Reads app registry
@@ -103,7 +112,7 @@ Each card shows:
 - `index.html` - Clean semantic structure
 - `style.css` - Soft pastel design with animations
 - `app.js` - Communicates with server API
-- Auto-refresh every 3 seconds
+- Auto-refresh every second
 - Real-time app status updates
 
 ## Auto-Discovery
@@ -133,10 +142,10 @@ POST   /api/apps/:id/restart  - Restart an app
 curl http://localhost:4605/api/apps
 
 # Start an app
-curl -X POST http://localhost:4605/api/apps/content-editor/start
+curl -X POST http://localhost:4605/api/apps/blog-post-manager/start
 
 # Stop an app
-curl -X POST http://localhost:4605/api/apps/content-editor/stop
+curl -X POST http://localhost:4605/api/apps/blog-post-manager/stop
 ```
 
 ## Design Philosophy
@@ -153,13 +162,13 @@ The launcher is designed with a **soft, easy-to-navigate aesthetic**:
 ## File Structure
 
 ```
-ritesDevLauncher/
+ritesDevApp/
 ├── electron-main.js              # Electron main process
 ├── preload.js                    # Security preload script
 ├── server.js                     # Express server with app discovery
 ├── launch.sh                     # Quick launch script
 ├── install-linux.sh              # Desktop installation script
-├── ritesDevLauncher.desktop      # Desktop file (for app menus)
+├── ritesDevApp.desktop      # Desktop file (for app menus)
 ├── package.json                  # Dependencies
 ├── devapp.meta.json              # Launcher metadata
 ├── public/
@@ -221,7 +230,7 @@ update-desktop-database ~/.local/share/applications
 
 ```bash
 # Run from terminal to see error messages
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 npm start
 ```
 
@@ -234,13 +243,13 @@ Change the port in `server.js` and update `devapps-registry.mjs`
 To remove the launcher from your system:
 
 ```bash
-rm ~/.local/share/applications/ritesDevLauncher.desktop
+rm ~/.local/share/applications/ritesDevApp.desktop
 update-desktop-database ~/.local/share/applications
 ```
 
 ## Port
 
-**Port 4605** - Managed by the RitesDev Launcher (Express server runs internally)
+**Port 4605** - Managed by the RitesDev App (Express server runs internally)
 
 ## Extending with New Apps
 

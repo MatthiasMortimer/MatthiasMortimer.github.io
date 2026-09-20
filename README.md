@@ -5,7 +5,7 @@ A multi-site Astro monorepo. Each website lives in its own folder under `sites/`
 Currently registered sites:
 
 - **[sites/s-ritesdev](sites/s-ritesdev)** - RitesDev business/portfolio site (freelance web development & technical teaching), served at `/`. Content is edited via Markdown/JSON in `sites/s-ritesdev/content/` (see [sites/s-ritesdev/content/README.md](sites/s-ritesdev/content/README.md)).
-- **[sites/s-blog](sites/s-blog)** - Personal blog, served at `/blog`. Posts/tags are defined in `sites/s-blog/const/`.
+- **[sites/s-blog](sites/s-blog)** - Personal blog, served at `/blog`. Editable site, page, card, and post content lives in `sites/s-blog/content/`.
 
 Shared identity/contact info, version numbers, and the site/app registries used by both sites live in [ritesGlobal/](ritesGlobal).
 
@@ -27,7 +27,7 @@ npm run build
 ```
 RitesDev-ecosystem/
 ├── astro.config.mjs      # Astro config (server output, node adapter)
-├── tsconfig.json         # Path aliases (@blog/*, @const/*, @components/*, @ritesGlobal/*, ...)
+├── tsconfig.json         # Path aliases (@blog/*, @components/*, @ritesGlobal/*, ...)
 ├── netlify.toml          # Netlify build/publish config
 ├── ritesGlobal/          # Shared modules reused across every site
 │   ├── contact.js/.json      # Shared identity & contact info
@@ -43,10 +43,9 @@ RitesDev-ecosystem/
 │   │   ├── site.meta.json
 │   │   ├── content/      # Editable Markdown/JSON (source of truth)
 │   │   ├── components/ layouts/ pages/ styles/
-│   │   └── const/        # Identity adapter for layout imports
 │   └── s-blog/           # Personal blog (basePath "/blog")
 │       ├── site.meta.json
-│       ├── const/        # posts.js, tags.js, siteStats.js, identity.js
+│       ├── content/      # Site settings, page copy, cards, and MDX posts
 │       ├── components/ pages/ styles/
 ├── devApps/              # Local dev tools (content editor, post manager, launcher, dashboard)
 ├── scripts/
@@ -60,7 +59,7 @@ RitesDev-ecosystem/
 
 1. Create `sites/s-<name>/` with a `site.meta.json` (`slug`, `label`, `basePath`, `order`) and a `pages/` folder.
 2. Run `npm run dev` (or `npm run sync`) - the new site's pages are symlinked into `src/pages/` automatically.
-3. Optionally register the site in `ritesGlobal/content-inventory.mjs` so devApps can discover its editable content.
+3. Put editable JSON, Markdown, MDX, JS, or MJS in the site's `content/` folder; the content editor discovers it automatically.
 
 ## Dev management tools
 
@@ -68,7 +67,7 @@ Run these from the repo root to inspect the registered sites and devApps:
 
 ```bash
 npm run mgmt:status    # Sites, apps, and content overview
-npm run mgmt:apps      # List devApps (content-editor, blog-post-manager, dev-master, ritesDevLauncher)
+npm run mgmt:apps      # List devApps (content-editor, blog-post-manager, inquiry-manager, ritesDevApp, siteHosting)
 npm run mgmt:content   # Content inventory across all sites
 npm run mgmt:setup     # Sanity-check the workspace setup
 ```

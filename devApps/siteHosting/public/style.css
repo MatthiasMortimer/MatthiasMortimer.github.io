@@ -311,3 +311,54 @@ body {
 	color: var(--color-danger);
 	font-weight: 600;
 }
+
+@media (max-width: 760px) {
+	body {
+		height: auto;
+		min-height: 100vh;
+	}
+
+	.header {
+		align-items: flex-start;
+		padding: 0.9rem 1rem;
+	}
+
+	.brand-logo {
+		display: none;
+	}
+
+	.layout {
+		display: flex;
+		flex-direction: column;
+		padding: 0.85rem 1rem 1rem;
+	}
+
+	.panel {
+		min-height: 420px;
+	}
+
+	.log {
+		min-height: 180px;
+	}
+
+	.preview-panel {
+		min-height: 500px;
+	}
+
+	.preview-head {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.preview-head .section-title {
+		overflow-wrap: anywhere;
+	}
+
+	.preview-actions {
+		width: 100%;
+	}
+
+	.preview-actions .btn {
+		min-width: 0;
+	}
+}

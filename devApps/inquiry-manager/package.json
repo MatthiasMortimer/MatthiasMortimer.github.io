@@ -1,0 +1,10 @@
+{
+  "name": "ritesdev-inquiry-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Contact form inquiry inbox tab for the RitesDev app",
+  "scripts": {
+    "test": "node --test"
+  }
+}

@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# RitesDev Launcher Installation Script for Linux (Fedora Plasma)
-# This script installs the RitesDev Launcher as a native desktop application
+# RitesDev App Installation Script for Linux (Fedora Plasma)
+# This script installs the RitesDev App as a native desktop application
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_NAME="RitesDev Launcher"
-DESKTOP_FILE="$SCRIPT_DIR/ritesDevLauncher.desktop"
+APP_NAME="RitesDev App"
+DESKTOP_FILE="$SCRIPT_DIR/ritesDevApp.desktop"
 APPS_DIR="$HOME/.local/share/applications"
-INSTALLED_DESKTOP="$APPS_DIR/ritesDevLauncher.desktop"
+INSTALLED_DESKTOP="$APPS_DIR/ritesDevApp.desktop"
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║  Installing RitesDev Launcher for Fedora Plasma               ║"
+echo "║  Installing RitesDev App for Fedora Plasma               ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -55,10 +55,10 @@ fi
 echo ""
 echo "✨ Installation complete!"
 echo ""
-echo "The RitesDev Launcher is now installed as a desktop application."
+echo "The RitesDev App is now installed as a desktop application."
 echo ""
 echo "You can launch it by:"
-echo "  • Searching for 'RitesDev Launcher' in your applications menu"
+echo "  • Searching for 'RitesDev App' in your applications menu"
 echo "  • Double-clicking the launcher icon in Plasma"
 echo "  • Running: npm start (from this directory)"
 echo ""

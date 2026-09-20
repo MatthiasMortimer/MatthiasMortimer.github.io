@@ -15,9 +15,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "editor": "npm --prefix devApps/content-editor start",
-    "post-manager": "npm --prefix devApps/blog-post-manager start",
-    "devapps": "npm --prefix devApps/dev-master start",
+    "app": "npm --prefix devApps/ritesDevApp start",
+    "devapps": "npm --prefix devApps/ritesDevApp start",
     "tunnel": "concurrently \"npm run dev -- --port 4321\" \"cloudflared tunnel run astro-site-tunnel\"",
     "tunnel:restart": "pkill -f cloudflared || true && npm run tunnel",
     "mgmt:status": "node scripts/management/status.mjs",
@@ -29,6 +28,7 @@
     "@astrojs/cloudflare": "^14.3.2",
     "@astrojs/mdx": "^8.0.0",
     "@astrojs/node": "^11.1.6",
+    "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.3.1"
   },
   "allowScripts": {

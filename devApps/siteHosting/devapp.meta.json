@@ -5,10 +5,12 @@
   "type": "hosting",
   "runtime": "desktop",
   "version": "1.0.0",
-  "port": 4321,
+  "port": null,
+  "mobilePort": 4615,
   "command": "npm start",
+  "embed": false,
   "manages": ["s-ritesdev", "s-blog"],
   "contentTypes": [],
   "author": "RitesDev",
-  "icon": "/media/logo.svg"
+  "icon": "globe"
 }

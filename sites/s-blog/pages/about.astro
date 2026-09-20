@@ -1,30 +1,24 @@
 ---
-import { happy, finished, goal } from "@blog/const/identity.js";
 import { projects } from "@ritesGlobal/projects.js";
-import skills from "@blog/const/skills.json";
-import SiteNav from "../components/SiteNav.astro";
---- 
+import BaseLayout from "../layouts/BaseLayout.astro";
+import site from "../content/site.json";
+import { frontmatter as page } from "../content/pages/about.md";
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>About - Blog Rites</title>
-	</head>
-	<body>
-	<SiteNav />
+const { identity } = site;
+const intro = page.intro
+	.replace("{firstName}", identity.firstName)
+	.replace("{occupation}", identity.occupation)
+	.replace("{country}", identity.country);
+const hobbies = page.hobbies.replace("{hobbies}", identity.hobbies.join(", "));
+---
 
-        <h1>Security Rites</h1>
-	</body>
-	<p> 
-				Through this blog, I hope to document my journey, share insights, and connect with others who are passionate about security. <br /> 
-	</p>
+<BaseLayout title={page.seo.title} description={page.seo.description}>
+	<h1>{page.title}</h1>
+	<p>{intro}</p>
+	<p>{hobbies}</p>
 
 	<section class="projects" aria-labelledby="projects-title">
-		<h2 id="projects-title">Current Projects</h2>
+		<h2 id="projects-title">{page.projectsTitle}</h2>
 		<ul>
 			{projects.map((project) => (
 				<li>
@@ -34,5 +28,4 @@ import SiteNav from "../components/SiteNav.astro";
 			))}
 		</ul>
 	</section>
-
-</html>
+</BaseLayout>

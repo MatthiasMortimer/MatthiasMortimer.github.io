@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; style-src 'self' file:; script-src 'self'; img-src 'self' data:; connect-src 'self'">
+	<title>Inquiry Manager</title>
+	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="/theme/app-theme.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="app-shell">
+		<header class="topbar">
+			<div>
+				<p class="eyebrow">RitesDev Studio</p>
+				<h1>Inquiry Manager</h1>
+			</div>
+			<div class="topbar-right">
+				<div id="stats" class="stats"></div>
+				<button id="refresh" class="button" type="button">Refresh</button>
+				<div id="save-state" class="save-state" role="status">Ready</div>
+			</div>
+		</header>
+
+		<main class="workspace">
+			<aside class="inquiry-browser" aria-label="Inquiries">
+				<div class="browser-heading">
+					<div>
+						<h2>Inbox</h2>
+						<span id="inquiry-count">0 entries</span>
+					</div>
+				</div>
+				<label class="search-field">
+					<span aria-hidden="true">⌕</span>
+					<input id="inquiry-search" type="search" placeholder="Search name, email, message" autocomplete="off">
+				</label>
+				<div class="filter-row" id="status-filter" role="group" aria-label="Filter by status">
+					<button class="chip is-active" type="button" data-status="all">All</button>
+					<button class="chip" type="button" data-status="new">New</button>
+					<button class="chip" type="button" data-status="read">Read</button>
+					<button class="chip" type="button" data-status="replied">Replied</button>
+					<button class="chip" type="button" data-status="archived">Archived</button>
+				</div>
+				<div id="inquiry-list" class="inquiry-list"></div>
+			</aside>
+
+			<section class="detail-panel">
+				<div id="empty-state" class="empty-state">
+					<p class="empty-mark">✉</p>
+					<h2>Select an inquiry</h2>
+					<p>Messages submitted through the site contact form appear here.</p>
+				</div>
+
+				<article id="detail" class="detail" hidden>
+					<div class="detail-toolbar">
+						<div>
+							<p class="eyebrow" id="detail-received">Received</p>
+							<h2 id="detail-name">Inquiry</h2>
+						</div>
+						<div class="toolbar-actions">
+							<button id="copy-email" class="button" type="button">Copy email</button>
+							<a id="reply-link" class="button primary" href="#">Reply by email</a>
+							<button id="delete-inquiry" class="button danger" type="button">Delete</button>
+						</div>
+					</div>
+
+					<div class="detail-scroll">
+						<dl class="meta-grid">
+							<div><dt>Email</dt><dd id="detail-email"></dd></div>
+							<div><dt>Service</dt><dd id="detail-service"></dd></div>
+							<div><dt>Timeline</dt><dd id="detail-timeline"></dd></div>
+							<div><dt>Status</dt><dd>
+								<select id="detail-status">
+									<option value="new">New</option>
+									<option value="read">Read</option>
+									<option value="replied">Replied</option>
+									<option value="archived">Archived</option>
+								</select>
+							</dd></div>
+						</dl>
+
+						<section class="block">
+							<h3>Message</h3>
+							<p id="detail-message" class="message-body"></p>
+						</section>
+
+						<section class="block">
+							<h3>Private notes</h3>
+							<textarea id="detail-notes" rows="5" placeholder="Follow-up notes, quoted price, next steps…"></textarea>
+							<button id="save-notes" class="button primary" type="button">Save notes</button>
+						</section>
+					</div>
+				</article>
+			</section>
+		</main>
+	</div>
+
+	<script src="browser-api.js"></script>
+	<script src="app.js"></script>
+</body>
+</html>

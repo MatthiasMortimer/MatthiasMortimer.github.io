@@ -14,6 +14,8 @@ STALE_FILES=(
 	"blogrites-content-editor.desktop"   # replaced by ritesdev-content-editor.desktop
 	"ritesdev-content-editor.desktop"    # app removed from the repo
 	"dev-master.desktop"                 # app removed from the repo
+	"blog-post-manager.desktop"          # now a tab inside RitesDev App
+	"ritesDevLauncher.desktop"           # renamed to ritesDevApp.desktop
 )
 for f in "${STALE_FILES[@]}"; do
 	if [ -f "$APPS_DIR/$f" ]; then
@@ -24,8 +26,7 @@ done
 
 # --- 2. (name -> source .desktop file) pairs to install/refresh ---
 declare -A APPS=(
-	["blog-post-manager.desktop"]="$SCRIPT_DIR/blog-post-manager/blog-post-manager.desktop"
-	["ritesDevLauncher.desktop"]="$SCRIPT_DIR/ritesDevLauncher/ritesDevLauncher.desktop"
+	["ritesDevApp.desktop"]="$SCRIPT_DIR/ritesDevApp/ritesDevApp.desktop"
 	["siteHosting.desktop"]="$SCRIPT_DIR/siteHosting/siteHosting.desktop"
 )
 
@@ -43,12 +44,12 @@ for dest_name in "${!APPS[@]}"; do
 	echo "✓ Installed $dest_name"
 done
 
-# ritesDevLauncher uses `npm start` (not a static Exec path) — keep that override
-if [ -f "$APPS_DIR/ritesDevLauncher.desktop" ]; then
-	sed -i "s|Exec=.*|Exec=bash -c 'cd $SCRIPT_DIR/ritesDevLauncher \&\& npm start'|" "$APPS_DIR/ritesDevLauncher.desktop"
+# ritesDevApp uses `npm start` (not a static Exec path) — keep that override
+if [ -f "$APPS_DIR/ritesDevApp.desktop" ]; then
+	sed -i "s|Exec=.*|Exec=bash -c 'cd $SCRIPT_DIR/ritesDevApp \&\& npm start'|" "$APPS_DIR/ritesDevApp.desktop"
 fi
 
-chmod +x "$SCRIPT_DIR/ritesDevLauncher/launch.sh" 2>/dev/null || true
+chmod +x "$SCRIPT_DIR/ritesDevApp/launch.sh" 2>/dev/null || true
 chmod +x "$SCRIPT_DIR/siteHosting/launch.sh" 2>/dev/null || true
 
 if command -v update-desktop-database &>/dev/null; then

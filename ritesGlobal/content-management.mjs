@@ -118,7 +118,7 @@ export async function getFileMetadata(siteSlug, contentType, filename) {
 }
 
 /**
- * Create a new post in posts.js
+ * Create a new post listing entry in content/posts.json
  * @param {string} siteSlug - Site slug
  * @param {Object} postData - Post data object
  * @returns {Promise<Array>} Updated posts array
@@ -129,14 +129,7 @@ export async function createPost(siteSlug, postData) {
 	}
 
 	try {
-		const content = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js");
-
-		// Parse the posts array from export statement
-		// Assumes format: export const posts = [...]
-		const postsMatch = content.match(/export const posts = (\[[\s\S]*\]);/);
-		if (!postsMatch) throw new Error("Could not parse posts array");
-
-		let posts = eval(postsMatch[1]); // Safely evaluate the array
+		const posts = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json");
 
 		// Add new post
 		posts.push({
@@ -147,13 +140,7 @@ export async function createPost(siteSlug, postData) {
 			description: postData.description || "",
 		});
 
-		// Write back to file
-		const updatedContent = content.replace(
-			/export const posts = \[[\s\S]*\];/,
-			`export const posts = ${JSON.stringify(posts, null, 2)};`
-		);
-
-		await writeContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js", updatedContent);
+		await writeContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json", posts);
 
 		return posts;
 	} catch (error) {
@@ -162,7 +149,7 @@ export async function createPost(siteSlug, postData) {
 }
 
 /**
- * Update an existing post in posts.js
+ * Update an existing post listing entry in content/posts.json
  * @param {string} siteSlug - Site slug
  * @param {number} postIndex - Index of post to update
  * @param {Object} updates - Updates to merge
@@ -174,12 +161,7 @@ export async function updatePost(siteSlug, postIndex, updates) {
 	}
 
 	try {
-		const content = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js");
-
-		const postsMatch = content.match(/export const posts = (\[[\s\S]*\]);/);
-		if (!postsMatch) throw new Error("Could not parse posts array");
-
-		let posts = eval(postsMatch[1]);
+		const posts = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json");
 
 		if (postIndex >= posts.length || postIndex < 0) {
 			throw new Error(`Invalid post index: ${postIndex}`);
@@ -187,12 +169,7 @@ export async function updatePost(siteSlug, postIndex, updates) {
 
 		posts[postIndex] = { ...posts[postIndex], ...updates };
 
-		const updatedContent = content.replace(
-			/export const posts = \[[\s\S]*\];/,
-			`export const posts = ${JSON.stringify(posts, null, 2)};`
-		);
-
-		await writeContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js", updatedContent);
+		await writeContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json", posts);
 
 		return posts;
 	} catch (error) {
@@ -201,7 +178,7 @@ export async function updatePost(siteSlug, postIndex, updates) {
 }
 
 /**
- * Delete a post from posts.js
+ * Delete a post listing entry from content/posts.json
  * @param {string} siteSlug - Site slug
  * @param {number} postIndex - Index of post to delete
  * @returns {Promise<Array>} Updated posts array
@@ -212,12 +189,7 @@ export async function deletePost(siteSlug, postIndex) {
 	}
 
 	try {
-		const content = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js");
-
-		const postsMatch = content.match(/export const posts = (\[[\s\S]*\]);/);
-		if (!postsMatch) throw new Error("Could not parse posts array");
-
-		let posts = eval(postsMatch[1]);
+		const posts = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json");
 
 		if (postIndex >= posts.length || postIndex < 0) {
 			throw new Error(`Invalid post index: ${postIndex}`);
@@ -225,12 +197,7 @@ export async function deletePost(siteSlug, postIndex) {
 
 		posts.splice(postIndex, 1);
 
-		const updatedContent = content.replace(
-			/export const posts = \[[\s\S]*\];/,
-			`export const posts = ${JSON.stringify(posts, null, 2)};`
-		);
-
-		await writeContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js", updatedContent);
+		await writeContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json", posts);
 
 		return posts;
 	} catch (error) {
@@ -245,12 +212,7 @@ export async function deletePost(siteSlug, postIndex) {
  */
 export async function getPosts(siteSlug) {
 	try {
-		const content = await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.js");
-		const postsMatch = content.match(/export const posts = (\[[\s\S]*\]);/);
-
-		if (!postsMatch) throw new Error("Could not parse posts array");
-
-		return eval(postsMatch[1]);
+		return await readContentFile(siteSlug, CONTENT_TYPES.CONFIG, "posts.json");
 	} catch (error) {
 		throw new Error(`Failed to get posts: ${error.message}`);
 	}
@@ -279,7 +241,8 @@ export async function getAllSites() {
 export function isPathSafe(filePath, allowedDir) {
 	const resolved = path.resolve(filePath);
 	const allowed = path.resolve(allowedDir);
-	return resolved.startsWith(allowed);
+	const relative = path.relative(allowed, resolved);
+	return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
 /**

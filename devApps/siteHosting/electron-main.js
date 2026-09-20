@@ -1,10 +1,25 @@
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("node:path");
 const { HostManager, config } = require("./host-manager");
+const { startMobileAppServer } = require("../../ritesGlobal/mobile-app-server.cjs");
 
 const host = new HostManager();
 let mainWindow = null;
 let quitting = false;
+
+startMobileAppServer({
+	port: 4615,
+	publicDir: path.join(__dirname, "public"),
+	handleApi: async ({ method, pathname }) => {
+		if (method === "GET" && pathname === "/api/host/config") return config;
+		if (method === "GET" && pathname === "/api/host/logs") return host.logs;
+		if (method === "GET" && pathname === "/api/host/status") return host.status();
+		if (method === "POST" && pathname === "/api/host/start") return host.start();
+		if (method === "POST" && pathname === "/api/host/stop") return host.stop();
+		if (method === "POST" && pathname === "/api/host/restart") return host.restart();
+		return { status: 404, data: { success: false, message: "Not found" } };
+	},
+});
 
 function createWindow() {
 	mainWindow = new BrowserWindow({

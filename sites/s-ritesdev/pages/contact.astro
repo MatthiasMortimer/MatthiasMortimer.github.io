@@ -1,11 +1,37 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ContactForm from "../components/ContactForm.astro";
-import { identity } from "@const/identity.js";
+import { identity } from "@ritesGlobal/content.js";
+import { createInquiryStore } from "@ritesGlobal/inquiry-store.mjs";
 import { frontmatter as contactPage } from "../content/pages/contact.md";
 
-const content = contactPage as { title: string; description: string; directTitle: string; emailLabel: string; locationLabel: string; statusLabel: string; faqTitle: string; faqs: Array<{ q: string; a: string }> };
+const content = contactPage as { title: string; description: string; directTitle: string; emailLabel: string; locationLabel: string; statusLabel: string; faqTitle: string; faqs: Array<{ question: string; answer: string }> };
 const { faqs } = content;
+
+// Fallback for visitors without JavaScript: the form normally POSTs JSON to /api/inquiry.
+let formError: string | null = null;
+if (Astro.request.method === "POST") {
+	const data = await Astro.request.formData();
+	if (data.get("bot-field")) {
+		// Honeypot tripped: pretend success without recording anything.
+		return Astro.redirect("/contact/?sent=1", 303);
+	}
+
+	try {
+		createInquiryStore().addSync({
+			name: data.get("name"),
+			email: data.get("email"),
+			service: data.get("service"),
+			timeline: data.get("timeline"),
+			message: data.get("message"),
+		});
+		return Astro.redirect("/contact/?sent=1", 303);
+	} catch (error) {
+		formError = error instanceof Error ? error.message : "Something went wrong saving your message. Please email us directly instead.";
+	}
+}
+
+const formSent = Astro.url.searchParams.get("sent") === "1";
 ---
 
 <BaseLayout title="Contact | RitesDev" description="Get in touch for freelance web development inquiries, custom software projects, or 1-on-1 coding mentorship sessions.">
@@ -18,12 +44,25 @@ const { faqs } = content;
 
 	<div class="grid-2" style="align-items: start; gap: 2.5rem;">
 		<!-- Contact Form -->
-		<ContactForm />
+		<div>
+			{formSent && (
+				<div class="tag tag-green" style="display: block; padding: 0.85rem 1rem; margin-bottom: 1rem; border-radius: var(--radius-sm);">
+					Thanks! Your message has been sent — we'll get back to you soon.
+				</div>
+			)}
+			{formError && (
+				<div style="display: block; padding: 0.85rem 1rem; margin-bottom: 1rem; border-radius: var(--radius-sm); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;">
+					{formError}
+				</div>
+			)}
+			<ContactForm />
+		</div>
 
 		<!-- Direct Info & FAQ -->
 		<div>
 			<div class="card" style="margin-bottom: 2rem;">
-				<h3 style="margin-top: 0; margin-bottom: 0.75rem;">{content.directTitle}</h3>
+				<p style="margin-top: 0;">Just looking for pricing? <a href="/pricing/">View Website Plans & Pricing →</a></p>
+				<h3 style="margin-bottom: 0.75rem;">{content.directTitle}</h3>
 				<ul style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
 					<li style="margin-bottom: 0.75rem;">
 						<span style="display: block; font-size: 0.8rem; color: var(--color-text-dim);">{content.emailLabel}</span>
@@ -43,10 +82,10 @@ const { faqs } = content;
 			<!-- FAQ Accordion / List -->
 			<div class="card">
 				<h3 style="margin-top: 0; margin-bottom: 1rem;">{content.faqTitle}</h3>
-				{faqs.map((faq: { q: string; a: string }) => (
+				{faqs.map((faq: { question: string; answer: string }) => (
 					<div style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem;">
-						<strong style="display: block; color: var(--color-text); font-size: 0.95rem; margin-bottom: 0.35rem;">{faq.q}</strong>
-						<p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 0;">{faq.a}</p>
+						<strong style="display: block; color: var(--color-text); font-size: 0.95rem; margin-bottom: 0.35rem;">{faq.question}</strong>
+						<p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 0;">{faq.answer}</p>
 					</div>
 				))}
 			</div>

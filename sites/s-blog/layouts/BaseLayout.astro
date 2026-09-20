@@ -1,0 +1,37 @@
+---
+import SiteNav from "../components/SiteNav.astro";
+import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
+import site from "../content/site.json";
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	noindex?: boolean;
+	// MDX/Markdown pages with a `layout:` frontmatter field pass their whole
+	// frontmatter object here instead of individual props.
+	frontmatter?: { title?: string; description?: string; image?: string };
+}
+
+const { title, description, image, noindex, frontmatter } = Astro.props;
+const pageTitle = title ?? frontmatter?.title ?? site.metadata.title;
+const pageDescription = description ?? frontmatter?.description ?? site.metadata.description;
+const pageImage = image ?? frontmatter?.image;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{pageTitle}</title>
+		<SeoMeta title={pageTitle} description={pageDescription} image={pageImage} noindex={noindex} />
+	</head>
+	<body>
+		<SiteNav />
+		<main>
+			<slot />
+		</main>
+	</body>
+</html>

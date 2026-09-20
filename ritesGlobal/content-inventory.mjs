@@ -3,76 +3,92 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { listSites } from "./sites.registry.mjs";
+
+const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export const CONTENT_TYPES = {
 	BLOG_POST: "blog_post",
 	PAGE: "page",
 	CONFIG: "config",
 	METADATA: "metadata",
-	COMPONENT: "component",
-	STYLE: "style",
+	IDENTITY: "identity",
+	PROJECTS: "projects",
+	VERSIONS: "versions",
+	SEO: "seo",
 };
 
-// Site-specific content configuration
-const SITE_CONTENT_CONFIG = {
-	"s-blog": {
-		name: "Blog",
-		contentTypes: {
-			[CONTENT_TYPES.BLOG_POST]: {
-				label: "Blog Posts",
-				registry: "const/posts.js",
-				folder: "pages/posts/",
-				files: [],
-			},
-			[CONTENT_TYPES.CONFIG]: {
-				label: "Configuration",
-				files: [
-					"const/posts.js",
-					"const/tags.js",
-					"const/skills.json",
-					"const/identity.js",
-					"const/siteStats.js",
-				],
-			},
-			[CONTENT_TYPES.COMPONENT]: {
-				label: "Components",
-				folder: "components/",
-				files: ["PostCard.astro", "SiteNav.astro"],
-			},
-		},
-	},
-	"s-ritesdev": {
-		name: "RitesDev",
-		contentTypes: {
-			[CONTENT_TYPES.PAGE]: {
-				label: "Pages",
-				folder: "content/pages/",
-				files: ["about.md", "contact.md", "index.md", "portfolio.md", "services.md"],
-			},
-			[CONTENT_TYPES.CONFIG]: {
-				label: "Configuration",
-				files: [
-					"const/identity.js",
-					"content/site.json",
-					"layouts/BaseLayout.astro",
-				],
-			},
-			[CONTENT_TYPES.COMPONENT]: {
-				label: "Components",
-				folder: "components/",
-				files: [
-					"ContactForm.astro",
-					"Footer.astro",
-					"ProjectCard.astro",
-					"ServiceCard.astro",
-					"SiteNav.astro",
-					"TestimonialCard.astro",
-				],
-			},
-		},
-	},
-};
+export const GLOBAL_CONTENT_FILES = [
+	"ritesGlobal/contact.json",
+	"ritesGlobal/projects.json",
+	"ritesGlobal/versions.json",
+	"ritesGlobal/seo.json",
+];
+
+const CONTENT_EXTENSIONS = new Set([".json", ".md", ".mdx", ".js", ".mjs"]);
+
+function discoverContentFiles(siteDir) {
+	const files = [];
+	const contentDir = path.join(siteDir, "content");
+	if (!fs.existsSync(contentDir)) return files;
+
+	function visit(directory) {
+		for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+			if (entry.name.startsWith(".") || entry.name.endsWith(".bak")) continue;
+
+			const filePath = path.join(directory, entry.name);
+			if (entry.isDirectory()) {
+				visit(filePath);
+				continue;
+			}
+
+			const relativePath = path.relative(siteDir, filePath).split(path.sep).join("/");
+			const extension = path.extname(entry.name).toLowerCase();
+			if (entry.name.toLowerCase() === "readme.md") continue;
+			if (!CONTENT_EXTENSIONS.has(extension)) continue;
+
+			files.push(relativePath);
+		}
+	}
+
+	visit(contentDir);
+	return files.sort();
+}
+
+function createContentTypes(siteDir) {
+	const groups = {};
+
+	for (const file of discoverContentFiles(siteDir)) {
+		let type = CONTENT_TYPES.CONFIG;
+		let label = "Reusable Content";
+
+		if (file === "content/site.json") {
+			type = CONTENT_TYPES.METADATA;
+			label = "Site Settings";
+		} else if (file.startsWith("content/posts/")) {
+			type = CONTENT_TYPES.BLOG_POST;
+			label = "Blog Posts";
+		} else if (file.startsWith("content/pages/")) {
+			type = CONTENT_TYPES.PAGE;
+			label = "Page Content";
+		}
+
+		groups[type] ??= { label, files: [] };
+		groups[type].files.push(file);
+	}
+
+	for (const group of Object.values(groups)) {
+		const directories = new Set(group.files.map((file) => path.posix.dirname(file)));
+		if (directories.size === 1) group.folder = `${[...directories][0]}/`;
+	}
+
+	return groups;
+}
+
+const SITE_CONTENT_CONFIG = Object.fromEntries(
+	listSites().map((site) => [site.folder, { name: site.label, contentTypes: createContentTypes(site.dir) }]),
+);
 
 /**
  * Get content inventory for all sites
@@ -80,9 +96,29 @@ const SITE_CONTENT_CONFIG = {
  */
 export function getContentInventory() {
 	const sites = listSites();
-	return sites.map((site) => {
-		const config = SITE_CONTENT_CONFIG[site.folder];
-		if (!config) return null;
+	const globalDir = path.join(ROOT_DIR, "ritesGlobal");
+	const globalContent = {
+		slug: "global",
+		folder: "ritesGlobal",
+		label: "Ecosystem Global",
+		dir: globalDir,
+		contentTypes: {
+			[CONTENT_TYPES.IDENTITY]: { label: "Contact & Identity", files: ["contact.json"] },
+			[CONTENT_TYPES.PROJECTS]: { label: "Projects", files: ["projects.json"] },
+			[CONTENT_TYPES.VERSIONS]: { label: "Versions", files: ["versions.json"] },
+			[CONTENT_TYPES.SEO]: { label: "SEO Defaults", files: ["seo.json"] },
+		},
+		metadata: {
+			created: new Date().toISOString(),
+			lastUpdated: getLastModified(globalDir),
+		},
+	};
+
+	const siteContent = sites.map((site) => {
+		const config = {
+			name: site.label,
+			contentTypes: createContentTypes(site.dir),
+		};
 
 		return {
 			slug: site.slug,
@@ -95,7 +131,9 @@ export function getContentInventory() {
 				lastUpdated: getLastModified(site.dir),
 			},
 		};
-	}).filter(Boolean);
+	});
+
+	return [globalContent, ...siteContent];
 }
 
 /**
@@ -110,6 +148,13 @@ export function getContentByType(contentType) {
 		label: site.label,
 		content: site.contentTypes[contentType] || null,
 	})).filter((item) => item.content !== null);
+}
+
+export function getGlobalContentInventory() {
+	return GLOBAL_CONTENT_FILES.map((file) => ({
+		file,
+		exists: fs.existsSync(path.join(ROOT_DIR, file)),
+	}));
 }
 
 /**
@@ -137,11 +182,12 @@ export function getContentFilePath(siteSlug, contentType, filename = "") {
 	if (!contentConfig) return null;
 
 	if (filename) {
-		const folder = contentConfig.folder;
-		if (folder) {
-			return path.join(site.dir, folder, filename);
-		}
-		return path.join(site.dir, contentConfig.files?.[0] || "");
+		const configuredFiles = contentConfig.files?.filter(
+			(file) => file === filename || path.basename(file) === filename,
+		) || [];
+		if (configuredFiles.length === 1) return path.join(site.dir, configuredFiles[0]);
+		if (contentConfig.folder) return path.join(site.dir, contentConfig.folder, filename);
+		return null;
 	}
 
 	if (contentConfig.folder) {
@@ -162,9 +208,13 @@ function getLastModified(dir) {
 
 		for (const file of files) {
 			const filePath = path.join(dir, file.name);
-			const stat = fs.statSync(filePath);
+			const stat = file.isDirectory() ? fs.statSync(filePath) : fs.statSync(filePath);
 			if (stat.mtime > latest) {
 				latest = stat.mtime;
+			}
+			if (file.isDirectory()) {
+				const nested = new Date(getLastModified(filePath));
+				if (nested > latest) latest = nested;
 			}
 		}
 		return latest.toISOString();

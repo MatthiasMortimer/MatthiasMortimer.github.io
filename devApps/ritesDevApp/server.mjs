@@ -1,9 +1,11 @@
 import express from "express";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import http from "node:http";
 import net from "node:net";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -13,9 +15,40 @@ const MEDIA_DIR = path.resolve(__dirname, "../../public/media");
 const DEVAPPS_DIR = path.resolve(__dirname, "..");
 const SELF_DIR_NAME = path.basename(__dirname);
 const PORT_CHECK_TIMEOUT_MS = 200;
+let mobileModeEnabled = false;
 
 // Store running processes
 const processes = new Map();
+
+// Embedded apps run inside this process: their handler and static server are
+// created once and reused, so switching tabs never starts another app.
+const embeddedApps = new Map();
+
+function getAppDir(appId) {
+	const appDir = path.join(DEVAPPS_DIR, appId);
+	if (!appDir.startsWith(`${DEVAPPS_DIR}${path.sep}`)) return null;
+	return fs.existsSync(path.join(appDir, "devapp.api.mjs")) ? appDir : null;
+}
+
+async function getEmbeddedApp(appId) {
+	if (embeddedApps.has(appId)) return embeddedApps.get(appId);
+
+	const appDir = getAppDir(appId);
+	if (!appDir) return null;
+
+	const loading = import(pathToFileURL(path.join(appDir, "devapp.api.mjs")).href)
+		.then((module) => ({
+			handleApi: module.createApiHandler(),
+			static: express.static(path.join(appDir, "public"), { index: "index.html" }),
+		}))
+		.catch((error) => {
+			embeddedApps.delete(appId);
+			throw error;
+		});
+
+	embeddedApps.set(appId, loading);
+	return loading;
+}
 
 function getManagedProcess(appId) {
 	const proc = processes.get(appId);
@@ -87,6 +120,15 @@ function isPortOpen(port) {
 	});
 }
 
+async function waitForPort(port, timeoutMs = 10_000) {
+	const deadline = Date.now() + timeoutMs;
+	do {
+		if (await isPortOpen(port)) return true;
+		await new Promise((resolve) => setTimeout(resolve, 150));
+	} while (Date.now() < deadline);
+	return false;
+}
+
 async function getRuntimeStatus(appId, appPath, port) {
 	const managedProcess = getManagedProcess(appId);
 	if (managedProcess) {
@@ -105,11 +147,110 @@ async function getRuntimeStatus(appId, appPath, port) {
 	return { isRunning: false, source: "none", pid: null };
 }
 
+function isLoopbackRequest(req) {
+	const address = req.socket.remoteAddress || "";
+	return address === "127.0.0.1" || address === "::1" || address === "::ffff:127.0.0.1";
+}
+
+function getLanAddress() {
+	for (const interfaces of Object.values(os.networkInterfaces())) {
+		for (const address of interfaces || []) {
+			if (address.family === "IPv4" && !address.internal) return address.address;
+		}
+	}
+	return null;
+}
+
+function getMobileModeStatus() {
+	const lanAddress = getLanAddress();
+	return {
+		enabled: mobileModeEnabled,
+		lanAddress,
+		url: mobileModeEnabled && lanAddress ? `http://${lanAddress}:${PORT}` : null,
+	};
+}
+
 // Middleware
+app.use((req, res, next) => {
+	if (isLoopbackRequest(req) || mobileModeEnabled) return next();
+	return res.status(403).json({ success: false, message: "Mobile mode is disabled" });
+});
 app.use(express.static("public"));
 app.use("/theme", express.static(GLOBAL_STYLES_DIR));
 app.use("/media", express.static(MEDIA_DIR));
+app.use("/ritesGlobal/styles", express.static(GLOBAL_STYLES_DIR));
+app.use("/public/media", express.static(MEDIA_DIR));
+app.use("/mobile/apps/:appId", async (req, res) => {
+	const apps = await discoverApps();
+	const targetApp = apps.find((candidate) => candidate.id === req.params.appId);
+	if (targetApp?.embedded) {
+		return res.redirect(targetApp.entryUrl);
+	}
+
+	if (!targetApp?.mobilePort) {
+		return res.status(404).json({ success: false, message: "This app does not support mobile mode" });
+	}
+
+	if (!(await waitForPort(targetApp.mobilePort))) {
+		return res.status(503).json({ success: false, message: "The app is not ready yet" });
+	}
+
+	const proxyRequest = http.request(
+		{
+			host: "127.0.0.1",
+			port: targetApp.mobilePort,
+			path: req.url || "/",
+			method: req.method,
+			headers: { ...req.headers, host: `127.0.0.1:${targetApp.mobilePort}` },
+		},
+		(proxyResponse) => {
+			res.writeHead(proxyResponse.statusCode || 502, proxyResponse.headers);
+			proxyResponse.pipe(res);
+		},
+	);
+	proxyRequest.on("error", (error) => {
+		if (!res.headersSent) res.status(502).json({ success: false, message: error.message });
+	});
+	req.pipe(proxyRequest);
+});
 app.use(express.json());
+
+/**
+ * Embedded dev apps: served from this process at /apps/<id>/ so the launcher can
+ * show them as instant tabs instead of spawning a separate Electron app each time.
+ */
+app.use("/apps/:appId", async (req, res, next) => {
+	let embedded;
+	try {
+		embedded = await getEmbeddedApp(req.params.appId);
+	} catch (error) {
+		console.error(`[embedded] ${req.params.appId} failed to load:`, error);
+		return res.status(500).json({ success: false, message: error.message });
+	}
+
+	if (!embedded) return res.status(404).json({ success: false, message: "Unknown app" });
+
+	const requestUrl = new URL(req.url, "http://127.0.0.1");
+	if (requestUrl.pathname === "/" && !req.originalUrl.split("?")[0].endsWith("/")) {
+		return res.redirect(`/apps/${encodeURIComponent(req.params.appId)}/`);
+	}
+
+	if (!requestUrl.pathname.startsWith("/api/")) {
+		return embedded.static(req, res, next);
+	}
+
+	try {
+		const result = await embedded.handleApi({
+			method: req.method,
+			pathname: requestUrl.pathname,
+			searchParams: requestUrl.searchParams,
+			body: req.body ?? null,
+		});
+		res.status(result?.status || 200).json(result?.data ?? result);
+	} catch (error) {
+		res.status(error.statusCode || 400).json({ success: false, message: error.message });
+	}
+});
 
 /**
  * Discover dev apps by scanning devApps/ directly — a folder only shows up if
@@ -147,7 +288,12 @@ async function discoverApps() {
 
 		const id = meta.slug || entry.name;
 		const pkgPath = path.join(appPath, "package.json");
-		const runtimeStatus = await getRuntimeStatus(id, appPath, meta.port || null);
+		const canEmbed =
+			meta.embed !== false &&
+			fs.existsSync(path.join(appPath, "devapp.api.mjs")) &&
+			fs.existsSync(path.join(appPath, "public", "index.html"));
+		const runtimeStatus = canEmbed ? null : await getRuntimeStatus(id, appPath, meta.port || null);
+		const mobileReady = canEmbed ? true : await isPortOpen(meta.mobilePort || null);
 
 		apps.push({
 			id,
@@ -155,6 +301,11 @@ async function discoverApps() {
 			type: meta.type || "app",
 			description: meta.description || "",
 			port: meta.port || null,
+			mobilePort: meta.mobilePort || null,
+			mobileReady,
+			embedded: canEmbed,
+			entryUrl: canEmbed ? `/apps/${encodeURIComponent(entry.name)}/` : null,
+			tabOrder: Number.isFinite(meta.tabOrder) ? meta.tabOrder : 99,
 			manages: meta.manages || [],
 			contentTypes: meta.contentTypes || [],
 			runtime: meta.runtime || "web",
@@ -162,15 +313,15 @@ async function discoverApps() {
 			folderExists: true,
 			hasMeta: true,
 			hasPkg: fs.existsSync(pkgPath),
-			isRunning: runtimeStatus.isRunning,
-			runningSource: runtimeStatus.source,
-			pid: runtimeStatus.pid,
+			isRunning: canEmbed ? true : runtimeStatus.isRunning,
+			runningSource: canEmbed ? "embedded" : runtimeStatus.source,
+			pid: canEmbed ? null : runtimeStatus.pid,
 			command: meta.command || "npm start",
 			env: meta.env || {},
 		});
 	}
 
-	return apps;
+	return apps.sort((first, second) => first.tabOrder - second.tabOrder || first.name.localeCompare(second.name));
 }
 
 /**
@@ -225,7 +376,7 @@ function startApp(appId, command, basePath) {
 /**
  * Stop an app process
  */
-function stopApp(appId) {
+async function stopApp(appId) {
 	const proc = getManagedProcess(appId);
 	if (!proc) {
 		return { success: false, message: "App not running" };
@@ -238,11 +389,32 @@ function stopApp(appId) {
 			// Windows
 			spawn("taskkill", ["/PID", pid.toString(), "/F"]);
 		} else {
-			// Unix - kill process group
-			process.kill(-pid);
+			// Unix: npm can leave Electron as a reparented descendant.
+			killDescendants(pid);
+			try {
+				process.kill(-pid);
+			} catch {
+				process.kill(pid, "SIGTERM");
+			}
 		}
+function killDescendants(pid) {
+	const children = spawnSync("pgrep", ["-P", String(pid)], { encoding: "utf8" }).stdout
+		.split(/\s+/)
+		.filter(Boolean)
+		.map(Number);
+
+	for (const childPid of children) {
+		killDescendants(childPid);
+		try {
+			process.kill(childPid, "SIGTERM");
+		} catch {
+			// The child may have exited while the process tree was being read.
+		}
+	}
+}
 
 		processes.delete(appId);
+		await waitForProcessExit(pid);
 		console.log(`[${new Date().toLocaleTimeString()}] Stopped ${appId} (PID: ${pid})`);
 
 		return { success: true, message: `Stopped ${appId}` };
@@ -252,7 +424,33 @@ function stopApp(appId) {
 	}
 }
 
+async function waitForProcessExit(pid, timeoutMs = 5_000) {
+	const deadline = Date.now() + timeoutMs;
+	while (Date.now() < deadline) {
+		try {
+			process.kill(pid, 0);
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		} catch {
+			return true;
+		}
+	}
+	return false;
+}
+
 // API Routes
+
+app.get("/api/mobile-mode", (req, res) => {
+	res.json({ ...getMobileModeStatus(), canConfigure: isLoopbackRequest(req) });
+});
+
+app.post("/api/mobile-mode", (req, res) => {
+	if (!isLoopbackRequest(req)) {
+		return res.status(403).json({ success: false, message: "Mobile mode can only be changed on this PC" });
+	}
+
+	mobileModeEnabled = req.body?.enabled === true;
+	res.json({ success: true, ...getMobileModeStatus() });
+});
 
 /**
  * GET /api/apps - List all discovered apps
@@ -274,7 +472,11 @@ app.post("/api/apps/:appId/start", async (req, res) => {
 		return res.status(404).json({ success: false, message: "App not found" });
 	}
 
-	if (app.isRunning) {
+	if (app.embedded) {
+		return res.status(400).json({ success: false, message: "This app only runs as a tab in RitesDev App" });
+	}
+
+	if (app.isRunning && (!mobileModeEnabled || app.mobileReady)) {
 		return res.status(400).json({ success: false, message: "App already running" });
 	}
 
@@ -283,6 +485,12 @@ app.post("/api/apps/:appId/start", async (req, res) => {
 	}
 
 	const result = startApp(appId, app.command, app.basePath);
+	if (result.success && app.mobilePort && !(await waitForPort(app.mobilePort))) {
+		return res.status(503).json({
+			success: false,
+			message: `${app.name} started but its control panel did not become ready on port ${app.mobilePort}`,
+		});
+	}
 	res.json(result);
 });
 
@@ -301,7 +509,7 @@ app.post("/api/apps/:appId/stop", async (req, res) => {
 		});
 	}
 
-	const result = stopApp(appId);
+	const result = await stopApp(appId);
 	res.json(result);
 });
 
@@ -318,6 +526,10 @@ app.post("/api/apps/:appId/restart", async (req, res) => {
 		return res.status(404).json({ success: false, message: "App not found" });
 	}
 
+	if (app.embedded) {
+		return res.status(400).json({ success: false, message: "This app only runs as a tab in RitesDev App" });
+	}
+
 	if (app.isRunning && app.runningSource !== "managed") {
 		return res.status(400).json({
 			success: false,
@@ -325,7 +537,7 @@ app.post("/api/apps/:appId/restart", async (req, res) => {
 		});
 	}
 
-	stopApp(appId);
+	await stopApp(appId);
 
 	// Give it a moment to shut down
 	await new Promise((resolve) => setTimeout(resolve, 500));
@@ -345,25 +557,26 @@ app.get("/api/status", (req, res) => {
 	});
 });
 
-// Server startup
-app.listen(PORT, () => {
-	console.log(`\n╔════════════════════════════════════════════════════════════════╗`);
-	console.log(`║           RitesDev Launcher - Ready on Port ${PORT}              ║`);
-	console.log(`╚════════════════════════════════════════════════════════════════╝\n`);
-	console.log(`🚀 Launcher UI:  http://localhost:${PORT}`);
-	console.log(`📊 API Status:   http://localhost:${PORT}/api/status\n`);
-});
+export function startLauncherServer(port = PORT) {
+	return app.listen(port, () => {
+		const actualPort = this?.address?.()?.port || port;
+		console.log(`RitesDev App ready at http://localhost:${actualPort}`);
+	});
+}
 
-// Graceful shutdown
-process.on("SIGINT", () => {
-	console.log("\n\n🛑 Shutting down launcher...");
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+	startLauncherServer();
+}
 
-	// Stop all running apps
-	for (const [appId, proc] of processes) {
-		stopApp(appId);
-	}
+export { app as launcherApp };
 
-	setTimeout(() => {
-		process.exit(0);
-	}, 1000);
-});
+function shutdown() {
+	console.log("Shutting down RitesDev App...");
+
+	Promise.all([...processes.keys()].map((appId) => stopApp(appId))).finally(() => {
+		setTimeout(() => process.exit(0), 500);
+	});
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

@@ -1,21 +1,8 @@
+@import "../../../ritesGlobal/styles/tokens.css";
+
 :root {
-	/* Same "Clean Tech" palette as RitesDev, kept minimal for easy reading */
-	--color-bg: #0b0f19;
-	--color-surface: #111827;
-	--color-border: #2d3748;
-
-	--color-text: #f3f4f6;
-	--color-muted: #9ca3af;
-	--color-dim: #6b7280;
-
-	--color-accent: #38bdf8;
-	--color-accent-hover: #7dd3fc;
-
 	--content-width: 42rem;
-	--font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-	--radius-sm: 6px;
-	--radius-md: 10px;
-	--transition: all 0.2s ease-in-out;
+	--color-surface: var(--color-bg-secondary);
 }
 
 * {
@@ -243,4 +230,104 @@ a:hover, a:focus-visible {
 .post-card__link:focus-visible .post-card__arrow {
 	color: var(--color-accent);
 	transform: translateX(3px);
+}
+
+/* Hero / intro (homepage) */
+.hero {
+	margin: 1.5rem 0 2rem;
+	padding: 1.75rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	background: linear-gradient(160deg, var(--color-surface), var(--color-bg));
+}
+
+.hero__eyebrow {
+	display: inline-block;
+	margin-bottom: 0.5rem;
+	color: var(--color-accent);
+	font-family: var(--font-mono);
+	font-size: 0.85rem;
+	letter-spacing: 0.04em;
+}
+
+.hero p {
+	max-width: 60ch;
+}
+
+.hero__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 1.25rem;
+}
+
+
+.hero__links a {
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	color: var(--color-text);
+	text-decoration: none;
+	font-size: 0.9rem;
+	transition: var(--transition);
+}
+
+.hero__links a:hover,
+.hero__links a:focus-visible {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+.section-heading {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.section-heading a {
+	font-size: 0.85rem;
+}
+
+/* Post/MDX content: code blocks styled for a tech/coding blog */
+main :not(pre) > code {
+	padding: 0.15rem 0.4rem;
+	border-radius: 4px;
+	background: var(--color-surface);
+	color: var(--color-accent);
+	font-family: var(--font-mono);
+	font-size: 0.9em;
+}
+
+main pre {
+	margin: 1.25rem 0;
+	padding: 1rem 1.1rem;
+	overflow-x: auto;
+	background: var(--color-bg-secondary);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+}
+
+main pre code {
+	background: none;
+	color: var(--color-text);
+	font-size: 0.88rem;
+}
+
+main blockquote {
+	margin: 1.25rem 0;
+	padding: 0.25rem 1rem;
+	border-left: 3px solid var(--color-accent);
+	color: var(--color-muted);
+}
+
+main ul,
+main ol {
+	margin: 0 0 1rem 1.25rem;
+	color: var(--color-muted);
+}
+
+main img {
+	max-width: 100%;
+	border-radius: var(--radius-sm);
 }

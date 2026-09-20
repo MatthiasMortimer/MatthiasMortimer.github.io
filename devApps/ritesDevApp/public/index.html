@@ -3,18 +3,28 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>RitesDev Launcher</title>
+	<title>RitesDev App</title>
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
+	<div class="workspace">
+		<nav class="tabbar" id="tabbar" aria-label="Apps">
+			<button class="tab is-active" type="button" data-tab="home">
+				<span class="tab-name">Home</span>
+				<span class="tab-hint">Ctrl+1</span>
+			</button>
+		</nav>
+
+		<div class="views" id="views">
+			<section class="view is-active" id="view-home">
 	<div class="container">
 		<!-- Header -->
 		<header class="header">
 			<div class="header-brand">
 				<img src="/media/logo.svg" alt="" class="header-logo">
 				<div class="header-content">
-					<h1>RitesDev Launcher</h1>
-					<p class="subtitle">Manage your development apps</p>
+					<h1>RitesDev App</h1>
+					<p class="subtitle">Every management tool in one window</p>
 				</div>
 			</div>
 			<div class="header-status">
@@ -28,7 +38,7 @@
 			<!-- Apps Grid -->
 			<div class="apps-section">
 				<div class="apps-header">
-					<h2>Your Apps</h2>
+					<h2>Standalone Apps</h2>
 					<button class="refresh-btn" onclick="refreshApps()" title="Refresh app list">
 						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
@@ -47,6 +57,24 @@
 
 			<!-- Running Apps Summary -->
 			<aside class="sidebar">
+				<div class="sidebar-card mobile-mode-card">
+					<div class="mobile-mode-heading">
+						<div>
+							<h3>Mobile Mode</h3>
+							<p id="mobile-mode-summary">Off</p>
+						</div>
+						<label class="switch" id="mobile-mode-control">
+							<input id="mobile-mode-toggle" type="checkbox" aria-label="Enable mobile mode">
+							<span class="switch-track"></span>
+						</label>
+					</div>
+					<div id="mobile-address-panel" class="mobile-address-panel" hidden>
+						<span>Open on your phone</span>
+						<a id="mobile-address" href="#" target="_blank" rel="noreferrer"></a>
+						<button id="copy-mobile-address" type="button">Copy address</button>
+					</div>
+				</div>
+
 				<div class="sidebar-card">
 					<h3>Running Apps</h3>
 					<div id="running-count" class="running-count">0</div>
@@ -56,17 +84,20 @@
 				</div>
 
 				<div class="sidebar-card info-card">
-					<h3>About Launcher</h3>
-					<p>This launcher automatically discovers and manages all your development apps.</p>
+					<h3>About This App</h3>
+					<p>Content apps run inside this window as tabs. Only Site Hosting runs as a separate process.</p>
 					<ul class="info-list">
-						<li>🚀 One-click launch</li>
-						<li>⏹️ Easy stop</li>
-						<li>🔄 Quick restart</li>
+						<li>⚡ Instant tab switching</li>
+						<li>⌨️ Ctrl+1…9 to jump tabs</li>
+						<li>📁 Drop a folder in devApps/ to add an app</li>
 						<li>👀 Live status</li>
 					</ul>
 				</div>
 			</aside>
 		</main>
+	</div>
+			</section>
+		</div>
 	</div>
 
 	<!-- App Template (hidden) -->

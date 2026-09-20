@@ -4,7 +4,7 @@
 
 ### What Was Done
 
-We've successfully converted the RitesDev Launcher from an Express web service to a **native Electron desktop application** for Fedora Plasma.
+We've successfully converted the RitesDev App from an Express web service to a **native Electron desktop application** for Fedora Plasma.
 
 #### 1. **Electron Main Process** (`electron-main.js`)
    - ✅ Created native BrowserWindow for desktop UI
@@ -27,7 +27,7 @@ We've successfully converted the RitesDev Launcher from an Express web service t
    - ✅ Kept Express in dependencies for server
    - ✅ Changed type from "module" to "commonjs" for Electron compatibility
 
-#### 4. **Desktop Application File** (`ritesDevLauncher.desktop`)
+#### 4. **Desktop Application File** (`ritesDevApp.desktop`)
    - ✅ Created valid .desktop file for Fedora Plasma menu
    - ✅ Name, Comment, Icon, Categories configured
    - ✅ Exec line points to: `npm start` in app directory
@@ -54,7 +54,7 @@ We've successfully converted the RitesDev Launcher from an Express web service t
 ### File Structure After Changes
 
 ```
-devApps/ritesDevLauncher/
+devApps/ritesDevApp/
 ├── 📄 electron-main.js              ✅ NEW - Electron main process
 ├── 📄 preload.js                    ✅ NEW - Security preload
 ├── 📄 server.js                     ✅ EXISTING - Express API server
@@ -64,7 +64,7 @@ devApps/ritesDevLauncher/
 ├── 📄 devapp.meta.json              ✅ EXISTING - App metadata
 ├── 🔧 launch.sh                     ✅ NEW - Quick launcher
 ├── 🔧 install-linux.sh              ✅ NEW - Desktop installer
-├── 📋 ritesDevLauncher.desktop      ✅ NEW - Fedora Plasma menu
+├── 📋 ritesDevApp.desktop      ✅ NEW - Fedora Plasma menu
 ├── 📁 public/
 │   ├── index.html                   ✅ EXISTING
 │   ├── style.css                    ✅ EXISTING
@@ -80,13 +80,13 @@ devApps/ritesDevLauncher/
 
 **Step 1: Install to Fedora Plasma Applications Menu**
 ```bash
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 bash install-linux.sh
 ```
-This creates `~/.local/share/applications/ritesDevLauncher.desktop`
+This creates `~/.local/share/applications/ritesDevApp.desktop`
 
 **Step 2: Launch the App**
-Option A (Easiest): Open Fedora Plasma menu → Search "RitesDev Launcher" → Click
+Option A (Easiest): Open Fedora Plasma menu → Search "RitesDev App" → Click
 Option B (Terminal): `npm start` from the app directory
 Option C (Script): `bash launch.sh`
 
@@ -94,7 +94,7 @@ Option C (Script): `bash launch.sh`
 
 After launching, verify:
 - [ ] App window appears with soft pastel UI (not in browser)
-- [ ] Window title shows "RitesDev Launcher"
+- [ ] Window title shows "RitesDev App"
 - [ ] App cards display all available apps
 - [ ] App status (Running/Stopped) shows correctly
 - [ ] Launch/Stop buttons work for at least one app
@@ -127,7 +127,7 @@ Each app becomes a standalone Electron application accessible from Fedora Plasma
 ## 📋 How It Works
 
 ### User Perspective
-1. User searches for "RitesDev Launcher" in Fedora Plasma menu
+1. User searches for "RitesDev App" in Fedora Plasma menu
 2. Clicks to launch
 3. Native desktop window opens (NOT in browser)
 4. UI shows all available management apps
@@ -181,7 +181,7 @@ npm install                        # Install/update dependencies
 # Maintenance
 lsof -i :4605                     # Check if port 4605 in use
 ps aux | grep electron             # Find running Electron processes
-rm ~/.local/share/applications/ritesDevLauncher.desktop  # Uninstall
+rm ~/.local/share/applications/ritesDevApp.desktop  # Uninstall
 
 # Desktop Database (if menu doesn't update)
 update-desktop-database ~/.local/share/applications
@@ -192,8 +192,8 @@ update-desktop-database ~/.local/share/applications
 ### devapps-registry.mjs (in ritesGlobal/)
 The launcher reads this to discover apps:
 ```javascript
-"ritesDevLauncher": {
-  name: "RitesDev Launcher",
+"ritesDevApp": {
+  name: "RitesDev App",
   type: APP_TYPES.LAUNCHER,
   port: 4605,
   active: true,
@@ -204,7 +204,7 @@ The launcher reads this to discover apps:
 Add new apps here with `active: true` to make them appear in launcher.
 
 ### Desktop File Location
-After installation: `~/.local/share/applications/ritesDevLauncher.desktop`
+After installation: `~/.local/share/applications/ritesDevApp.desktop`
 
 Contains:
 - Application name and description
@@ -241,8 +241,8 @@ No browser chrome - completely native window.
 4. Check Express server starts: `npm run server`
 
 ### If menu entry doesn't appear:
-1. Verify desktop file created: `cat ~/.local/share/applications/ritesDevLauncher.desktop`
-2. Validate desktop file: `desktop-file-validate ~/.local/share/applications/ritesDevLauncher.desktop`
+1. Verify desktop file created: `cat ~/.local/share/applications/ritesDevApp.desktop`
+2. Validate desktop file: `desktop-file-validate ~/.local/share/applications/ritesDevApp.desktop`
 3. Update database: `update-desktop-database ~/.local/share/applications`
 
 ### If apps won't launch from launcher:
@@ -277,7 +277,7 @@ No browser chrome - completely native window.
 
 ## Summary
 
-✨ **The RitesDev Launcher is now a native Electron desktop application!**
+✨ **The RitesDev App is now a native Electron desktop application!**
 
 All the infrastructure is in place. The user just needs to:
 1. Run `bash install-linux.sh` to register with Fedora Plasma

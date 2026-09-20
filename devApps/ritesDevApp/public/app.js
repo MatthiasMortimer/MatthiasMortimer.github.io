@@ -1,14 +1,20 @@
 let allApps = [];
 let refreshInterval;
 const cardsById = new Map();
+const tabsById = new Map();
+const viewsById = new Map();
+let activeTab = localStorage.getItem("ritesdev.activeTab") || "home";
 let lastAppsSignature = null;
 let refreshInFlight = false;
 let refreshQueued = false;
+let mobileMode = { enabled: false, canConfigure: true, url: null };
 
 /**
  * Initialize the launcher
  */
 document.addEventListener("DOMContentLoaded", () => {
+	initializeTabs();
+	initializeMobileMode();
 	refreshApps();
 
 	refreshInterval = setInterval(refreshApps, 1000);
@@ -17,6 +23,157 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (!document.hidden) refreshApps();
 	});
 });
+
+function initializeTabs() {
+	tabsById.set("home", document.querySelector('.tab[data-tab="home"]'));
+	viewsById.set("home", document.getElementById("view-home"));
+	tabsById.get("home").addEventListener("click", () => activateTab("home"));
+
+	document.addEventListener("keydown", (event) => {
+		if (!event.ctrlKey || event.altKey || event.shiftKey) return;
+		const index = Number(event.key) - 1;
+		if (!Number.isInteger(index) || index < 0) return;
+		const id = [...tabsById.keys()][index];
+		if (!id) return;
+		event.preventDefault();
+		activateTab(id);
+	});
+
+	// Embedded apps live in iframes, so their key presses never reach this document.
+	window.addEventListener("message", (event) => {
+		if (event.data?.type === "ritesdev:activate-tab") activateTab(event.data.tabId);
+	});
+}
+
+/**
+ * Render one tab + hidden iframe per embedded app. Iframes are created once and
+ * kept alive, so switching tabs is instant and no extra processes are started.
+ */
+function renderTabs(apps) {
+	const tabbar = document.getElementById("tabbar");
+	const views = document.getElementById("views");
+	const seen = new Set(["home"]);
+
+	apps.forEach((app, index) => {
+		seen.add(app.id);
+
+		if (!tabsById.has(app.id)) {
+			const tab = document.createElement("button");
+			tab.type = "button";
+			tab.className = "tab";
+			tab.dataset.tab = app.id;
+			tab.title = app.description || app.name;
+			tab.addEventListener("click", () => activateTab(app.id));
+			tabbar.appendChild(tab);
+			tabsById.set(app.id, tab);
+
+			const view = document.createElement("section");
+			view.className = "view";
+			view.id = `view-${app.id}`;
+
+			const frame = document.createElement("iframe");
+			frame.className = "app-frame";
+			frame.src = app.entryUrl;
+			frame.title = app.name;
+			view.appendChild(frame);
+			views.appendChild(view);
+			viewsById.set(app.id, view);
+		}
+
+		const tab = tabsById.get(app.id);
+		tab.innerHTML = "";
+		const name = document.createElement("span");
+		name.className = "tab-name";
+		name.textContent = app.name;
+		const hint = document.createElement("span");
+		hint.className = "tab-hint";
+		hint.textContent = `Ctrl+${index + 2}`;
+		tab.append(name, hint);
+	});
+
+	for (const [id, tab] of tabsById) {
+		if (seen.has(id)) continue;
+		tab.remove();
+		viewsById.get(id)?.remove();
+		tabsById.delete(id);
+		viewsById.delete(id);
+		if (activeTab === id) activateTab("home");
+	}
+
+	if (!tabsById.has(activeTab)) activeTab = "home";
+	activateTab(activeTab);
+}
+
+function activateTab(tabId) {
+	if (!tabsById.has(tabId)) return;
+	activeTab = tabId;
+	localStorage.setItem("ritesdev.activeTab", tabId);
+
+	for (const [id, tab] of tabsById) {
+		const isActive = id === tabId;
+		tab.classList.toggle("is-active", isActive);
+		tab.setAttribute("aria-current", isActive ? "page" : "false");
+		viewsById.get(id)?.classList.toggle("is-active", isActive);
+	}
+}
+
+async function initializeMobileMode() {
+	const toggle = document.getElementById("mobile-mode-toggle");
+	toggle.addEventListener("change", async () => {
+		toggle.disabled = true;
+		try {
+			const response = await fetch("/api/mobile-mode", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ enabled: toggle.checked }),
+			});
+			const data = await response.json();
+			if (!response.ok) throw new Error(data.message || "Could not change mobile mode");
+			mobileMode = { ...mobileMode, ...data };
+			renderMobileMode();
+			lastAppsSignature = null;
+			refreshApps();
+		} catch (error) {
+			toggle.checked = mobileMode.enabled;
+			showNotification(error.message, "error");
+		} finally {
+			toggle.disabled = false;
+		}
+	});
+
+	document.getElementById("copy-mobile-address").addEventListener("click", async () => {
+		if (!mobileMode.url) return;
+		await navigator.clipboard.writeText(mobileMode.url);
+		showNotification("Mobile address copied", "success");
+	});
+
+	try {
+		const response = await fetch("/api/mobile-mode");
+		mobileMode = await response.json();
+		renderMobileMode();
+	} catch (error) {
+		showNotification("Could not load mobile mode", "error");
+	}
+}
+
+function renderMobileMode() {
+	const toggle = document.getElementById("mobile-mode-toggle");
+	const control = document.getElementById("mobile-mode-control");
+	const summary = document.getElementById("mobile-mode-summary");
+	const panel = document.getElementById("mobile-address-panel");
+	const address = document.getElementById("mobile-address");
+
+	toggle.checked = mobileMode.enabled;
+	control.hidden = !mobileMode.canConfigure;
+	summary.textContent = mobileMode.canConfigure
+		? mobileMode.enabled && mobileMode.url
+			? "Available on your local network"
+			: mobileMode.enabled ? "No local network address found" : "Only this PC can connect"
+		: "Connected from this device";
+	panel.hidden = !mobileMode.enabled || !mobileMode.url;
+	address.textContent = mobileMode.url || "";
+	address.href = mobileMode.url || "#";
+}
 
 /**
  * Fetch and display all apps
@@ -66,16 +223,21 @@ function displayApps(apps) {
 	const grid = document.getElementById("apps-grid");
 	const template = document.getElementById("app-card-template");
 
-	if (apps.length === 0) {
+	renderTabs(apps.filter((app) => app.embedded));
+	const standaloneApps = apps.filter((app) => !app.embedded);
+
+	if (standaloneApps.length === 0) {
 		cardsById.clear();
 		grid.innerHTML =
-			'<div class="empty-state"><p>No apps found. Add apps to devApps/ folder.</p></div>';
+			'<div class="empty-state"><p>No standalone apps. Add a folder to devApps/ to add another app.</p></div>';
 		return;
 	}
 
+	grid.querySelector(".loading, .empty-state")?.remove();
+
 	const seenIds = new Set();
 
-	apps.forEach((app) => {
+	standaloneApps.forEach((app) => {
 		seenIds.add(app.id);
 		let card = cardsById.get(app.id);
 
@@ -137,15 +299,16 @@ function updateCard(card, app) {
 	stopBtn.dataset.appId = app.id;
 	restartBtn.dataset.appId = app.id;
 	const isExternallyRunning = app.isRunning && app.runningSource !== "managed";
+	const isMobileClient = mobileMode.enabled && !mobileMode.canConfigure;
 
 	// Don't fight buttons that are mid-action (e.g. "Launching..."), only
 	// sync visibility/disabled state once we know the definitive server status
 	if (!launchBtn.classList.contains("is-busy")) {
-		launchBtn.style.display = app.isRunning ? "none" : "flex";
-		stopBtn.style.display = app.isRunning ? "flex" : "none";
-		restartBtn.style.display = app.isRunning ? "flex" : "none";
+		launchBtn.style.display = isMobileClient && app.mobilePort ? "flex" : app.isRunning ? "none" : "flex";
+		stopBtn.style.display = isMobileClient ? "none" : app.isRunning ? "flex" : "none";
+		restartBtn.style.display = isMobileClient ? "none" : app.isRunning ? "flex" : "none";
 		launchBtn.disabled = false;
-		launchBtn.textContent = "Launch";
+		launchBtn.textContent = isMobileClient && app.mobileReady ? "Open" : "Launch";
 		stopBtn.disabled = isExternallyRunning;
 		stopBtn.textContent = isExternallyRunning ? "Already Open" : "Stop";
 		restartBtn.disabled = isExternallyRunning;
@@ -160,13 +323,18 @@ function updateCard(card, app) {
 		stopBtn.disabled = true;
 		restartBtn.disabled = true;
 	}
+
+	if (isMobileClient && !app.mobilePort) {
+		launchBtn.disabled = true;
+		launchBtn.textContent = "Desktop only";
+	}
 }
 
 /**
  * Update the running apps sidebar
  */
 function updateRunningAppsList() {
-	const runningApps = allApps.filter((app) => app.isRunning);
+	const runningApps = allApps.filter((app) => app.isRunning && !app.embedded);
 	const count = document.getElementById("running-count");
 	const list = document.getElementById("running-list");
 
@@ -199,22 +367,33 @@ async function launchApp(event) {
 	if (!app) return;
 
 	const btn = event.currentTarget;
+	const isMobileClient = mobileMode.enabled && !mobileMode.canConfigure;
+	const mobileTab = isMobileClient ? window.open("about:blank", "_blank") : null;
+	if (mobileTab) {
+		mobileTab.document.title = `Opening ${app.name}`;
+		mobileTab.document.body.textContent = `Opening ${app.name}...`;
+	}
 	btn.disabled = true;
 	btn.classList.add("is-busy");
 	btn.textContent = "Launching...";
 
 	try {
-		const response = await fetch(`/api/apps/${appId}/start`, { method: "POST" });
-		const data = await response.json();
+		const appUiIsReady = isMobileClient ? app.mobileReady : app.isRunning;
+		const data = appUiIsReady
+			? { success: true }
+			: await fetch(`/api/apps/${appId}/start`, { method: "POST" }).then((response) => response.json());
 
 		if (data.success) {
 			showNotification(`✓ ${app.name} launched!`, "success");
+			if (mobileTab) mobileTab.location.href = `/mobile/apps/${encodeURIComponent(appId)}/`;
 			await new Promise((resolve) => setTimeout(resolve, 500));
 		} else {
+			mobileTab?.close();
 			showNotification(`✗ Failed: ${data.message}`, "error");
 			btn.textContent = "Launch";
 		}
 	} catch (error) {
+		mobileTab?.close();
 		console.error("Error launching app:", error);
 		showNotification("Error launching app", "error");
 		btn.textContent = "Launch";

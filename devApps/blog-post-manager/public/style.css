@@ -362,3 +362,49 @@ textarea:focus-visible {
 		grid-column: auto;
 	}
 }
+
+@media (max-width: 700px) {
+	body {
+		height: auto;
+		overflow: auto;
+	}
+
+	.app-shell {
+		height: auto;
+		min-height: 100vh;
+	}
+
+	.topbar {
+		min-height: 76px;
+		padding: 14px 16px;
+	}
+
+	.workspace {
+		display: block;
+	}
+
+	.post-browser {
+		max-height: 42vh;
+		padding: 16px;
+		border-right: 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.editor-panel {
+		min-height: 58vh;
+	}
+
+	.post-form {
+		height: auto;
+	}
+
+	.editor-toolbar {
+		align-items: flex-start;
+		padding: 14px 16px;
+	}
+
+	.form-scroll {
+		overflow: visible;
+		padding: 18px 16px 28px;
+	}
+}

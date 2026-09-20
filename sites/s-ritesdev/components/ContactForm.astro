@@ -1,44 +1,46 @@
 ---
-import { identity } from "@const/identity.js";
+import { identity } from "@ritesGlobal/content.js";
 import { frontmatter as home } from "../content/pages/index.md";
 
-const devServices = home.services.items.filter((service) => service.category === "Development");
-const teachingServices = home.services.items.filter((service) => service.category === "Teaching");
+const devServices = home.services.items.filter((service: { category: string }) => service.category === "Development");
+const teachingServices = home.services.items.filter((service: { category: string }) => service.category === "Teaching");
 ---
 
-<div class="card" style="padding: 2rem;">
+<div class="card inquiry-card">
 	<h2 style="margin-top: 0; margin-bottom: 0.5rem;">Send an Inquiry</h2>
 	<p style="margin-bottom: 1.5rem;">Fill out the form below for freelance project availability, custom quotes, or tutoring sessions.</p>
 
-	<form name="inquiry" method="POST" action="/contact/" data-netlify="true" netlify-honeypot="bot-field">
-		<input type="hidden" name="form-name" value="inquiry" />
-		<p hidden>
-			<label>Don't fill this out if you're human: <input name="bot-field" /></label>
+	<form name="inquiry" method="POST" action="/contact/" id="inquiry-form">
+		<p hidden aria-hidden="true">
+			<label>Don't fill this out if you're human: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
 		</p>
-		<div class="grid-2">
+
+		<div class="inquiry-status" id="inquiry-status" role="status" aria-live="polite" hidden></div>
+
+		<div class="form-row">
 			<div class="form-group">
 				<label for="name">Your Name *</label>
-				<input type="text" id="name" name="name" class="form-control" placeholder="e.g. Sarah Jenkins" required />
+				<input type="text" id="name" name="name" class="form-control" placeholder="e.g. Sarah Jenkins" autocomplete="name" required />
 			</div>
 
 			<div class="form-group">
 				<label for="email">Email Address *</label>
-				<input type="email" id="email" name="email" class="form-control" placeholder="e.g. sarah@example.com" required />
+				<input type="email" id="email" name="email" class="form-control" placeholder="e.g. sarah@example.com" autocomplete="email" required />
 			</div>
 		</div>
 
-		<div class="grid-2">
+		<div class="form-row">
 			<div class="form-group">
 				<label for="service">Service Category *</label>
 				<select id="service" name="service" class="form-control" required>
 					<option value="" disabled selected>Select a Service</option>
 					<optgroup label="Freelance Development">
-						{devServices.map((s) => (
+						{devServices.map((s: { id: string; title: string }) => (
 							<option value={s.id}>{s.title}</option>
 						))}
 					</optgroup>
 					<optgroup label="Freelance Teaching & Mentorship">
-						{teachingServices.map((s) => (
+						{teachingServices.map((s: { id: string; title: string }) => (
 							<option value={s.id}>{s.title}</option>
 						))}
 					</optgroup>
@@ -57,11 +59,128 @@ const teachingServices = home.services.items.filter((service) => service.categor
 			<textarea id="message" name="message" class="form-control" placeholder="Briefly describe your project requirements, tech stack, or what topics you'd like to learn in 1-on-1 tutoring..." required></textarea>
 		</div>
 
-		<button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; padding: 0.85rem;">Send Message</button>
+		<button type="submit" class="btn btn-primary inquiry-submit">Send Message</button>
 	</form>
 
-	<div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); text-align: center;">
-		<p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--color-text-dim);">Or reach out directly via email:</p>
-		<a href={`mailto:${identity.email}`} style="font-size: 1.1rem; font-weight: 600; font-family: var(--font-mono); color: var(--color-accent);">{identity.email}</a>
+	<div class="inquiry-direct">
+		<p>Or reach out directly via email:</p>
+		<a href={`mailto:${identity.email}`}>{identity.email}</a>
 	</div>
 </div>
+
+<style>
+	.inquiry-card {
+		padding: 2rem;
+		display: block;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+		gap: 0 1.25rem;
+	}
+
+	@media (max-width: 640px) {
+		.form-row {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.form-row :global(.form-group) {
+		min-width: 0;
+	}
+
+	.inquiry-submit {
+		width: 100%;
+		font-size: 1.05rem;
+		padding: 0.85rem;
+	}
+
+	.inquiry-submit[disabled] {
+		opacity: 0.6;
+		cursor: progress;
+	}
+
+	.inquiry-status {
+		padding: 0.85rem 1rem;
+		margin-bottom: 1.25rem;
+		border-radius: var(--radius-sm);
+		font-size: 0.92rem;
+	}
+
+	.inquiry-status[data-tone="success"] {
+		color: var(--color-accent-green);
+		background: rgba(16, 185, 129, 0.1);
+		border: 1px solid rgba(16, 185, 129, 0.35);
+	}
+
+	.inquiry-status[data-tone="error"] {
+		color: #f87171;
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.4);
+	}
+
+	.inquiry-direct {
+		margin-top: 2rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--color-border);
+		text-align: center;
+	}
+
+	.inquiry-direct p {
+		font-size: 0.9rem;
+		margin-bottom: 0.5rem;
+		color: var(--color-text-dim);
+	}
+
+	.inquiry-direct a {
+		font-size: 1.1rem;
+		font-weight: 600;
+		font-family: var(--font-mono);
+		color: var(--color-accent);
+	}
+</style>
+
+<script>
+	const form = document.getElementById("inquiry-form") as HTMLFormElement | null;
+	const status = document.getElementById("inquiry-status");
+	if (form && status) {
+		const submitButton = form.querySelector("button[type=submit]") as HTMLButtonElement;
+
+		const show = (tone: "success" | "error", message: string) => {
+			status.textContent = message;
+			status.setAttribute("data-tone", tone);
+			status.hidden = false;
+		};
+
+		form.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			if (!form.reportValidity()) return;
+
+			const payload = Object.fromEntries(new FormData(form).entries());
+			submitButton.disabled = true;
+			submitButton.textContent = "Sending…";
+
+			try {
+				const response = await fetch("/api/inquiry", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload),
+				});
+				const result = await response.json().catch(() => ({}));
+				if (!response.ok || !result.success) {
+					throw new Error(result.message || "Something went wrong sending your message.");
+				}
+
+				form.reset();
+				show("success", "Thanks! Your inquiry was received — we'll get back to you soon.");
+			} catch (error) {
+				const message = error instanceof Error ? error.message : "Something went wrong.";
+				show("error", `${message} You can also email us directly instead.`);
+			} finally {
+				submitButton.disabled = false;
+				submitButton.textContent = "Send Message";
+			}
+		});
+	}
+</script>

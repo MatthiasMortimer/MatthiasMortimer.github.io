@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const fs = require("fs");
+const net = require("net");
 
 let mainWindow;
 let serverProcess;
@@ -34,8 +35,47 @@ function startServer() {
 
 	console.log("[Main] Server started (PID: " + serverProcess.pid + ")");
 
-	// Give server time to start
-	return new Promise((resolve) => setTimeout(resolve, 1000));
+	return waitForServer(4605);
+}
+
+function waitForServer(port, timeoutMs = 10_000) {
+	const deadline = Date.now() + timeoutMs;
+
+	return new Promise((resolve, reject) => {
+		function check() {
+			if (!serverProcess) {
+				reject(new Error("RitesDev App server exited before it became ready."));
+				return;
+			}
+
+			const socket = net.createConnection({ host: "127.0.0.1", port });
+			let settled = false;
+			const finish = (error) => {
+				if (settled) return;
+				settled = true;
+				socket.destroy();
+
+				if (!error) {
+					resolve();
+					return;
+				}
+
+				if (Date.now() >= deadline) {
+					reject(new Error(`RitesDev App server did not open port ${port} within ${timeoutMs}ms.`));
+					return;
+				}
+
+				setTimeout(check, 100);
+			};
+
+			socket.setTimeout(500);
+			socket.once("connect", () => finish());
+			socket.once("timeout", () => finish(new Error("Server is still starting.")));
+			socket.once("error", () => finish(new Error("Server is still starting.")));
+		}
+
+		check();
+	});
 }
 
 /**
@@ -43,10 +83,12 @@ function startServer() {
  */
 function createWindow() {
 	mainWindow = new BrowserWindow({
-		width: 1200,
-		height: 800,
-		minWidth: 800,
-		minHeight: 600,
+		width: 1400,
+		height: 900,
+		minWidth: 900,
+		minHeight: 640,
+		title: "RitesDev App",
+		backgroundColor: "#f7f5fa",
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
 			nodeIntegration: false,
@@ -122,8 +164,13 @@ function createMenu() {
  * App event handlers
  */
 app.on("ready", async () => {
-	// Start the Express server
-	await startServer();
+	try {
+		await startServer();
+	} catch (error) {
+		console.error("[Main] Failed to start server:", error);
+		app.quit();
+		return;
+	}
 
 	// Create the window
 	createWindow();
@@ -133,7 +180,7 @@ app.on("ready", async () => {
 		"\n╔════════════════════════════════════════════════════════════════╗"
 	);
 	console.log(
-		"║           RitesDev Launcher - Electron App Ready               ║"
+		"║                    RitesDev App Ready                           ║"
 	);
 	console.log(
 		"╚════════════════════════════════════════════════════════════════╝\n"

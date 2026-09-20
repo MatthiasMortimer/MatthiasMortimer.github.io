@@ -1,14 +1,17 @@
 ---
 import SiteNav from "../components/SiteNav.astro";
 import Footer from "../components/Footer.astro";
-import { siteMetadata, identity } from "@const/identity.js";
+import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
+import site from "../content/site.json";
 
 export interface Props {
 	title?: string;
 	description?: string;
+	image?: string;
+	noindex?: boolean;
 }
 
-const { title = siteMetadata.title, description = siteMetadata.description } = Astro.props;
+const { title = site.metadata.title, description = site.metadata.description, image, noindex } = Astro.props;
 ---
 
 <html lang="en">
@@ -18,7 +21,7 @@ const { title = siteMetadata.title, description = siteMetadata.description } = A
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		<meta name="description" content={description} />
+		<SeoMeta title={title} description={description} image={image} noindex={noindex} />
 	</head>
 	<body>
 		<SiteNav />

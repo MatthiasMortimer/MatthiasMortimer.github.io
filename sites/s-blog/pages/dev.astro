@@ -1,29 +1,25 @@
 ---
-import SiteNav from "../components/SiteNav.astro";
-import { siteStats } from "@blog/const/siteStats.js";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSiteVersion, gitversion } from "@ritesGlobal/versions.js";
+import site from "../content/site.json";
+import { frontmatter as page } from "../content/pages/dev.md";
+
+const siteStats = {
+	siteName: site.name,
+	posts: site.stats.posts,
+	version: getSiteVersion("blog"),
+	gitversion,
+	lastUpdated: site.stats.lastUpdated,
+};
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Blog Rites</title>
-	</head>
-	<body>
-	<SiteNav />
-
-		<h1>Site Stats</h1>
-		<ul>
-			{Object.entries(siteStats)
-				.map(([label, value]) => (
-				<li><strong>{label}:</strong> {value}</li>
-				))}
-		</ul>
-		<p>
-			This page is mostly for myself and development purposes.
-		</p>
-	</body>
-</html>
+<BaseLayout title={page.seo.title} description={page.seo.description}>
+	<h1>{page.title}</h1>
+	<ul>
+		{Object.entries(siteStats)
+			.map(([label, value]) => (
+			<li><strong>{label}:</strong> {value}</li>
+			))}
+	</ul>
+	<p>{page.description}</p>
+</BaseLayout>

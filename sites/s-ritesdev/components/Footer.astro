@@ -1,11 +1,12 @@
 ---
-import { identity } from "@const/identity.js";
+import { identity } from "@ritesGlobal/content.js";
+import site from "../content/site.json";
 ---
 
 <footer class="site-footer">
 	<div class="site-footer__info">
 		<p>&copy; {new Date().getFullYear()} {identity.fullName}. All rights reserved.</p>
-		<p style="font-size: 0.85rem; margin-bottom: 0;">Freelance Web Development &amp; Technical Mentorship</p>
+		<p style="font-size: 0.85rem; margin-bottom: 0;">{site.footer.tagline}</p>
 	</div>
 	<div class="site-footer__socials">
 		{identity.socials.github && <a href={identity.socials.github} target="_blank" rel="noopener noreferrer">GitHub</a>}

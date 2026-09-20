@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quick launch script for RitesDev Launcher
+# Quick launch script for the RitesDev App
 # Usage: ./launch.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,5 +14,5 @@ if [ ! -d "node_modules" ]; then
 fi
 
 # Start the app
-echo "🚀 Starting RitesDev Launcher..."
+echo "🚀 Starting RitesDev App..."
 npm start

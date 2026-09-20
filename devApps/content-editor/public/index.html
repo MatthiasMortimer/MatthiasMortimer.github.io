@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; style-src 'self' file:; script-src 'self'; img-src 'self' data: https:; connect-src 'self'">
+	<title>Website Content Editor</title>
+	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="app-shell">
+		<header class="topbar">
+			<div>
+				<p class="eyebrow">RitesDev Studio</p>
+				<h1>Website Content Editor</h1>
+			</div>
+			<div class="topbar-status">
+				<span id="site-count">0 websites</span>
+				<span id="save-state" class="save-state" role="status">Ready</span>
+			</div>
+		</header>
+
+		<main class="workspace">
+			<aside class="site-rail" aria-label="Websites">
+				<div class="rail-heading">
+					<p class="eyebrow">Websites</p>
+					<button id="refresh" class="icon-button" type="button" title="Refresh websites" aria-label="Refresh websites">↻</button>
+				</div>
+				<nav id="site-list" class="site-list"></nav>
+			</aside>
+
+			<aside class="file-browser" aria-label="Content files">
+				<div class="browser-heading">
+					<div>
+						<p class="eyebrow">Content</p>
+						<h2 id="site-title">Select a website</h2>
+					</div>
+					<span id="file-count">0 files</span>
+				</div>
+				<label class="search-field">
+					<span aria-hidden="true">⌕</span>
+					<input id="file-search" type="search" placeholder="Search content" autocomplete="off">
+				</label>
+				<div id="file-list" class="file-list"></div>
+			</aside>
+
+			<section class="editor-panel">
+				<div id="empty-state" class="empty-state">
+					<p class="empty-mark">Aa</p>
+					<h2>Select content to edit</h2>
+				</div>
+
+				<form id="content-form" class="content-form" hidden>
+					<div class="editor-toolbar">
+						<div class="document-heading">
+							<p id="document-path" class="eyebrow"></p>
+							<h2 id="document-title">Content</h2>
+						</div>
+						<button class="button primary" type="submit">Save changes</button>
+					</div>
+					<div id="editor-scroll" class="editor-scroll">
+						<section id="fields-section" class="edit-section">
+							<div class="section-heading">
+								<h3>Details</h3>
+								<span>Structured fields</span>
+							</div>
+							<div id="fields-editor" class="fields-editor"></div>
+						</section>
+						<section id="body-section" class="edit-section">
+							<div class="section-heading">
+								<h3 id="body-label">Page body</h3>
+								<span id="body-format">Markdown</span>
+							</div>
+							<textarea id="body-editor" class="body-editor" spellcheck="true"></textarea>
+						</section>
+					</div>
+				</form>
+			</section>
+		</main>
+	</div>
+
+	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+	<script src="browser-api.js"></script>
+	<script type="module" src="app.js"></script>
+</body>
+</html>

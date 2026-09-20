@@ -1,2 +1,1 @@
-[ ] fix color text of button
-[ ] 
+[x] fix color text of button

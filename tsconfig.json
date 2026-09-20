@@ -2,8 +2,8 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
-      "@const/*": ["sites/s-ritesdev/const/*"],
       "@components/*": ["sites/s-ritesdev/components/*"],
       "@layouts/*": ["sites/s-ritesdev/layouts/*"],
       "@styles/*": ["sites/s-ritesdev/styles/*"],

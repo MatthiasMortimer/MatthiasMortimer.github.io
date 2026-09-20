@@ -1,0 +1,53 @@
+---
+// Shared <head> SEO partial for every site's BaseLayout: canonical URL, Open Graph/Twitter
+// tags, robots directive, and Person JSON-LD, all driven by ritesGlobal/seo.json + contact.json.
+import { seoDefaults } from "../seo.js";
+import { identity } from "../content.js";
+
+export interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	type?: "website" | "article";
+	noindex?: boolean;
+}
+
+const { title, description, image = seoDefaults.defaultImage, type = "website", noindex = false } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
+const shouldIndex = !noindex && seoDefaults.robotsIndex;
+const shouldFollow = !noindex && seoDefaults.robotsFollow;
+
+const personLd = {
+	"@context": "https://schema.org",
+	"@type": seoDefaults.organizationType,
+	name: identity.fullName,
+	jobTitle: identity.title,
+	url: canonicalURL.toString(),
+	image: imageURL.toString(),
+	email: identity.email,
+	sameAs: Object.values(identity.socials || {}).filter(Boolean),
+};
+---
+
+<link rel="canonical" href={canonicalURL} />
+<meta name="description" content={description} />
+<meta name="robots" content={`${shouldIndex ? "index" : "noindex"}, ${shouldFollow ? "follow" : "nofollow"}`} />
+<meta name="theme-color" content={seoDefaults.themeColor} />
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={imageURL} />
+<meta property="og:site_name" content={seoDefaults.siteName} />
+<meta property="og:locale" content={seoDefaults.locale} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageURL} />
+{seoDefaults.twitterHandle && <meta name="twitter:site" content={seoDefaults.twitterHandle} />}
+
+<script type="application/ld+json" set:html={JSON.stringify(personLd)} />

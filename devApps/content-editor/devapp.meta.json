@@ -1,0 +1,14 @@
+{
+  "name": "Website Content Editor",
+  "slug": "content-editor",
+  "description": "Edit page copy, site details, data, and Markdown across every RitesDev website",
+  "type": "content_manager",
+  "runtime": "tab",
+  "version": "1.0.0",
+  "embed": true,
+  "tabOrder": 1,
+  "manages": ["all"],
+  "contentTypes": ["page", "metadata", "config", "blog_post"],
+  "author": "RitesDev",
+  "icon": "document-edit"
+}

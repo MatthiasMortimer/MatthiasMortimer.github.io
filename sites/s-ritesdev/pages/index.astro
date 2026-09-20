@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ServiceCard from "../components/ServiceCard.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TestimonialCard from "../components/TestimonialCard.astro";
-import { identity } from "@const/identity.js";
+import { identity } from "@ritesGlobal/content.js";
 import { frontmatter as home } from "../content/pages/index.md";
 import { frontmatter as portfolioPage } from "../content/pages/portfolio.md";
 
@@ -31,7 +31,7 @@ const featuredProjects = portfolioPage.projects.slice(0, 2);
 			</div>
 		</div>
 		<div class="hero__image">
-			<img src="/media/hero-illustration.svg" alt="Workspace illustration placeholder" />
+			<img src="/media/hero-illustration.svg" alt="Public-safe project directory tree illustration" />
 		</div>
 	</section>
 
@@ -81,8 +81,9 @@ const featuredProjects = portfolioPage.projects.slice(0, 2);
 			<ServiceCard service={featuredTeaching} />
 		</div>
 
-		<div style="text-align: center; margin-top: 1.5rem;">
+		<div style="text-align: center; margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
 			<a href="/services/" class="btn btn-secondary">{home.services.link}</a>
+			<a href="/pricing/" class="btn btn-secondary">View Website Plans & Pricing →</a>
 		</div>
 	</section>
 

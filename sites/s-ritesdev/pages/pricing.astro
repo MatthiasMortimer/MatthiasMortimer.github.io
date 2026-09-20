@@ -1,0 +1,62 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PlanCard from "../components/PlanCard.astro";
+import { frontmatter as pricingPage } from "../content/pages/pricing.md";
+
+const content = pricingPage as {
+	title: string;
+	description: string;
+	intro: string;
+	plans: Array<{ id: string; name: string; price: string; priceSuffix?: string; tagline: string; popular?: boolean; features: string[] }>;
+	addonsTitle: string;
+	addonsDescription: string;
+	addons: Array<{ id: string; name: string; price: string; description: string }>;
+	note: string;
+	ctaLabel: string;
+};
+---
+
+<BaseLayout title="Website Plans & Pricing | RitesDev" description={content.description}>
+	<div style="margin-bottom: 2rem;">
+		<h1>{content.title}</h1>
+		<p style="font-size: 1.1rem; max-width: 45rem;">{content.description}</p>
+		<p style="max-width: 45rem; color: var(--color-text-muted);">{content.intro}</p>
+	</div>
+
+	<!-- Base Plans -->
+	<section>
+		<div class="grid-3">
+			{content.plans.map((plan) => (
+				<PlanCard plan={plan} />
+			))}
+		</div>
+	</section>
+
+	<!-- Add-ons -->
+	<section style="margin-top: 3rem;">
+		<div class="section-header" style="border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+			<h2 style="margin: 0;">{content.addonsTitle}</h2>
+			<p style="margin-top: 0.5rem; margin-bottom: 0;">{content.addonsDescription}</p>
+		</div>
+
+		<div class="grid-3" style="margin-top: 1.5rem;">
+			{content.addons.map((addon) => (
+				<div class="card addon-card">
+					<div>
+						<h3 class="card-title">{addon.name}</h3>
+						<p class="card-desc">{addon.description}</p>
+					</div>
+					<div class="card-footer" style="border-top: none;">
+						<strong style="font-family: var(--font-mono); color: var(--color-accent);">{addon.price}</strong>
+					</div>
+				</div>
+			))}
+		</div>
+	</section>
+
+	<!-- Custom Quote CTA -->
+	<section style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-top: 3rem; text-align: center;">
+		<p style="max-width: 40rem; margin: 0 auto 1.5rem;">{content.note}</p>
+		<a href="/contact/" class="btn btn-primary">{content.ctaLabel}</a>
+	</section>
+</BaseLayout>

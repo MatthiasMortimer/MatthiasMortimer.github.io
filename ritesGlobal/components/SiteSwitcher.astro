@@ -4,7 +4,7 @@ import { listSites } from "../sites.registry.mjs";
 const sites = listSites();
 const currentPath = Astro.url.pathname;
 
-function isActive(basePath) {
+function isActive(basePath: string) {
 	if (basePath === "/") return currentPath === "/";
 	return currentPath === basePath || currentPath.startsWith(`${basePath}/`);
 }
@@ -38,10 +38,17 @@ function isActive(basePath) {
 	});
 	document.addEventListener("click", (event) => {
 		document.querySelectorAll(".site-switcher.is-open").forEach((switcher) => {
-			if (!switcher.contains(event.target)) {
+			if (!switcher.contains(event.target as Node)) {
 				switcher.classList.remove("is-open");
 				switcher.querySelector(".site-switcher__toggle")?.setAttribute("aria-expanded", "false");
 			}
+		});
+	});
+	document.addEventListener("keydown", (event) => {
+		if (event.key !== "Escape") return;
+		document.querySelectorAll(".site-switcher.is-open").forEach((switcher) => {
+			switcher.classList.remove("is-open");
+			switcher.querySelector(".site-switcher__toggle")?.setAttribute("aria-expanded", "false");
 		});
 	});
 </script>
@@ -59,7 +66,7 @@ function isActive(basePath) {
 		border: 1px solid var(--color-border, rgba(128, 128, 128, 0.4));
 		color: inherit;
 		padding: 0.35rem 0.7rem;
-		border-radius: 999px;
+		border-radius: 4px;
 		font: inherit;
 		font-size: 0.85rem;
 		cursor: pointer;

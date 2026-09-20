@@ -1,7 +1,7 @@
 {
-  "name": "RitesDev Launcher",
-  "slug": "ritesDevLauncher",
-  "description": "Beautiful app launcher for managing all RitesDev development apps",
+  "name": "RitesDev App",
+  "slug": "ritesDevApp",
+  "description": "Master window hosting every management app as a tab",
   "type": "launcher",
   "version": "1.0.0",
   "port": 4605,

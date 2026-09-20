@@ -1,11 +1,11 @@
-# RitesDev Launcher - Installation & Setup Guide
+# RitesDev App - Installation & Setup Guide
 
 ## Quick Start for Fedora Plasma
 
 ### Step 1: Automatic Installation (Recommended)
 
 ```bash
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 bash install-linux.sh
 ```
 
@@ -20,12 +20,12 @@ After installation, you have three options:
 
 **Option A: From Applications Menu (Easiest)**
 - Open Fedora Plasma applications menu
-- Search for "RitesDev Launcher"
+- Search for "RitesDev App"
 - Click to launch
 
 **Option B: From Terminal**
 ```bash
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 npm start
 ```
 
@@ -39,11 +39,11 @@ bash launch.sh
 When you run `bash install-linux.sh`, it creates:
 
 ```
-~/.local/share/applications/ritesDevLauncher.desktop
+~/.local/share/applications/ritesDevApp.desktop
 ```
 
 This file tells Fedora Plasma:
-- The app is called "RitesDev Launcher"
+- The app is called "RitesDev App"
 - It should open with the command: `npm start` in the app directory
 - It's a development utility app
 - It should appear in your applications menu
@@ -51,7 +51,7 @@ This file tells Fedora Plasma:
 ## File Structure
 
 ```
-ritesDevLauncher/
+ritesDevApp/
 ├── 📄 electron-main.js           # Electron main process (creates native window)
 ├── 📄 server.js                  # Express server (provides API & app discovery)
 ├── 📄 preload.js                 # Security preload script
@@ -60,7 +60,7 @@ ritesDevLauncher/
 ├── 📄 devapp.meta.json           # App metadata
 ├── 🔧 launch.sh                  # Quick launch script
 ├── 🔧 install-linux.sh           # Installation script
-├── 📋 ritesDevLauncher.desktop   # Desktop application file
+├── 📋 ritesDevApp.desktop   # Desktop application file
 ├── 📁 public/
 │   ├── index.html                # User interface
 │   ├── style.css                 # Soft pastel design
@@ -144,16 +144,15 @@ Both are installed automatically when you run `npm install`.
 
 ## Ports
 
-- **Port 4605** - RitesDev Launcher Express Server (runs internally)
+- **Port 4605** - RitesDev App Express Server (runs internally)
   - **API Base**: http://localhost:4605
   - **WebSocket**: Available for real-time updates
   - **Development**: Accessible via http://localhost:4605
 
 Other apps will run on their configured ports as seen in `devapps-registry.mjs`:
-- Port 4600 - dev-master launcher
-- Port 4602 - content-editor
+- Port 4321 - siteHosting (Astro dev server + tunnel)
 - Port 4603 - blog-post-manager
-- Port 4605 - ritesDevLauncher
+- Port 4605 - ritesDevApp
 
 ## Configuration
 
@@ -161,12 +160,12 @@ Apps are configured in `../../ritesGlobal/devapps-registry.mjs`:
 
 ```javascript
 {
-  "ritesDevLauncher": {
-    name: "RitesDev Launcher",
+  "ritesDevApp": {
+    name: "RitesDev App",
     type: APP_TYPES.LAUNCHER,
     description: "Beautiful app launcher for managing all RitesDev development apps",
     port: 4605,
-    basePath: "ritesDevLauncher",
+    basePath: "ritesDevApp",
     active: true,
     manages: ["all"],
     command: "npm start"
@@ -187,7 +186,7 @@ ls node_modules | grep electron
 
 **Check 2: Run from terminal for errors**
 ```bash
-cd devApps/ritesDevLauncher
+cd devApps/ritesDevApp
 npm start
 ```
 
@@ -217,7 +216,7 @@ Then refresh your application menu.
 
 Check it was created:
 ```bash
-cat ~/.local/share/applications/ritesDevLauncher.desktop
+cat ~/.local/share/applications/ritesDevApp.desktop
 ```
 
 If missing, reinstall:
@@ -230,11 +229,11 @@ bash install-linux.sh
 Remove the desktop entry:
 
 ```bash
-rm ~/.local/share/applications/ritesDevLauncher.desktop
+rm ~/.local/share/applications/ritesDevApp.desktop
 update-desktop-database ~/.local/share/applications
 ```
 
-The app folder remains in `devApps/ritesDevLauncher/` if you want to keep it.
+The app folder remains in `devApps/ritesDevApp/` if you want to keep it.
 
 ## Development
 
@@ -302,7 +301,7 @@ ps aux | grep electron  # Check running process
 
 ## Support
 
-For issues or questions about the RitesDev Launcher, check:
+For issues or questions about the RitesDev App, check:
 1. This guide's Troubleshooting section
 2. The [README.md](./README.md) in this folder
 3. The main project's GitHub issues
@@ -311,4 +310,4 @@ For issues or questions about the RitesDev Launcher, check:
 
 **Installed Successfully!** 🎉
 
-Your RitesDev Launcher is ready to use. Search for it in Fedora Plasma's applications menu and launch it!
+Your RitesDev App is ready to use. Search for it in Fedora Plasma's applications menu and launch it!

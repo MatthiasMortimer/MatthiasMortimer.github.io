@@ -1,23 +1,32 @@
 ---
 import "../styles/global.css";
-import { identity } from "@const/identity.js";
+import { identity } from "@ritesGlobal/content.js";
 import SiteSwitcher from "@ritesGlobal/components/SiteSwitcher.astro";
+import site from "../content/site.json";
 
-const { currentPath = Astro.url.pathname } = Astro;
+const currentPath = Astro.url.pathname;
 ---
 
 <nav class="site-nav" aria-label="Main navigation">
 	<a class="site-nav__brand" href="/">
 		<img src={identity.logo} alt="" width="38" height="38" />
-		<span>{identity.name}</span>
+		<span>{site.name}</span>
 	</a>
 	<div class="site-nav__links">
-		<a href="/" class={currentPath === "/" ? "active" : ""}>Home</a>
-		<a href="/services/" class={currentPath === "/services/" || currentPath === "/services" ? "active" : ""}>Services & Teaching</a>
-		<a href="/portfolio/" class={currentPath === "/portfolio/" || currentPath === "/portfolio" ? "active" : ""}>Portfolio</a>
-		<a href="/about/" class={currentPath === "/about/" || currentPath === "/about" ? "active" : ""}>About</a>
-		<a href="/contact/" class={currentPath === "/contact/" || currentPath === "/contact" ? "active" : ""}>Contact</a>
-		<a href="/contact/" class="btn btn-primary btn-sm">Hire / Book</a>
+		{site.navigation.map((item) => (
+			<a href={item.href} class={currentPath === item.href || currentPath === item.href.replace(/\/$/, "") ? "active" : ""}>{item.label}</a>
+		))}
+		<a href={site.primaryAction.href} class="btn btn-primary btn-sm">{site.primaryAction.label}</a>
 		<SiteSwitcher />
 	</div>
+	<details class="site-nav__mobile-menu">
+		<summary>Menu</summary>
+		<div class="site-nav__mobile-panel">
+			{site.navigation.map((item) => (
+				<a href={item.href} class={currentPath === item.href || currentPath === item.href.replace(/\/$/, "") ? "active" : ""}>{item.label}</a>
+			))}
+			<a href={site.primaryAction.href} class="btn btn-primary btn-sm">{site.primaryAction.label}</a>
+			<SiteSwitcher />
+		</div>
+	</details>
 </nav>

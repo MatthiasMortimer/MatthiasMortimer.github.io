@@ -1,23 +1,32 @@
 ---
-import SiteNav from "../components/SiteNav.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import posts from "../content/posts.json";
+import site from "../content/site.json";
+import { frontmatter as page } from "../content/pages/index.md";
+
+const { identity } = site;
+const latestPosts = [...posts]
+	.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+	.slice(0, 3);
+const heroTitle = page.hero.title.replace("{firstName}", identity.firstName);
+const heroDescription = page.hero.description.replace("{occupation}", identity.occupation);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Blog Rites</title>
-	</head>
-	<body>
-	<SiteNav />
-  
-  <h1>About Me</h1>
-  <h2>... and my new blog site!</h2>
-  <p>Here, I will share my thoughts and experiences as I learn and grow in the world of web development.</p>
+<BaseLayout title={page.seo.title} description={page.seo.description}>
+	<section class="hero">
+		<span class="hero__eyebrow">{page.hero.eyebrow}</span>
+		<h1>{heroTitle}</h1>
+		<p>{heroDescription}</p>
+	</section>
 
-  <p>This site will update as I complete more of the blog, so keep checking back and see how my journey is going!</p>
-	</body>
-</html>
+	<section aria-labelledby="latest-title">
+		<div class="section-heading">
+			<h2 id="latest-title">{page.latest.title}</h2>
+			<a href="/blog/blog/">{page.latest.link}</a>
+		</div>
+		<div class="post-grid">
+			{latestPosts.map((post) => <PostCard {...post} />)}
+		</div>
+	</section>
+</BaseLayout>

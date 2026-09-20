@@ -17,6 +17,7 @@ export const APP_TYPES = {
 	TUNNEL: "tunnel",
 	CONTENT_EDITOR: "content_editor",
 	POST_MANAGER: "post_manager",
+	INQUIRY_MANAGER: "inquiry_manager",
 	ANALYTICS: "analytics",
 	DEPLOYER: "deployer",
 };
@@ -26,31 +27,67 @@ export const APP_TYPES = {
  * Each app can manage specific content types across sites
  */
 export const DEV_APPS_REGISTRY = {
-	// NOTE: "dev-master" and "content-editor" were removed — their folders no
-	// longer exist under devApps/. ritesDevLauncher discovers apps by scanning
-	// devApps/ directly (see devApps/ritesDevLauncher/server.mjs), so this
-	// registry is only used by the scripts/management/*.mjs CLI tools now.
+	// Apps with a devapp.api.mjs run as tabs inside RitesDev App (runtime "tab").
+	// ritesDevApp discovers apps by scanning devApps/ directly (see
+	// devApps/ritesDevApp/server.mjs), so this registry is only used by the
+	// scripts/management/*.mjs CLI tools now.
+	"content-editor": {
+		name: "Website Content Editor",
+		type: APP_TYPES.CONTENT_EDITOR,
+		description: "Edit page copy, site details, data, and Markdown across every RitesDev website",
+		port: null,
+		runtime: "tab",
+		basePath: "content-editor",
+		version: "1.0.0",
+		active: true,
+		manages: ["all"],
+		contentTypes: ["page", "metadata", "config", "blog_post"],
+	},
 	"blog-post-manager": {
 		name: "Blog Post Manager",
 		type: APP_TYPES.POST_MANAGER,
 		description: "Blog post creation and management",
-		port: 4603,
-		runtime: "desktop",
+		port: null,
+		runtime: "tab",
 		basePath: "blog-post-manager",
 		version: "1.0.0",
 		active: true,
 		manages: ["s-blog"],
 		contentTypes: ["blog_post"],
 	},
-	"ritesDevLauncher": {
-		name: "RitesDev Launcher",
+	"inquiry-manager": {
+		name: "Inquiry Manager",
+		type: APP_TYPES.INQUIRY_MANAGER,
+		description: "Inbox for contact form inquiries saved by the RitesDev site",
+		port: null,
+		runtime: "tab",
+		basePath: "inquiry-manager",
+		version: "1.0.0",
+		active: true,
+		manages: ["s-ritesdev"],
+		contentTypes: ["inquiry"],
+	},
+	"ritesDevApp": {
+		name: "RitesDev App",
 		type: APP_TYPES.LAUNCHER,
-		description: "Beautiful app launcher for managing all RitesDev development apps",
+		description: "Master window hosting every management app as a tab",
 		port: 4605,
-		basePath: "ritesDevLauncher",
+		basePath: "ritesDevApp",
 		version: "1.0.0",
 		active: true,
 		manages: ["all"],
+	},
+	"siteHosting": {
+		name: "Site Hosting",
+		type: APP_TYPES.TUNNEL,
+		description: "Controls the Astro development server and Cloudflare tunnel",
+		port: 4321,
+		runtime: "desktop",
+		basePath: "siteHosting",
+		version: "1.0.0",
+		active: true,
+		manages: ["all"],
+		contentTypes: [],
 	},
 	// Template for new apps to be added:
 	// "new-app-name": {
@@ -103,8 +140,10 @@ export function getAppsBySite(siteSlug) {
  * @returns {number} Next available port
  */
 export function getNextAvailablePort() {
-	const ports = Object.values(DEV_APPS_REGISTRY).map((app) => app.port);
-	let nextPort = Math.max(...ports) + 1;
+	const ports = Object.values(DEV_APPS_REGISTRY)
+		.map((app) => app.port)
+		.filter((port) => Number.isFinite(port));
+	let nextPort = Math.max(4599, ...ports) + 1;
 	// Ensure port is in safe range (4600-4999)
 	while (nextPort > 4999) {
 		nextPort = 4600;

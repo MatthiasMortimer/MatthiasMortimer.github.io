@@ -5,16 +5,23 @@ hero:
   mentorship: Book Mentorship
 overview:
   title: What I Do
-  description: Combining hands-on software engineering with high-impact technical instruction.
+  description: >-
+    Combining hands-on software engineering with high-impact technical
+    instruction.
   development:
     tag: Freelance Development
     title: Web Applications & API Engineering
-    body: 'I build production-ready web applications, responsive landing pages, and backend APIs designed for performance, accessibility, and maintainability.'
+    body: >-
+      I build production-ready web applications, responsive landing pages, and
+      backend APIs designed for performance, accessibility, and maintainability.
     link: Dev Services →
   teaching:
     tag: Freelance Teaching
     title: 1-on-1 Mentorship & Workshops
-    body: 'I tutor beginning developers in JavaScript, React, Astro, and full-stack engineering through structured live screen-share sessions and code reviews.'
+    body: >-
+      I tutor beginning developers in JavaScript, React, Astro, and full-stack
+      engineering through structured live screen-share sessions and code
+      reviews.
     link: Teaching Options →
 services:
   title: Featured Services
@@ -23,22 +30,28 @@ services:
   items:
     - id: fullstack-web
       category: Development
-      title: Full-Stack Web Development
+      title: Full-Stack Website Development
       icon: "\U0001F4BB"
-      description: 'From concept to production deployment, I build fast, SEO-optimized, responsive web applications tailored to your business goals. Clean code, performance, and accessibility come standard.'
+      description: >-
+        From concept to production deployment, I build fast, SEO-optimized,
+        responsive web applications tailored to your business goals. Clean code,
+        performance, and accessibility come standard.
       deliverables:
         - Responsive
         - mobile-first design implementation
         - Fast server-side rendering or static site generation
         - API integrations & custom backend endpoints
         - SEO & accessibility optimization
-      pricing: Starting at $$$ / project or hourly rates available
+      pricing: Starting at  $150/ project or hourly rates available
       popular: true
     - id: mentorship-1on1
       category: Teaching
       title: 1-on-1 Code Mentorship & Tutoring
       icon: "\U0001F393"
-      description: 'Tailored private sessions focused on your specific learning goals. Whether learning web fundamentals (HTML, CSS, JS), mastering modern frameworks (Astro, React), or tackling algorithm challenges.'
+      description: >-
+        Tailored private sessions focused on your specific learning goals.
+        Whether learning web fundamentals (HTML, CSS, JS), mastering modern
+        frameworks (Astro, React), or tackling algorithm challenges.
       deliverables:
         - Live 60-minute video sessions with real-time pair programming
         - Customized learning plan and weekly homework tasks
@@ -50,7 +63,10 @@ services:
       category: Development
       title: Backend & API Architecture
       icon: ⚡
-      description: 'Robust backend solutions with secure authentication, efficient database queries, and automated testing to ensure your services remain reliable as you grow.'
+      description: >-
+        Robust backend solutions with secure authentication, efficient database
+        queries, and automated testing to ensure your services remain reliable
+        as you grow.
       deliverables:
         - RESTful / GraphQL API engineering
         - Database design (PostgreSQL
@@ -63,7 +79,9 @@ services:
       category: Development
       title: Codebase Refactoring & Performance Audits
       icon: "\U0001F6E0️"
-      description: 'In-depth review of existing web applications to eliminate performance lag, enhance security posture, and improve developer experience.'
+      description: >-
+        In-depth review of existing web applications to eliminate performance
+        lag, enhance security posture, and improve developer experience.
       deliverables:
         - Performance & Lighthouse audit report
         - Dependency upgrades & security patches
@@ -74,7 +92,10 @@ services:
       category: Teaching
       title: Team Workshops & Bootcamps
       icon: "\U0001F4DA"
-      description: 'Hands-on, project-based workshops covering modern web architecture, Astro deployment pipelines, Git workflows, and TypeScript best practices.'
+      description: >-
+        Hands-on, project-based workshops covering modern web architecture,
+        Astro deployment pipelines, Git workflows, and TypeScript best
+        practices.
       deliverables:
         - Curriculum slides
         - repository templates
@@ -87,7 +108,10 @@ services:
       category: Teaching
       title: Asynchronous Code Reviews & Feedback
       icon: "\U0001F50D"
-      description: 'Submit your repository or pull request for line-by-line feedback on code quality, design patterns, security risks, and optimization opportunities.'
+      description: >-
+        Submit your repository or pull request for line-by-line feedback on code
+        quality, design patterns, security risks, and optimization
+        opportunities.
       deliverables:
         - Video walkthrough explaining suggested improvements
         - Detailed GitHub pull request comments
@@ -108,7 +132,9 @@ testimonials:
       type: Development Client
 cta:
   title: Have a Project in Mind or Want to Learn?
-  description: 'Whether you need a full-stack web application built from scratch or guidance on your software engineering journey, I''m here to help.'
+  description: >-
+    Whether you need a full-stack web application built from scratch or guidance
+    on your software engineering journey, I'm here to help.
   start: Start a Conversation
   email: Direct Email
 ---

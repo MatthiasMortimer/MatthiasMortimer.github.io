@@ -1,0 +1,16 @@
+[
+  {
+    "title": "My First Blog Post",
+    "href": "/blog/posts/post-1/",
+    "date": "2026-01-07",
+    "tag": "Astro",
+    "description": "My first steps learning Astro and building this blog."
+  },
+  {
+    "title": "Company",
+    "href": "/blog/posts/post-2/",
+    "date": "2026-08-14",
+    "tag": "Astro",
+    "description": "RitesDev website"
+  }
+]

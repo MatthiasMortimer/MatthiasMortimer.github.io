@@ -1,0 +1,14 @@
+{
+  "name": "Inquiry Manager",
+  "slug": "inquiry-manager",
+  "description": "Review and triage inquiries sent from the RitesDev contact form",
+  "type": "inquiry_manager",
+  "runtime": "tab",
+  "version": "1.0.0",
+  "embed": true,
+  "tabOrder": 3,
+  "manages": ["s-ritesdev"],
+  "contentTypes": ["inquiry"],
+  "author": "RitesDev",
+  "icon": "mail-mark-unread"
+}

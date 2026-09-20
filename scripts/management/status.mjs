@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Display status of all dev management apps and content
 
+import fs from "node:fs";
+import path from "node:path";
 import { getAppSummary, getActiveApps, DEV_APPS_REGISTRY } from "../../ritesGlobal/devapps-registry.mjs";
 import { getContentInventory } from "../../ritesGlobal/content-inventory.mjs";
 import { listSites } from "../../ritesGlobal/sites.registry.mjs";
@@ -26,7 +28,17 @@ inventory.forEach((site) => {
 	console.log(`\n  Site: ${site.label} (${site.slug})`);
 	console.log(`  Last Updated: ${new Date(site.metadata.lastUpdated).toLocaleString()}`);
 	Object.entries(site.contentTypes).forEach(([typeKey, typeConfig]) => {
-		const fileCount = typeConfig.files ? typeConfig.files.length : 0;
+		let fileCount = typeConfig.files ? typeConfig.files.length : 0;
+		if (typeConfig.folder) {
+			const folderPath = path.join(site.dir, typeConfig.folder);
+			try {
+				if (fs.existsSync(folderPath)) {
+					fileCount = fs.readdirSync(folderPath).filter((f) => !f.startsWith(".")).length;
+				}
+			} catch {
+				// keep fallback count
+			}
+		}
 		console.log(`    • ${typeConfig.label}: ${fileCount} files`);
 	});
 });
@@ -60,8 +72,7 @@ console.log("  npm run mgmt:apps       - List all dev management apps");
 console.log("  npm run mgmt:content    - Show detailed content inventory");
 console.log("  npm run mgmt:status     - Display this status report");
 console.log("  npm run mgmt:setup      - Verify environment setup");
-console.log("\n  npm run devapps         - Launch dev master (app launcher)");
-console.log("  npm run editor          - Launch content editor");
+console.log("\n  npm run app             - Open RitesDev App (all tools in tabs)");
 console.log("  npm run dev             - Start Astro dev server");
 console.log("  npm run tunnel          - Start dev server + tunnel");
 

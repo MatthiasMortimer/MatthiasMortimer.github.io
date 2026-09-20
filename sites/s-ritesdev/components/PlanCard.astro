@@ -1,0 +1,40 @@
+---
+export interface Props {
+	plan: {
+		id: string;
+		name: string;
+		price: string;
+		priceSuffix?: string;
+		tagline: string;
+		popular?: boolean;
+		features: string[];
+	};
+}
+
+const { plan } = Astro.props;
+---
+
+<div class={`card plan-card ${plan.popular ? "plan-card--popular" : ""}`}>
+	<div>
+		<div class="card-header">
+			<h3 class="card-title" style="margin: 0;">{plan.name}</h3>
+			{plan.popular && <span class="tag tag-green">Most Popular</span>}
+		</div>
+		<p class="card-desc">{plan.tagline}</p>
+		<div class="plan-price">
+			<span class="plan-price__amount">{plan.price}</span>
+			{plan.priceSuffix && <span class="plan-price__suffix">{plan.priceSuffix}</span>}
+		</div>
+		<ul style="list-style-type: none; padding-left: 0; margin: 1rem 0 0;">
+			{plan.features.map((feature) => (
+				<li style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+					<span style="color: var(--color-accent-green);">✓</span> {feature}
+				</li>
+			))}
+		</ul>
+	</div>
+
+	<div class="card-footer" style="border-top: none; padding-top: 1.25rem;">
+		<a href={`/contact/?service=${plan.id}`} class="btn btn-primary btn-sm" style="width: 100%; text-align: center;">Choose {plan.name}</a>
+	</div>
+</div>
