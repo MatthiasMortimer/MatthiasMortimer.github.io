@@ -1,13 +1,33 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
-import posts from "../content/posts.json";
+import { tags as sharedTags, normalizeTags } from "@ritesGlobal/tags.js";
+import type { MDXInstance } from "astro";
 import { frontmatter as page } from "../content/pages/blog.md";
 
-// Derive filter tags from actual posts so the list never drifts out of sync
-// (previously a hand-maintained tags.js listed tags no post used, plus a
-// duplicate "astro"/"Astro" pair whose casing didn't match post.tag values).
-const tags = [...new Set(posts.map((post) => post.tag))].sort();
+interface PostFrontmatter {
+	title?: string;
+	pubDate?: Date | string;
+	tags?: string[];
+	description?: string;
+}
+
+const postModules = import.meta.glob<MDXInstance<PostFrontmatter>>("../content/posts/*.mdx", { eager: true });
+const posts = Object.entries(postModules)
+	.map(([filePath, { frontmatter }]) => {
+		const slug = filePath.split("/").at(-1)?.replace(/\.mdx$/, "") || "";
+		const date = frontmatter.pubDate ? new Date(frontmatter.pubDate).toISOString().slice(0, 10) : "";
+		return {
+			title: frontmatter.title || slug,
+			href: `/blog/posts/${slug}/`,
+			date,
+			tags: normalizeTags(frontmatter.tags),
+			description: frontmatter.description || "",
+		};
+	})
+	.sort((first, second) => second.date.localeCompare(first.date));
+const usedTags = new Set(posts.flatMap((post) => post.tags));
+const tags = sharedTags.filter((tag) => usedTags.has(tag));
 ---
 
 <BaseLayout title={page.seo.title} description={page.seo.description}>
@@ -38,7 +58,8 @@ const tags = [...new Set(posts.map((post) => post.tag))].sort();
 				});
 
 				postCards.forEach((postCard) => {
-					postCard.hidden = selectedTag !== "all" && postCard.dataset.tag !== selectedTag;
+					const cardTags = (postCard.dataset.tags || "").split(",");
+					postCard.hidden = selectedTag !== "all" && !cardTags.includes(selectedTag || "");
 				});
 			});
 		});

@@ -11,13 +11,20 @@ const fields = Object.fromEntries(
 );
 
 let posts = [];
+let knownTags = [];
 let originalSlug = null;
 let dirty = false;
 let toastTimer;
 
 async function loadPosts(selectedSlug = originalSlug) {
 	try {
-		posts = await window.postsAPI.list();
+		[posts, knownTags] = await Promise.all([window.postsAPI.list(), window.postsAPI.tags()]);
+		const tagOptions = document.querySelector("#tag-options");
+		tagOptions.replaceChildren(...knownTags.map((tag) => {
+			const option = document.createElement("option");
+			option.value = tag;
+			return option;
+		}));
 		renderPosts(selectedSlug);
 	} catch (error) {
 		showToast(error.message, true);

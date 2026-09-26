@@ -4,14 +4,14 @@ import ServiceCard from "../components/ServiceCard.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TestimonialCard from "../components/TestimonialCard.astro";
 import { identity } from "@ritesGlobal/content.js";
+import { projects } from "@ritesGlobal/projects.js";
 import { frontmatter as home } from "../content/pages/index.md";
-import { frontmatter as portfolioPage } from "../content/pages/portfolio.md";
 
 const devServices = home.services.items.filter((service) => service.category === "Development");
 const teachingServices = home.services.items.filter((service) => service.category === "Teaching");
 const featuredDev = devServices[0];
 const featuredTeaching = teachingServices[0];
-const featuredProjects = portfolioPage.projects.slice(0, 2);
+const featuredProjects = projects.slice(0, 2);
 ---
 
 <BaseLayout>

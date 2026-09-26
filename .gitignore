@@ -1,18 +1,68 @@
-# build output
+# Build output and caches
 .astro/
 dist/
-# dependencies
-node_modules/
+coverage/
+.wrangler/
+.netlify/
 
-# logs
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Logs and runtime data
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+*.log
+*.pid
+*.pid.lock
+dev/contact-submissions.jsonl
+dev/contact-submissions.jsonl.*
+*.tmp
+*.temp
 
-# environment variables
-.env
-.env.production
+# Secrets and local environment files
+.env*
+!.env.example
+!.env.*.example
+.npmrc
+!.npmrc.example
+secrets/
+**/secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+
+# Local backups and editor swap files
+*.bak
+*.backup
+*.orig
+*.rej
+*~
+*.swp
+*.swo
+
+# Postman user state and secret-bearing exports
+.postman/
+postman/environments/
+postman/globals/
+
+# Operating system metadata
+.DS_Store
+**/.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor metadata (keep shareable workspace settings)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
 
 # Local development folder (session notes, runbooks, temporary files)
-/dev/
 dev/

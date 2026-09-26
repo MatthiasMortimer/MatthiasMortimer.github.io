@@ -8,6 +8,7 @@ if (!window.postsAPI) {
 
 	window.postsAPI = {
 		list: () => request("api/posts"),
+		tags: () => request("api/tags"),
 		read: (slug) => request(`api/posts/${encodeURIComponent(slug)}`),
 		save: (post) => request("api/posts", {
 			method: "POST",

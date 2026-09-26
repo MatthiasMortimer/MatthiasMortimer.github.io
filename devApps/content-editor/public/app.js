@@ -1,6 +1,6 @@
 import { createArrayItem, getValueAtPath, setValueAtPath } from "./structured-values.js";
 
-const siteList = document.querySelector("#site-list");
+const siteSelect = document.querySelector("#site-select");
 const fileList = document.querySelector("#file-list");
 const searchInput = document.querySelector("#file-search");
 const form = document.querySelector("#content-form");
@@ -35,25 +35,23 @@ async function loadInventory() {
 }
 
 function renderSites() {
-	siteList.replaceChildren();
+	siteSelect.replaceChildren();
 	for (const site of sites) {
-		const button = document.createElement("button");
-		button.type = "button";
-		button.className = `site-item${site.slug === activeSite?.slug ? " active" : ""}`;
-		const monogram = document.createElement("span");
-		monogram.className = "site-monogram";
-		monogram.textContent = site.label.slice(0, 2).toUpperCase();
-		const text = document.createElement("span");
-		text.className = "site-name";
-		text.textContent = site.label;
-		button.append(monogram, text);
-		button.addEventListener("click", () => selectSite(site.slug));
-		siteList.append(button);
+		const option = document.createElement("option");
+		option.value = site.slug;
+		option.textContent = site.label;
+		option.selected = site.slug === activeSite?.slug;
+		siteSelect.append(option);
 	}
+	siteSelect.disabled = sites.length === 0;
 }
 
 function selectSite(siteSlug) {
-	if (siteSlug === activeSite?.slug || !canDiscardChanges()) return;
+	if (siteSlug === activeSite?.slug) return;
+	if (!canDiscardChanges()) {
+		renderSites();
+		return;
+	}
 	activeSite = sites.find((site) => site.slug === siteSlug);
 	activeFile = null;
 	activeDocument = null;
@@ -128,7 +126,7 @@ function renderEditor() {
 
 	bodySection.hidden = activeDocument.mode === "structured";
 	bodyEditor.value = activeDocument.body || "";
-	document.querySelector("#body-label").textContent = activeDocument.mode === "source" ? "JavaScript source" : "Page body";
+	document.querySelector("#body-label").textContent = activeDocument.mode === "source" ? "Source code" : "Page body";
 	document.querySelector("#body-format").textContent = activeDocument.mode === "source" ? activeFile.extension : "Markdown";
 	bodyEditor.spellcheck = activeDocument.mode !== "source";
 }
@@ -343,6 +341,7 @@ form.addEventListener("submit", async (event) => {
 });
 
 searchInput.addEventListener("input", renderFiles);
+siteSelect.addEventListener("change", () => selectSite(siteSelect.value));
 document.querySelector("#refresh").addEventListener("click", loadInventory);
 window.addEventListener("keydown", (event) => {
 	if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {

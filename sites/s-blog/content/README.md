@@ -6,8 +6,9 @@ This directory is the source of truth for editable Blog content.
 | --- | --- |
 | `site.json` | Reusable site name, SEO defaults, author details, navigation, and stats |
 | `pages/*.md` | Headings, descriptions, labels, and other copy for each top-level route |
-| `posts.json` | Blog listing cards, dates, tags, links, and summaries |
-| `posts/*.mdx` | Blog post frontmatter and body content |
+| `posts/*.mdx` | Blog post frontmatter, listing metadata, tags, and body content |
 | `skills.json` | Reusable skill labels |
 
 The Website Content Editor discovers supported files recursively from this directory. Keep implementation components, layouts, and route files outside `content/`.
+
+Canonical reusable tag labels live in `ritesGlobal/tags.json`; the post-specific selection lives in each MDX file's `tags` frontmatter field.

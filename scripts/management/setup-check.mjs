@@ -136,6 +136,7 @@ try {
 		"ritesGlobal/contact.js",
 		"ritesGlobal/contact.json",
 		"ritesGlobal/projects.js",
+		"ritesGlobal/tags.json",
 		"ritesGlobal/sites.registry.mjs",
 	];
 

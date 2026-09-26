@@ -1,14 +1,53 @@
 [
   {
-    "name": "Blog Rites",
-    "description": "A personal blog for documenting my learning and security work."
+    "id": "blog",
+    "title": "Matt's Dev Log",
+    "description": "A personal website for documenting learning, security work, projects, and ideas.",
+    "category": "Development",
+    "tags": ["Astro", "React", "Blog"],
+    "image": "/media/project-dev.svg",
+    "summary": "A personal website for me to Blog and document my projects and thoughts.",
+    "highlights": [],
+    "demoUrl": "https://rites-blog.netlify.app",
+    "githubUrl": "https://github.com/MatthiasMortimer/Blog-Rites"
   },
   {
-    "name": "Learning Astro",
-    "description": "A project for practicing Astro, reusable components, and shared data."
+    "id": "home-page",
+    "title": "RiteDev Home Website",
+    "description": "RitesDev official Homepage.",
+    "category": "Development",
+    "tags": ["Astro", "Business", "VSCode"],
+    "image": "/media/project-home.svg",
+    "summary": "RitesDev official Homepage.",
+    "highlights": [],
+    "demoUrl": "https://rites-dev.netlify.app/",
+    "githubUrl": "https://github.com/MatthiasMortimer/RitesDev-Site"
   },
   {
-    "name": "Contractor Template",
-    "description": "A template for contractor projects, forked from a past commission."
+    "id": "web-dev-bootcamp",
+    "title": "Programming Fundamentals Curriculum - Game Development on GoDot",
+    "description": "A 16 class hands on curriculum making a small 2D game of the students choice.",
+    "category": "Teaching",
+    "tags": ["Learner", "Python", "GoDot", "Curriculum"],
+    "image": "/media/project-teaching.svg",
+    "summary": "A 16 class hands on curriculum making a small 2D game of the students choice.",
+    "highlights": [
+      "Guided students from zero coding knowledge to market-ready game",
+      "100% positive feedback rating from workshop attendees"
+    ],
+    "demoUrl": "https://example.com/curriculum",
+    "githubUrl": "https://github.com/MatthiasMortimer/SamClass"
+  },
+  {
+    "id": "astro-starter-kit",
+    "title": "Open-Source Astro Tech Starter Website",
+    "description": "A secure website starter (fill details here).",
+    "category": "Teaching / Open Source",
+    "tags": ["Astro", "MDX", "CSS Modules"],
+    "image": "/media/project-teaching.svg",
+    "summary": "A secure website starter (fill details here).",
+    "highlights": [],
+    "demoUrl": "https://example.com/astro-starter",
+    "githubUrl": "https://github.com/example/astro-starter"
   }
 ]

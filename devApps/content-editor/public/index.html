@@ -15,21 +15,20 @@
 				<p class="eyebrow">RitesDev Studio</p>
 				<h1>Website Content Editor</h1>
 			</div>
-			<div class="topbar-status">
-				<span id="site-count">0 websites</span>
-				<span id="save-state" class="save-state" role="status">Ready</span>
+			<div class="topbar-actions">
+				<label class="site-switcher">
+					<span>Website</span>
+					<select id="site-select" aria-label="Select website"></select>
+				</label>
+				<button id="refresh" class="icon-button" type="button" title="Refresh websites" aria-label="Refresh websites">↻</button>
+				<div class="topbar-status">
+					<span id="site-count">0 websites</span>
+					<span id="save-state" class="save-state" role="status">Ready</span>
+				</div>
 			</div>
 		</header>
 
 		<main class="workspace">
-			<aside class="site-rail" aria-label="Websites">
-				<div class="rail-heading">
-					<p class="eyebrow">Websites</p>
-					<button id="refresh" class="icon-button" type="button" title="Refresh websites" aria-label="Refresh websites">↻</button>
-				</div>
-				<nav id="site-list" class="site-list"></nav>
-			</aside>
-
 			<aside class="file-browser" aria-label="Content files">
 				<div class="browser-heading">
 					<div>

@@ -1,13 +1,33 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
-import posts from "../content/posts.json";
+import type { MDXInstance } from "astro";
+import { normalizeTags } from "@ritesGlobal/tags.js";
 import site from "../content/site.json";
 import { frontmatter as page } from "../content/pages/index.md";
 
 const { identity } = site;
-const latestPosts = [...posts]
-	.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+interface PostFrontmatter {
+	title?: string;
+	pubDate?: Date | string;
+	tags?: string[];
+	description?: string;
+}
+
+const postModules = import.meta.glob<MDXInstance<PostFrontmatter>>("../content/posts/*.mdx", { eager: true });
+const latestPosts = Object.entries(postModules)
+	.map(([filePath, { frontmatter }]) => {
+		const slug = filePath.split("/").at(-1)?.replace(/\.mdx$/, "") || "";
+		const date = frontmatter.pubDate ? new Date(frontmatter.pubDate).toISOString().slice(0, 10) : "";
+		return {
+			title: frontmatter.title || slug,
+			href: `/blog/posts/${slug}/`,
+			date,
+			tags: normalizeTags(frontmatter.tags),
+			description: frontmatter.description || "",
+		};
+	})
+	.sort((first, second) => second.date.localeCompare(first.date))
 	.slice(0, 3);
 const heroTitle = page.hero.title.replace("{firstName}", identity.firstName);
 const heroDescription = page.hero.description.replace("{occupation}", identity.occupation);

@@ -22,7 +22,7 @@ const hobbies = page.hobbies.replace("{hobbies}", identity.hobbies.join(", "));
 		<ul>
 			{projects.map((project) => (
 				<li>
-					<strong>{project.name}</strong>
+					<strong>{project.title}</strong>
 					<p>{project.description}</p>
 				</li>
 			))}

@@ -60,7 +60,7 @@
 							<label class="field">Publish date<input id="pubDate" name="pubDate" type="date" required></label>
 							<label class="field wide">Description<textarea id="description" name="description" rows="2" required></textarea></label>
 							<label class="field">Author<input id="author" name="author" required></label>
-							<label class="field">Tags<input id="tags" name="tags" placeholder="astro, business, updates"></label>
+							<label class="field">Tags<input id="tags" name="tags" list="tag-options" placeholder="Astro, Business" aria-describedby="tag-help"><datalist id="tag-options"></datalist><span id="tag-help" class="field-hint">Choose shared labels or enter comma-separated tags.</span></label>
 							<label class="field">Image URL<input id="imageUrl" name="imageUrl" type="url"></label>
 							<label class="field">Image alt text<input id="imageAlt" name="imageAlt"></label>
 						</div>

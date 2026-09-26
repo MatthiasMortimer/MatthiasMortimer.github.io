@@ -34,10 +34,10 @@ Use the `globalContent` export when a page needs more than identity or media:
 ```js
 import { globalContent } from "../../../ritesGlobal/content.js";
 
-const { identity, media, projects, versions, sites } = globalContent;
+const { identity, media, projects, tags, versions, sites } = globalContent;
 ```
 
-It contains shared identity/contact data, media paths, projects, version data, and discovered site metadata. Keep site-specific copy in the site directory instead of creating another global registry.
+It contains shared identity/contact data, media paths, projects, canonical tags, version data, and discovered site metadata. Keep site-specific copy in the site directory instead of creating another global registry. `ritesGlobal/tags.json` is editable through the Content Editor and is the canonical label list for reusable project and blog-post tags.
 
 `ritesGlobal/styles/tokens.css` defines shared colors, fonts, radii, shadows, and transitions. Each site imports it from its local `styles/global.css` and sets only local presentation values such as content width. `ritesGlobal/content-inventory.mjs` exposes `GLOBAL_CONTENT_FILES` and `getGlobalContentInventory()` for management tooling.
 
@@ -47,7 +47,7 @@ Management utilities resolve configured files by complete path or basename. For 
 
 Every site stores editable data beneath its own `content/` directory. `content/site.json` contains reusable site settings, `content/pages/*.md` contains route copy and card content, and other JSON files contain reusable collections. The editor recursively discovers these files without a site-specific registry. Shared identity remains in `ritesGlobal/contact.json`.
 
-Blog posts are MDX files under `sites/s-blog/content/posts/` and are rendered by the dynamic `pages/posts/[slug].astro` route. Example frontmatter fields are `title`, `pubDate`, `description`, `author`, `image`, and `tags`. Add the corresponding card entry to `sites/s-blog/content/posts.json` with a `/blog/posts/<slug>/` URL and a valid ISO date. The blog listing derives its tag filters from that structured JSON.
+Blog posts are MDX files under `sites/s-blog/content/posts/` and are rendered by the dynamic `pages/posts/[slug].astro` route. Example frontmatter fields are `title`, `pubDate`, `description`, `author`, `image`, and `tags`. The blog listing and homepage derive card data directly from MDX frontmatter; there is no duplicate `posts.json` registry. Use labels from `ritesGlobal/tags.json`; blog filtering supports every tag on a post.
 
 Minimal MDX example:
 
@@ -57,7 +57,7 @@ title: "A useful debugging note"
 pubDate: 2026-09-19
 description: "What failed, why it failed, and the small fix."
 author: "Matt"
-tags: ["javascript", "debugging"]
+tags: ["Astro", "Testing"]
 ---
 
 ## The failure
@@ -75,7 +75,7 @@ Apps that ship a `devapp.api.mjs` (exporting `createApiHandler()`) and a `public
 
 | App | Folder | How to open | Purpose |
 | --- | --- | --- | --- |
-| Website Content Editor | `devApps/content-editor` | tab in RitesDev App | Edit site copy, data, and Markdown |
+| Website Content Editor | `devApps/content-editor` | tab in RitesDev App | Edit site copy, data, and Markdown from /ritesGlobal and site-local /content folders|
 | Blog Post Manager | `devApps/blog-post-manager` | tab in RitesDev App | Create/manage blog MDX posts |
 | Inquiry Manager | `devApps/inquiry-manager` | tab in RitesDev App | Triage contact form inquiries |
 | RitesDev App | `devApps/ritesDevApp` | `npm run app` | Master window: hosts app tabs, controls Site Hosting |

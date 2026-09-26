@@ -1,10 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import { projects } from "@ritesGlobal/projects.js";
 import { frontmatter as portfolioPage } from "../content/pages/portfolio.md";
 
-const devProjects = portfolioPage.projects.filter((p) => p.category === "Development");
-const teachingProjects = portfolioPage.projects.filter((p) => p.category.includes("Teaching"));
+const devProjects = projects.filter((project) => project.category === "Development");
+const teachingProjects = projects.filter((project) => project.category.includes("Teaching"));
 ---
 
 <BaseLayout title="Portfolio | RitesDev" description="Explore showcase development projects, web applications, open-source repositories, and teaching curricula.">

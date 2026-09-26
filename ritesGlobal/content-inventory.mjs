@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { listSites } from "./sites.registry.mjs";
+import { listEditableSites } from "./sites.registry.mjs";
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -15,6 +15,7 @@ export const CONTENT_TYPES = {
 	METADATA: "metadata",
 	IDENTITY: "identity",
 	PROJECTS: "projects",
+	TAGS: "tags",
 	VERSIONS: "versions",
 	SEO: "seo",
 };
@@ -22,16 +23,16 @@ export const CONTENT_TYPES = {
 export const GLOBAL_CONTENT_FILES = [
 	"ritesGlobal/contact.json",
 	"ritesGlobal/projects.json",
+	"ritesGlobal/tags.json",
 	"ritesGlobal/versions.json",
 	"ritesGlobal/seo.json",
 ];
 
-const CONTENT_EXTENSIONS = new Set([".json", ".md", ".mdx", ".js", ".mjs"]);
+const CONTENT_EXTENSIONS = new Set([".json", ".md", ".mdx", ".js", ".mjs", ".astro", ".html", ".txt"]);
 
-function discoverContentFiles(siteDir) {
+function discoverContentFiles(siteDir, roots = ["content"], extensions = CONTENT_EXTENSIONS) {
 	const files = [];
-	const contentDir = path.join(siteDir, "content");
-	if (!fs.existsSync(contentDir)) return files;
+	const allowedExtensions = extensions instanceof Set ? extensions : new Set(extensions);
 
 	function visit(directory) {
 		for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -46,20 +47,35 @@ function discoverContentFiles(siteDir) {
 			const relativePath = path.relative(siteDir, filePath).split(path.sep).join("/");
 			const extension = path.extname(entry.name).toLowerCase();
 			if (entry.name.toLowerCase() === "readme.md") continue;
-			if (!CONTENT_EXTENSIONS.has(extension)) continue;
+			if (!allowedExtensions.has(extension)) continue;
 
 			files.push(relativePath);
 		}
 	}
 
-	visit(contentDir);
+	for (const root of roots) {
+		const contentRoot = path.resolve(siteDir, root);
+		const relativeRoot = path.relative(siteDir, contentRoot);
+		if (relativeRoot.startsWith("..") || path.isAbsolute(relativeRoot) || !fs.existsSync(contentRoot)) continue;
+		visit(contentRoot);
+	}
 	return files.sort();
 }
 
-function createContentTypes(siteDir) {
+function createContentTypes(site) {
+	if (site.editor?.groups) {
+		return Object.fromEntries(site.editor.groups.map((group) => [
+			group.type,
+			{
+				label: group.label,
+				files: discoverContentFiles(site.dir, group.roots, group.extensions || CONTENT_EXTENSIONS),
+			},
+		]));
+	}
+
 	const groups = {};
 
-	for (const file of discoverContentFiles(siteDir)) {
+	for (const file of discoverContentFiles(site.dir)) {
 		let type = CONTENT_TYPES.CONFIG;
 		let label = "Reusable Content";
 
@@ -87,7 +103,7 @@ function createContentTypes(siteDir) {
 }
 
 const SITE_CONTENT_CONFIG = Object.fromEntries(
-	listSites().map((site) => [site.folder, { name: site.label, contentTypes: createContentTypes(site.dir) }]),
+	listEditableSites().map((site) => [site.folder, { name: site.label, contentTypes: createContentTypes(site) }]),
 );
 
 /**
@@ -95,7 +111,7 @@ const SITE_CONTENT_CONFIG = Object.fromEntries(
  * @returns {Array} Array of site content objects with detailed file information
  */
 export function getContentInventory() {
-	const sites = listSites();
+	const sites = listEditableSites();
 	const globalDir = path.join(ROOT_DIR, "ritesGlobal");
 	const globalContent = {
 		slug: "global",
@@ -105,6 +121,7 @@ export function getContentInventory() {
 		contentTypes: {
 			[CONTENT_TYPES.IDENTITY]: { label: "Contact & Identity", files: ["contact.json"] },
 			[CONTENT_TYPES.PROJECTS]: { label: "Projects", files: ["projects.json"] },
+			[CONTENT_TYPES.TAGS]: { label: "Shared Tags", files: ["tags.json"] },
 			[CONTENT_TYPES.VERSIONS]: { label: "Versions", files: ["versions.json"] },
 			[CONTENT_TYPES.SEO]: { label: "SEO Defaults", files: ["seo.json"] },
 		},
@@ -117,7 +134,7 @@ export function getContentInventory() {
 	const siteContent = sites.map((site) => {
 		const config = {
 			name: site.label,
-			contentTypes: createContentTypes(site.dir),
+			contentTypes: createContentTypes(site),
 		};
 
 		return {

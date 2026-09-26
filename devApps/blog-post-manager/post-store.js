@@ -1,6 +1,8 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const matter = require("gray-matter");
+const TAGS = require("../../ritesGlobal/tags.json");
+const TAGS_BY_KEY = new Map(TAGS.map((tag) => [tag.toLocaleLowerCase(), tag]));
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -69,10 +71,11 @@ function createPostStore(postsDirectory) {
 			data.image = { url: post.imageUrl.trim(), alt: post.imageAlt.trim() };
 		}
 
-		data.tags = post.tags
+		data.tags = [...new Set(post.tags
 			.split(",")
 			.map((tag) => tag.trim())
-			.filter(Boolean);
+			.filter(Boolean)
+			.map((tag) => TAGS_BY_KEY.get(tag.toLocaleLowerCase()) || tag))];
 
 		await fs.mkdir(postsDirectory, { recursive: true });
 		const output = matter.stringify(`${post.content.trim()}\n`, data);

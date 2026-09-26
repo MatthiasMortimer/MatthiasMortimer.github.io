@@ -81,12 +81,40 @@ h1 {
 	text-transform: uppercase;
 }
 
+.topbar-actions,
 .topbar-status {
 	display: flex;
 	align-items: center;
 	gap: 10px;
+}
+
+.topbar-status {
 	font-size: 12px;
 	color: var(--color-primary);
+}
+
+.site-switcher {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--color-primary);
+	font-family: "Trebuchet MS", sans-serif;
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.site-switcher select {
+	width: clamp(180px, 22vw, 290px);
+	min-height: 38px;
+	padding: 0 34px 0 11px;
+	color: var(--color-dark);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	background: white;
+	font-family: "Trebuchet MS", sans-serif;
+	font-size: 13px;
+	font-weight: 700;
 }
 
 .save-state {
@@ -107,26 +135,15 @@ h1 {
 
 .workspace {
 	display: grid;
-	grid-template-columns: 190px minmax(270px, 320px) minmax(0, 1fr);
+	grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
 	min-height: 0;
 }
 
-.site-rail,
 .file-browser {
 	min-width: 0;
 	border-right: 1px solid var(--color-border);
 }
 
-.site-rail {
-	padding: 21px 14px;
-	background: rgba(74, 71, 90, 0.94);
-}
-
-.site-rail .eyebrow {
-	color: #d9d1e9;
-}
-
-.rail-heading,
 .browser-heading,
 .editor-toolbar,
 .section-heading {
@@ -149,55 +166,12 @@ h1 {
 	background: rgba(255, 255, 255, 0.08);
 }
 
-.site-list {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	margin-top: 17px;
+.topbar .icon-button {
+	color: var(--color-dark);
+	border-color: var(--color-border);
+	background: white;
 }
 
-.site-item {
-	display: grid;
-	grid-template-columns: 35px minmax(0, 1fr);
-	align-items: center;
-	gap: 9px;
-	width: 100%;
-	padding: 8px;
-	color: #f7f5fa;
-	text-align: left;
-	border: 1px solid transparent;
-	border-radius: var(--radius-sm);
-	background: transparent;
-}
-
-.site-item:hover,
-.site-item.active {
-	border-color: rgba(255, 255, 255, 0.15);
-	background: rgba(255, 255, 255, 0.11);
-}
-
-.site-monogram {
-	display: grid;
-	place-items: center;
-	width: 35px;
-	height: 35px;
-	border-radius: var(--radius-sm);
-	background: #b8a8d9;
-	color: #353142;
-	font-family: "Trebuchet MS", sans-serif;
-	font-size: 11px;
-	font-weight: 700;
-}
-
-.site-name {
-	min-width: 0;
-	overflow: hidden;
-	font-family: "Trebuchet MS", sans-serif;
-	font-size: 13px;
-	font-weight: 700;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
 
 .file-browser {
 	display: flex;
@@ -550,8 +524,8 @@ h1 {
 .icon-button:focus-visible,
 .array-add-button:focus-visible,
 .array-remove-button:focus-visible,
-.site-item:focus-visible,
 .file-item:focus-visible,
+select:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
 	outline: 3px solid rgba(184, 168, 217, 0.48);
@@ -584,12 +558,7 @@ textarea:focus-visible {
 
 @media (max-width: 1120px) {
 	.workspace {
-		grid-template-columns: 155px 270px minmax(0, 1fr);
-	}
-
-	.site-item {
-		grid-template-columns: 32px minmax(0, 1fr);
-		padding: 7px;
+		grid-template-columns: 270px minmax(0, 1fr);
 	}
 
 	.field-grid,
@@ -617,24 +586,23 @@ textarea:focus-visible {
 		flex-wrap: wrap;
 	}
 
+	.topbar-actions {
+		width: 100%;
+		flex-wrap: wrap;
+	}
+
+	.site-switcher {
+		flex: 1 1 240px;
+	}
+
+	.site-switcher select {
+		width: 100%;
+	}
+
 	.workspace {
 		display: block;
 		width: 100%;
 		min-width: 0;
-	}
-
-	.site-rail {
-		padding: 14px;
-		border-right: 0;
-	}
-
-	.site-list {
-		flex-direction: row;
-		overflow-x: auto;
-	}
-
-	.site-item {
-		flex: 0 0 150px;
 	}
 
 	.file-browser {

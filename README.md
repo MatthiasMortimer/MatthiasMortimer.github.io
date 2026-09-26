@@ -7,7 +7,7 @@ Currently registered sites:
 - **[sites/s-ritesdev](sites/s-ritesdev)** - RitesDev business/portfolio site (freelance web development & technical teaching), served at `/`. Content is edited via Markdown/JSON in `sites/s-ritesdev/content/` (see [sites/s-ritesdev/content/README.md](sites/s-ritesdev/content/README.md)).
 - **[sites/s-blog](sites/s-blog)** - Personal blog, served at `/blog`. Editable site, page, card, and post content lives in `sites/s-blog/content/`.
 
-Shared identity/contact info, version numbers, and the site/app registries used by both sites live in [ritesGlobal/](ritesGlobal).
+Shared identity/contact info, version numbers, and the site/app registries used by both sites live in [ritesGlobal/](ritesGlobal). The content editor also discovers sibling projects in the parent `websites/` folder when they contain a `ritesdev.site.json` manifest.
 
 ## Quick Start
 
@@ -60,6 +60,28 @@ RitesDev-ecosystem/
 1. Create `sites/s-<name>/` with a `site.meta.json` (`slug`, `label`, `basePath`, `order`) and a `pages/` folder.
 2. Run `npm run dev` (or `npm run sync`) - the new site's pages are symlinked into `src/pages/` automatically.
 3. Put editable JSON, Markdown, MDX, JS, or MJS in the site's `content/` folder; the content editor discovers it automatically.
+
+To edit a standalone sibling website without moving it into the ecosystem, add `ritesdev.site.json` at that website's root:
+
+```json
+{
+	"slug": "example",
+	"label": "Example Site",
+	"order": 60,
+	"editor": {
+		"groups": [
+			{
+				"type": "page",
+				"label": "Page Content",
+				"roots": ["src/content"],
+				"extensions": [".md", ".json"]
+			}
+		]
+	}
+}
+```
+
+Each root is resolved inside that website and only discovered files can be opened or saved. The website dropdown refreshes from these manifests when the RitesDev app starts or its refresh button is used.
 
 ## Dev management tools
 

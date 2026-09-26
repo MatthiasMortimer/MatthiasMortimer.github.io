@@ -37,8 +37,8 @@ addonsDescription: Extend any plan with these à la carte extras.
 addons:
   - id: extra-page
     name: Extra Page
-    price: $20 / page
-    description: 'Add another page to your site (e.g. FAQ, testimonials, gallery).'
+    price: $10 / page
+    description: 'Add another simple page to your site (e.g. FAQ, testimonials, gallery).'
   - id: staff-dashboard
     name: Staff Dashboard
     price: $150+
@@ -47,12 +47,14 @@ addons:
       or internal notes.
   - id: booking-system
     name: Booking / Scheduling
-    price: $100+
+    price: $50+
     description: Let customers book appointments directly from your site.
   - id: online-store
     name: Basic Online Store
     price: $250+
-    description: Sell a small catalog of products or services with checkout.
+    description: >-
+      Sell a small catalog of products or services with checkout. Includes shop
+      dashboard.
   - id: maintenance
     name: Monthly Maintenance
     price: $25 / month
