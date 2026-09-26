@@ -4,11 +4,15 @@
     "title": "Matt's Dev Log",
     "description": "A personal website for documenting learning, security work, projects, and ideas.",
     "category": "Development",
-    "tags": ["Astro", "React", "Blog"],
+    "tags": [
+      "Astro",
+      "React",
+      "Blog"
+    ],
     "image": "/media/project-dev.svg",
     "summary": "A personal website for me to Blog and document my projects and thoughts.",
     "highlights": [],
-    "demoUrl": "https://rites-blog.netlify.app",
+    "demoUrl": "https://ritesdev.dev/blog",
     "githubUrl": "https://github.com/MatthiasMortimer/Blog-Rites"
   },
   {
@@ -16,19 +20,28 @@
     "title": "RiteDev Home Website",
     "description": "RitesDev official Homepage.",
     "category": "Development",
-    "tags": ["Astro", "Business", "VSCode"],
+    "tags": [
+      "Astro",
+      "Business",
+      "VSCode"
+    ],
     "image": "/media/project-home.svg",
     "summary": "RitesDev official Homepage.",
     "highlights": [],
-    "demoUrl": "https://rites-dev.netlify.app/",
+    "demoUrl": "https://ritesdev.dev",
     "githubUrl": "https://github.com/MatthiasMortimer/RitesDev-Site"
   },
   {
     "id": "web-dev-bootcamp",
     "title": "Programming Fundamentals Curriculum - Game Development on GoDot",
-    "description": "A 16 class hands on curriculum making a small 2D game of the students choice.",
+    "description": "A 16 class hands on curriculum making a small 2D game.",
     "category": "Teaching",
-    "tags": ["Learner", "Python", "GoDot", "Curriculum"],
+    "tags": [
+      "Learner",
+      "Python",
+      "GoDot",
+      "Curriculum"
+    ],
     "image": "/media/project-teaching.svg",
     "summary": "A 16 class hands on curriculum making a small 2D game of the students choice.",
     "highlights": [
@@ -43,7 +56,11 @@
     "title": "Open-Source Astro Tech Starter Website",
     "description": "A secure website starter (fill details here).",
     "category": "Teaching / Open Source",
-    "tags": ["Astro", "MDX", "CSS Modules"],
+    "tags": [
+      "Astro",
+      "MDX",
+      "CSS Modules"
+    ],
     "image": "/media/project-teaching.svg",
     "summary": "A secure website starter (fill details here).",
     "highlights": [],
