@@ -4,13 +4,18 @@ const els = {
 	start: document.getElementById("btn-start"),
 	stop: document.getElementById("btn-stop"),
 	restart: document.getElementById("btn-restart"),
+	devStart: document.getElementById("btn-dev-start"),
+	devStop: document.getElementById("btn-dev-stop"),
 	refreshPreview: document.getElementById("btn-refresh-preview"),
 	openExternal: document.getElementById("btn-open-external"),
 	checkLocal: document.getElementById("check-local"),
 	checkPublic: document.getElementById("check-public"),
+	checkDevLocal: document.getElementById("check-dev-local"),
 	localUrl: document.getElementById("local-url"),
 	publicUrl: document.getElementById("public-url"),
+	devPublicUrl: document.getElementById("dev-public-url"),
 	astroPid: document.getElementById("astro-pid"),
+	devPid: document.getElementById("dev-pid"),
 	tunnelPid: document.getElementById("tunnel-pid"),
 	log: document.getElementById("log"),
 	preview: document.getElementById("preview"),
@@ -36,22 +41,26 @@ async function init() {
 	config = await window.hosting.config();
 	els.localUrl.textContent = config.localUrl;
 	els.publicUrl.textContent = config.publicUrl;
+	els.devPublicUrl.textContent = config.devPublicUrl;
 	els.previewTarget.textContent = config.publicUrl;
 
 	for (const entry of await window.hosting.logs()) appendLog(entry);
 
 	window.hosting.onLog(appendLog);
 	window.hosting.onState(() => refreshStatus());
+	window.hosting.onDevState(() => refreshStatus());
 
 	els.start.addEventListener("click", () => runAction("start", window.hosting.start));
 	els.stop.addEventListener("click", () => runAction("stop", window.hosting.stop));
 	els.restart.addEventListener("click", () => runAction("restart", window.hosting.restart));
+	els.devStart.addEventListener("click", () => runAction("dev-start", window.hosting.startDevelopment));
+	els.devStop.addEventListener("click", () => runAction("dev-stop", window.hosting.stopDevelopment));
 	els.refreshPreview.addEventListener("click", () => {
 		previewLoaded = false;
 		refreshStatus();
 	});
 	els.openExternal.addEventListener("click", () => window.hosting.openExternal(config.publicUrl));
-	for (const link of [els.localUrl, els.publicUrl]) {
+	for (const link of [els.localUrl, els.publicUrl, els.devPublicUrl]) {
 		link.addEventListener("click", (event) => {
 			event.preventDefault();
 			window.hosting.openExternal(link.textContent);
@@ -87,17 +96,24 @@ async function refreshStatus() {
 
 	els.statePill.dataset.state = status.state;
 	els.stateText.textContent = STATE_LABELS[status.state] || status.state;
-	els.astroPid.textContent = status.astroPid ?? "—";
+	els.astroPid.textContent = status.productionPid ?? "—";
+	els.devPid.textContent = status.devPid ?? "—";
 	els.tunnelPid.textContent = status.tunnelPid ?? "—";
 
 	renderCheck(els.checkLocal, status.local);
 	renderCheck(els.checkPublic, status.public);
+	els.checkDevLocal.dataset.health = status.devPublic.ok ? "ok" : status.devState === "running" ? "bad" : "warn";
+	els.checkDevLocal.querySelector(".check-status").textContent = status.devState === "running"
+		? `${status.devPublic.status ?? "…"} ${status.devPublic.ok ? "OK" : "unreachable"}`
+		: status.devState === "starting" ? "Starting…" : status.devState === "error" ? "Error" : "Stopped";
 
 	if (!busy) {
 		const running = status.state === "running" || status.state === "starting";
 		els.start.disabled = running;
 		els.stop.disabled = status.state === "stopped";
 		els.restart.disabled = status.state === "stopped";
+		els.devStart.disabled = status.devState === "running" || status.devState === "starting" || status.state !== "running";
+		els.devStop.disabled = status.devState !== "running" && status.devState !== "starting";
 	}
 
 	updatePreview(status);

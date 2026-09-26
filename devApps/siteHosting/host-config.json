@@ -2,5 +2,10 @@
   "tunnelName": "astro-site-tunnel",
   "publicUrl": "https://ritesdev.dev",
   "localUrl": "http://127.0.0.1:4321",
-  "astroPort": 4321
+  "productionPort": 4321,
+  "devLocalUrl": "http://127.0.0.1:4324/workstation",
+  "devPublicUrl": "https://ritesdev.dev/workstation",
+  "devPort": 4324,
+  "devInternalPort": 4325,
+  "devBase": "/workstation"
 }

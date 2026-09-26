@@ -17,6 +17,8 @@ startMobileAppServer({
 		if (method === "POST" && pathname === "/api/host/start") return host.start();
 		if (method === "POST" && pathname === "/api/host/stop") return host.stop();
 		if (method === "POST" && pathname === "/api/host/restart") return host.restart();
+		if (method === "POST" && pathname === "/api/host/dev/start") return host.startDevelopment();
+		if (method === "POST" && pathname === "/api/host/dev/stop") return host.stopDevelopment();
 		return { status: 404, data: { success: false, message: "Not found" } };
 	},
 });
@@ -57,15 +59,18 @@ function send(channel, payload) {
 
 host.on("log", (entry) => send("host:log", entry));
 host.on("state", (state) => send("host:state", state));
+host.on("dev-state", (state) => send("host:dev-state", state));
 
 ipcMain.handle("host:start", () => host.start());
 ipcMain.handle("host:stop", () => host.stop());
 ipcMain.handle("host:restart", () => host.restart());
+ipcMain.handle("host:dev:start", () => host.startDevelopment());
+ipcMain.handle("host:dev:stop", () => host.stopDevelopment());
 ipcMain.handle("host:status", () => host.status());
 ipcMain.handle("host:logs", () => host.logs);
 ipcMain.handle("host:config", () => config);
 ipcMain.handle("host:openExternal", (_event, url) => {
-	if (url === config.publicUrl || url === config.localUrl) shell.openExternal(url);
+	if ([config.publicUrl, config.localUrl, config.devPublicUrl, config.devLocalUrl].includes(url)) shell.openExternal(url);
 });
 
 app.whenReady().then(() => {

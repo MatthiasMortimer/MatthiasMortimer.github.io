@@ -1,6 +1,8 @@
 const { spawn, spawnSync } = require("node:child_process");
 const { EventEmitter } = require("node:events");
 const path = require("node:path");
+const http = require("node:http");
+const net = require("node:net");
 
 const config = require("./host-config.json");
 
@@ -12,11 +14,14 @@ class HostManager extends EventEmitter {
 	constructor() {
 		super();
 		this.state = "stopped";
-		// Astro 7 daemonizes `astro dev`, so we only ever hold its reported pid
-		this.astroPid = null;
+		this.devState = "stopped";
+		this.productionServer = null;
+		this.devPid = null;
+		this.gateway = null;
 		this.tunnel = null;
 		this.logs = [];
 		this.transition = null;
+		this.devTransition = null;
 	}
 
 	log(message, level = "info") {
@@ -38,9 +43,12 @@ class HostManager extends EventEmitter {
 	 */
 	reapStrays() {
 		spawnSync("pkill", ["-f", `cloudflared tunnel run ${config.tunnelName}`], { stdio: "ignore" });
-		spawnSync("npx", ["astro", "dev", "stop"], { cwd: REPO_ROOT, stdio: "ignore", timeout: 15_000 });
-		spawnSync("fuser", ["-k", `${config.astroPort}/tcp`], { stdio: "ignore" });
-		this.astroPid = null;
+		spawnSync("npx", ["astro", "dev", "stop", "--port", String(config.devInternalPort)], { cwd: REPO_ROOT, stdio: "ignore", timeout: 15_000 });
+		for (const port of [config.productionPort, config.devInternalPort, config.devPort]) {
+			spawnSync("fuser", ["-k", `${port}/tcp`], { stdio: "ignore" });
+		}
+		this.productionServer = null;
+		this.devPid = null;
 	}
 
 	killChild(child) {
@@ -78,22 +86,25 @@ class HostManager extends EventEmitter {
 
 	async _start() {
 		this.setState("starting");
-		this.log("Cleaning up any stray Astro/cloudflared processes…");
+			this.log("Cleaning up previous production server and tunnel processes…");
 		this.reapStrays();
 		await delay(500);
 
 		try {
-			this.log(`Starting Astro dev on ${config.localUrl}…`);
-			await this.launchAstro();
+			this.log("Building the production site…");
+			await this.buildProduction();
 
-			const ready = await this.waitForAstro();
+			this.log(`Starting built production site on ${config.localUrl}…`);
+			this.launchProduction();
+
+			const ready = await this.waitForUrl(config.localUrl);
 			if (!ready) {
-				this.log("Astro never became reachable — aborting start", "error");
+				this.log("Production server never became reachable — aborting start", "error");
 				await this.stop();
 				this.setState("error");
-				return { success: false, message: "Astro dev server did not start" };
+				return { success: false, message: "Production server did not start" };
 			}
-			this.log(`Astro dev ready${this.astroPid ? ` (pid ${this.astroPid})` : ""}`);
+			this.log("Built production site is ready");
 
 			this.tunnel = spawn("cloudflared", ["tunnel", "run", config.tunnelName], {
 				cwd: REPO_ROOT,
@@ -112,7 +123,7 @@ class HostManager extends EventEmitter {
 			this.log(`Cloudflare tunnel "${config.tunnelName}" starting (pid ${this.tunnel.pid})`);
 
 			this.setState("running");
-			return { success: true, message: "Hosting started" };
+			return { success: true, message: "Production hosting started" };
 		} catch (error) {
 			this.log(`Start failed: ${error.message}`, "error");
 			await this.stop();
@@ -121,60 +132,207 @@ class HostManager extends EventEmitter {
 		}
 	}
 
-	/**
-	 * `astro dev --background` daemonizes, so the npm command returns immediately;
-	 * we wait for it to finish and scrape the background server's pid from its output.
-	 */
-	launchAstro() {
+	buildProduction() {
 		return new Promise((resolve, reject) => {
-			const child = spawn(
-				"npm",
-				[
-					"run",
-					"dev",
-					"--",
-					"--host",
-					"127.0.0.1",
-					"--port",
-					String(config.astroPort),
-					"--force",
-					"--background",
-				],
-				{ cwd: REPO_ROOT, stdio: ["ignore", "pipe", "pipe"] },
-			);
-
-			const scrapePid = (data) => {
-				const match = /\(pid (\d+)/.exec(data.toString());
-				if (match) this.astroPid = Number(match[1]);
-			};
-			child.stdout?.on("data", scrapePid);
-			child.stderr?.on("data", scrapePid);
+			const child = spawn("npm", ["run", "build"], { cwd: REPO_ROOT, stdio: ["ignore", "pipe", "pipe"] });
 			this.pipeOutput(child, "astro");
-
 			child.on("error", reject);
 			child.on("exit", (code) => {
 				if (code === 0) resolve();
-				else reject(new Error(`npm run dev exited with code ${code}`));
+				else reject(new Error(`npm run build exited with code ${code}`));
 			});
 		});
 	}
 
-	async waitForAstro() {
+	launchProduction() {
+		this.productionServer = spawn("node", ["dist/server/entry.mjs"], {
+			cwd: REPO_ROOT,
+			env: { ...process.env, HOST: "127.0.0.1", PORT: String(config.productionPort) },
+			detached: true,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		this.pipeOutput(this.productionServer, "production");
+		this.productionServer.on("exit", (code) => {
+			this.log(`Production server exited (code ${code})`, code ? "error" : "info");
+			this.productionServer = null;
+			if (this.state === "running") this.setState("error");
+		});
+		this.productionServer.on("error", (error) => this.log(`Could not start production server: ${error.message}`, "error"));
+	}
+
+	async startDevelopment() {
+		if (this.devTransition) return this.devTransition;
+		if (this.state !== "running") return { success: false, message: "Start production hosting before starting the public development server" };
+		if (this.devState === "running") return { success: false, message: "Development server is already running" };
+		this.devTransition = this._startDevelopment().finally(() => { this.devTransition = null; });
+		return this.devTransition;
+	}
+
+	async _startDevelopment() {
+		this.setDevState("starting");
+		try {
+			this.log("Starting Astro development server on the internal port…");
+			await this.launchDevelopment();
+			if (!await this.waitForUrl(`http://127.0.0.1:${config.devInternalPort}/`)) {
+				throw new Error("Development server did not become reachable");
+			}
+
+			this.log(`Starting workstation gateway at ${config.devPublicUrl}…`);
+			await this.startGateway();
+			if (!await this.waitForUrl(config.devLocalUrl)) throw new Error("Workstation gateway did not become reachable");
+
+			this.log(`Development server ready${this.devPid ? ` (pid ${this.devPid})` : ""}`);
+			this.setDevState("running");
+			return { success: true, message: "Development server started" };
+		} catch (error) {
+			this.log(`Development server start failed: ${error.message}`, "error");
+			await this.stopDevelopment();
+			this.setDevState("error");
+			return { success: false, message: error.message };
+		}
+	}
+
+	setDevState(state) {
+		if (this.devState === state) return;
+		this.devState = state;
+		this.emit("dev-state", state);
+	}
+
+	/**
+	 * Astro runs at its normal root ('/') on a loopback-only port; hardcoded
+	 * root-absolute asset paths in this codebase aren't reliably base-prefixed
+	 * by Astro's dev server, so startGateway() fronts it instead of relying on
+	 * Astro's `base` config for the public-facing /workstation path.
+	 */
+	launchDevelopment() {
+		return new Promise((resolve, reject) => {
+			const child = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", String(config.devInternalPort), "--force", "--background"], {
+				cwd: REPO_ROOT,
+				stdio: ["ignore", "pipe", "pipe"],
+			});
+			const scrapePid = (data) => {
+				const match = /\(pid (\d+)/.exec(data.toString());
+				if (match) this.devPid = Number(match[1]);
+			};
+			child.stdout?.on("data", scrapePid);
+			child.stderr?.on("data", scrapePid);
+			this.pipeOutput(child, "development");
+			child.on("error", reject);
+			child.on("exit", (code) => code === 0 ? resolve() : reject(new Error(`npm run dev exited with code ${code}`)));
+		});
+	}
+
+	/**
+	 * Reverse proxy that strips the `/workstation` prefix from inbound requests
+	 * and rewrites root-absolute href/src/action/Location values in the
+	 * response so the browser's follow-up requests stay under `/workstation`
+	 * (otherwise Cloudflare would route them to production instead).
+	 */
+	startGateway() {
+		return new Promise((resolve, reject) => {
+			const proxy = http.createServer((req, res) => this.handleGatewayRequest(req, res));
+			proxy.on("upgrade", (req, clientSocket, head) => this.handleGatewayUpgrade(req, clientSocket, head));
+			proxy.once("error", reject);
+			proxy.listen(config.devPort, "127.0.0.1", () => {
+				proxy.removeListener("error", reject);
+				proxy.on("error", (error) => this.log(`Workstation gateway error: ${error.message}`, "error"));
+				this.gateway = proxy;
+				resolve();
+			});
+		});
+	}
+
+	handleGatewayRequest(req, res) {
+		const prefix = config.devBase;
+		let targetPath = req.url === prefix ? "/" : req.url;
+		if (targetPath.startsWith(`${prefix}/`) || targetPath.startsWith(`${prefix}?`)) targetPath = targetPath.slice(prefix.length);
+
+		const upstream = http.request(
+			{ host: "127.0.0.1", port: config.devInternalPort, path: targetPath, method: req.method, headers: req.headers },
+			(upstreamRes) => {
+				const headers = { ...upstreamRes.headers };
+				if (typeof headers.location === "string" && headers.location.startsWith("/") && !headers.location.startsWith(prefix)) {
+					headers.location = prefix + headers.location;
+				}
+				if ((headers["content-type"] || "").includes("text/html")) {
+					const chunks = [];
+					upstreamRes.on("data", (chunk) => chunks.push(chunk));
+					upstreamRes.on("end", () => {
+						const body = rewriteHtmlForPrefix(Buffer.concat(chunks).toString("utf8"), prefix);
+						delete headers["content-length"];
+						res.writeHead(upstreamRes.statusCode, headers);
+						res.end(body);
+					});
+				} else {
+					res.writeHead(upstreamRes.statusCode, headers);
+					upstreamRes.pipe(res);
+				}
+			},
+		);
+		upstream.on("error", (error) => {
+			if (!res.headersSent) res.writeHead(502, { "content-type": "text/plain" });
+			res.end(`Workstation dev server unreachable: ${error.message}`);
+		});
+		req.pipe(upstream);
+	}
+
+	handleGatewayUpgrade(req, clientSocket, head) {
+		const prefix = config.devBase;
+		let targetPath = req.url;
+		if (targetPath.startsWith(prefix)) targetPath = targetPath.slice(prefix.length) || "/";
+
+		const upstreamSocket = net.connect(config.devInternalPort, "127.0.0.1", () => {
+			const headerLines = [`GET ${targetPath} HTTP/1.1`];
+			for (const [key, value] of Object.entries(req.headers)) headerLines.push(`${key}: ${value}`);
+			upstreamSocket.write(`${headerLines.join("\r\n")}\r\n\r\n`);
+			if (head?.length) upstreamSocket.write(head);
+			upstreamSocket.pipe(clientSocket);
+			clientSocket.pipe(upstreamSocket);
+		});
+		upstreamSocket.on("error", () => clientSocket.destroy());
+		clientSocket.on("error", () => upstreamSocket.destroy());
+	}
+
+	stopGateway() {
+		return new Promise((resolve) => {
+			if (!this.gateway) return resolve();
+			const gateway = this.gateway;
+			this.gateway = null;
+			gateway.close(() => resolve());
+			gateway.closeAllConnections?.();
+		});
+	}
+
+	async waitForUrl(url) {
 		const deadline = Date.now() + ASTRO_READY_TIMEOUT_MS;
 		while (Date.now() < deadline) {
-			const result = await probe(config.localUrl);
+			const result = await probe(url);
 			if (result.ok) return true;
 			await delay(1000);
 		}
 		return false;
 	}
 
+	async stopDevelopment() {
+		await this.stopGateway();
+		spawnSync("npx", ["astro", "dev", "stop", "--port", String(config.devInternalPort)], { cwd: REPO_ROOT, stdio: "ignore", timeout: 15_000 });
+		spawnSync("fuser", ["-k", `${config.devInternalPort}/tcp`], { stdio: "ignore" });
+		spawnSync("fuser", ["-k", `${config.devPort}/tcp`], { stdio: "ignore" });
+		this.devPid = null;
+		this.setDevState("stopped");
+		return { success: true, message: "Development server stopped" };
+	}
+
 	async stop() {
 		this.log("Stopping hosting…");
 		this.killChild(this.tunnel);
 		this.tunnel = null;
+		spawnSync("pkill", ["-f", `cloudflared tunnel run ${config.tunnelName}`], { stdio: "ignore" });
+		this.killChild(this.productionServer);
+		this.productionServer = null;
 		await delay(400);
-		this.reapStrays();
+		await this.stopDevelopment();
+		spawnSync("fuser", ["-k", `${config.productionPort}/tcp`], { stdio: "ignore" });
 		this.setState("stopped");
 		this.log("Hosting stopped");
 		return { success: true, message: "Hosting stopped" };
@@ -187,14 +345,24 @@ class HostManager extends EventEmitter {
 	}
 
 	async status() {
-		const [local, publicSite] = await Promise.all([probe(config.localUrl), probe(config.publicUrl)]);
+		const devUnavailable = { ok: false, status: null, error: "stopped" };
+		const [local, publicSite, devLocal, devPublic] = await Promise.all([
+			probe(config.localUrl),
+			probe(config.publicUrl),
+			this.devState === "running" ? probe(config.devLocalUrl) : Promise.resolve(devUnavailable),
+			this.devState === "running" ? probe(config.devPublicUrl) : Promise.resolve(devUnavailable),
+		]);
 		return {
 			state: this.state,
+			devState: this.devState,
 			config,
-			astroPid: local.ok ? this.astroPid : null,
+			productionPid: local.ok ? this.productionServer?.pid ?? null : null,
+			devPid: devLocal.ok ? this.devPid : null,
 			tunnelPid: this.tunnel?.pid ?? null,
 			local,
 			public: publicSite,
+			devLocal,
+			devPublic,
 		};
 	}
 }
@@ -215,6 +383,17 @@ async function probe(url) {
 
 function delay(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Prefixes root-absolute href/src/action attributes so follow-up browser
+// requests stay under the gateway's path instead of falling through to production.
+function rewriteHtmlForPrefix(html, prefix) {
+	const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const alreadyPrefixed = new RegExp(`^${escapedPrefix}(/|$)`);
+	return html.replace(/(href|src|action)="(\/[^"]*)"/g, (match, attr, value) => {
+		if (alreadyPrefixed.test(value) || value.startsWith("//")) return match;
+		return `${attr}="${prefix}${value}"`;
+	});
 }
 
 // cloudflared writes everything to stderr, so use its own level tag instead

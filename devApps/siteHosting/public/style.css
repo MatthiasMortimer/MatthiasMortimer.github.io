@@ -111,6 +111,10 @@ body {
 	flex-wrap: wrap;
 }
 
+.dev-controls {
+	margin-top: 0.65rem;
+}
+
 .btn {
 	flex: 1 1 auto;
 	padding: 0.6rem 0.9rem;

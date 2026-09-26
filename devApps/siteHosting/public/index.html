@@ -13,7 +13,7 @@
 			<img src="../../../public/media/logo.svg" alt="" class="brand-logo">
 			<div>
 				<h1>Site Hosting</h1>
-				<p class="subtitle">Astro dev server + Cloudflare tunnel</p>
+				<p class="subtitle">Built production site + optional workstation preview</p>
 			</div>
 		</div>
 		<div class="state-pill" id="state-pill">
@@ -25,7 +25,7 @@
 	<main class="layout">
 		<section class="panel">
 			<div class="controls">
-				<button id="btn-start" class="btn btn-start">Start hosting</button>
+				<button id="btn-start" class="btn btn-start">Build &amp; start production</button>
 				<button id="btn-restart" class="btn btn-restart">Restart</button>
 				<button id="btn-stop" class="btn btn-stop">Stop</button>
 			</div>
@@ -33,10 +33,21 @@
 			<div class="checks">
 				<div class="check" id="check-local">
 					<div class="check-head">
-						<span class="check-name">Local Astro</span>
+						<span class="check-name">Production site</span>
 						<span class="check-status">—</span>
 					</div>
 					<a class="check-url" id="local-url" href="#"></a>
+				</div>
+				<div class="check" id="check-dev-local">
+					<div class="check-head">
+						<span class="check-name">Workstation development</span>
+						<span class="check-status">Stopped</span>
+					</div>
+					<a class="check-url" id="dev-public-url" href="#"></a>
+					<div class="controls dev-controls">
+						<button id="btn-dev-start" class="btn btn-start">Start dev server</button>
+						<button id="btn-dev-stop" class="btn btn-stop">Stop dev server</button>
+					</div>
 				</div>
 				<div class="check" id="check-public">
 					<div class="check-head">
@@ -48,7 +59,8 @@
 			</div>
 
 			<div class="pids">
-				<span>Astro PID: <b id="astro-pid">—</b></span>
+				<span>Production PID: <b id="astro-pid">—</b></span>
+				<span>Dev PID: <b id="dev-pid">—</b></span>
 				<span>Tunnel PID: <b id="tunnel-pid">—</b></span>
 			</div>
 
@@ -58,7 +70,7 @@
 
 		<section class="panel preview-panel">
 			<div class="preview-head">
-				<h2 class="section-title">Live preview <span id="preview-target" class="muted"></span></h2>
+				<h2 class="section-title">Production preview <span id="preview-target" class="muted"></span></h2>
 				<div class="preview-actions">
 					<button id="btn-refresh-preview" class="btn btn-ghost">Refresh</button>
 					<button id="btn-open-external" class="btn btn-ghost">Open in browser</button>

@@ -1,6 +1,7 @@
 # Build output and caches
 .astro/
 dist/
+public/generated/
 coverage/
 .wrangler/
 .netlify/
