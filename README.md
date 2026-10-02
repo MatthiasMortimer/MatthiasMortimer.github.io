@@ -1,6 +1,6 @@
 # RitesDev Ecosystem
 
-A multi-site Astro monorepo. Each website lives in its own folder under `sites/`, and `scripts/sync-sites.mjs` symlinks their pages into a single Astro app (`src/pages/`) at dev/build time based on each site's `site.meta.json`.
+A multi-site Astro monorepo. Each website lives in its own folder under `sites/`, and `scripts/sync-sites.mjs` symlinks their pages into a single Astro app (`src/pages/`) at dev/build time based on each site's `site.meta.json`. Production pages and blog posts are prerendered as static files; the Node server remains for dynamic endpoints such as the inquiry API.
 
 Currently registered sites:
 
@@ -26,7 +26,7 @@ npm run build
 
 ```
 RitesDev-ecosystem/
-├── astro.config.mjs      # Astro config (server output, Node standalone adapter; self-hosted behind a Cloudflare Tunnel)
+├── astro.config.mjs      # Astro config (static-first output, Node standalone adapter; self-hosted behind a Cloudflare Tunnel)
 ├── tsconfig.json         # Path aliases (@blog/*, @components/*, @ritesGlobal/*, ...)
 ├── ritesGlobal/          # Shared modules reused across every site
 │   ├── contact.js/.json      # Shared identity & contact info

@@ -9,8 +9,8 @@ export default defineConfig({
   base: '/',   // Explicitly set base to '/' so all assets resolve to the root domain root
   integrations: [mdx(), sitemap()],
   
-  // Keep output as 'server' to handle your dynamic routing layers natively
-  output: 'server', 
+  // Prerender pages and blog posts; routes with prerender=false stay server-rendered.
+  output: 'static',
   adapter: node({
     mode: 'standalone',
   }),
