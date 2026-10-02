@@ -70,7 +70,7 @@ ipcMain.handle("host:status", () => host.status());
 ipcMain.handle("host:logs", () => host.logs);
 ipcMain.handle("host:config", () => config);
 ipcMain.handle("host:openExternal", (_event, url) => {
-	if ([config.publicUrl, config.localUrl, config.devPublicUrl, config.devLocalUrl].includes(url)) shell.openExternal(url);
+	if ([config.publicUrl, config.localUrl, config.devLocalUrl].includes(url)) shell.openExternal(url);
 });
 
 app.whenReady().then(() => {

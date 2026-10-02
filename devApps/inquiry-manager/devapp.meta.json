@@ -4,7 +4,7 @@
   "description": "Review and triage inquiries sent from the RitesDev contact form",
   "type": "inquiry_manager",
   "runtime": "tab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "embed": true,
   "tabOrder": 3,
   "manages": ["s-ritesdev"],

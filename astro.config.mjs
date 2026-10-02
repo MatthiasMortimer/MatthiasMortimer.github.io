@@ -17,7 +17,10 @@ export default defineConfig({
 
   vite: {
     server: {
-      allowedHosts: ['ritesdev.dev', '.ritesdev.dev']
+      allowedHosts: ['ritesdev.dev', '.ritesdev.dev'],
+      fs: {
+        deny: ['**/dev/**'],
+      },
     }
   }
 });

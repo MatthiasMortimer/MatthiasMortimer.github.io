@@ -75,7 +75,11 @@ function createPostStore(postsDirectory) {
 			.split(",")
 			.map((tag) => tag.trim())
 			.filter(Boolean)
-			.map((tag) => TAGS_BY_KEY.get(tag.toLocaleLowerCase()) || tag))];
+			.map((tag) => {
+				const canonicalTag = TAGS_BY_KEY.get(tag.toLocaleLowerCase());
+				if (!canonicalTag) throw new Error(`Unknown tag "${tag}". Choose a tag from the shared tags list.`);
+				return canonicalTag;
+			}))];
 
 		await fs.mkdir(postsDirectory, { recursive: true });
 		const output = matter.stringify(`${post.content.trim()}\n`, data);

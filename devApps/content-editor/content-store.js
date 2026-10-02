@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
+import { validateFrontmatter } from "./frontmatter-schema.js";
 
 const MARKDOWN_EXTENSIONS = new Set([".md", ".mdx"]);
 
@@ -69,6 +70,7 @@ export function createContentStore(getInventory) {
 			if (!document.fields || Array.isArray(document.fields) || typeof document.fields !== "object") {
 				throw new Error("Markdown frontmatter must be an object.");
 			}
+			validateFrontmatter(siteSlug, relativePath, document.fields);
 			output = matter.stringify(`${String(document.body || "").trim()}\n`, document.fields);
 		} else {
 			output = String(document.body || "");

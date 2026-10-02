@@ -32,6 +32,12 @@ test("creates, reads, renames, lists, and deletes an MDX post", async (context) 
 		content: "# Hello\n\nPost body.",
 	};
 
+	await assert.rejects(
+		() => store.save({ ...post, slug: "unknown-tag", tags: "astro, ad-hoc" }),
+		/Unknown tag "ad-hoc"/,
+	);
+	assert.deepEqual(await store.list(), []);
+
 	await store.save(post);
 	const created = await store.read("first-post");
 	assert.equal(created.title, post.title);

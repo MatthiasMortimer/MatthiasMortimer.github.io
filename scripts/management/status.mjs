@@ -3,7 +3,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { getAppSummary, getActiveApps, DEV_APPS_REGISTRY } from "../../ritesGlobal/devapps-registry.mjs";
+import { getAppSummary } from "../../ritesGlobal/devapps-registry.mjs";
 import { getContentInventory } from "../../ritesGlobal/content-inventory.mjs";
 import { listSites } from "../../ritesGlobal/sites.registry.mjs";
 
@@ -53,7 +53,7 @@ summary.apps
 	.filter((app) => app.active)
 	.forEach((app) => {
 		const status = app.folderExists ? "✓" : "✗";
-		console.log(`    ${status} ${app.name.padEnd(25)} [${app.type}] :${app.port}`);
+		console.log(`    ${status} ${app.name.padEnd(25)} [${app.type}] ${app.port == null ? "(no port)" : `:${app.port}`}`);
 		console.log(`       ${app.description}`);
 		console.log(`       Manages: ${app.manages.join(", ")}`);
 	});

@@ -1,8 +1,6 @@
 const { spawn, spawnSync } = require("node:child_process");
 const { EventEmitter } = require("node:events");
 const path = require("node:path");
-const http = require("node:http");
-const net = require("node:net");
 
 const config = require("./host-config.json");
 
@@ -17,7 +15,6 @@ class HostManager extends EventEmitter {
 		this.devState = "stopped";
 		this.productionServer = null;
 		this.devPid = null;
-		this.gateway = null;
 		this.tunnel = null;
 		this.logs = [];
 		this.transition = null;
@@ -44,7 +41,7 @@ class HostManager extends EventEmitter {
 	reapStrays() {
 		spawnSync("pkill", ["-f", `cloudflared tunnel run ${config.tunnelName}`], { stdio: "ignore" });
 		spawnSync("npx", ["astro", "dev", "stop", "--port", String(config.devInternalPort)], { cwd: REPO_ROOT, stdio: "ignore", timeout: 15_000 });
-		for (const port of [config.productionPort, config.devInternalPort, config.devPort]) {
+		for (const port of [config.productionPort, config.devInternalPort, config.legacyDevGatewayPort]) {
 			spawnSync("fuser", ["-k", `${port}/tcp`], { stdio: "ignore" });
 		}
 		this.productionServer = null;
@@ -162,7 +159,6 @@ class HostManager extends EventEmitter {
 
 	async startDevelopment() {
 		if (this.devTransition) return this.devTransition;
-		if (this.state !== "running") return { success: false, message: "Start production hosting before starting the public development server" };
 		if (this.devState === "running") return { success: false, message: "Development server is already running" };
 		this.devTransition = this._startDevelopment().finally(() => { this.devTransition = null; });
 		return this.devTransition;
@@ -171,19 +167,15 @@ class HostManager extends EventEmitter {
 	async _startDevelopment() {
 		this.setDevState("starting");
 		try {
-			this.log("Starting Astro development server on the internal port…");
+			this.log(`Starting local-only Astro development server at ${config.devLocalUrl}…`);
 			await this.launchDevelopment();
-			if (!await this.waitForUrl(`http://127.0.0.1:${config.devInternalPort}/`)) {
+			if (!await this.waitForUrl(config.devLocalUrl)) {
 				throw new Error("Development server did not become reachable");
 			}
 
-			this.log(`Starting workstation gateway at ${config.devPublicUrl}…`);
-			await this.startGateway();
-			if (!await this.waitForUrl(config.devLocalUrl)) throw new Error("Workstation gateway did not become reachable");
-
 			this.log(`Development server ready${this.devPid ? ` (pid ${this.devPid})` : ""}`);
 			this.setDevState("running");
-			return { success: true, message: "Development server started" };
+			return { success: true, message: `Local development server started at ${config.devLocalUrl}` };
 		} catch (error) {
 			this.log(`Development server start failed: ${error.message}`, "error");
 			await this.stopDevelopment();
@@ -198,12 +190,6 @@ class HostManager extends EventEmitter {
 		this.emit("dev-state", state);
 	}
 
-	/**
-	 * Astro runs at its normal root ('/') on a loopback-only port; hardcoded
-	 * root-absolute asset paths in this codebase aren't reliably base-prefixed
-	 * by Astro's dev server, so startGateway() fronts it instead of relying on
-	 * Astro's `base` config for the public-facing /workstation path.
-	 */
 	launchDevelopment() {
 		return new Promise((resolve, reject) => {
 			const child = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", String(config.devInternalPort), "--force", "--background"], {
@@ -222,87 +208,6 @@ class HostManager extends EventEmitter {
 		});
 	}
 
-	/**
-	 * Reverse proxy that strips the `/workstation` prefix from inbound requests
-	 * and rewrites root-absolute href/src/action/Location values in the
-	 * response so the browser's follow-up requests stay under `/workstation`
-	 * (otherwise Cloudflare would route them to production instead).
-	 */
-	startGateway() {
-		return new Promise((resolve, reject) => {
-			const proxy = http.createServer((req, res) => this.handleGatewayRequest(req, res));
-			proxy.on("upgrade", (req, clientSocket, head) => this.handleGatewayUpgrade(req, clientSocket, head));
-			proxy.once("error", reject);
-			proxy.listen(config.devPort, "127.0.0.1", () => {
-				proxy.removeListener("error", reject);
-				proxy.on("error", (error) => this.log(`Workstation gateway error: ${error.message}`, "error"));
-				this.gateway = proxy;
-				resolve();
-			});
-		});
-	}
-
-	handleGatewayRequest(req, res) {
-		const prefix = config.devBase;
-		let targetPath = req.url === prefix ? "/" : req.url;
-		if (targetPath.startsWith(`${prefix}/`) || targetPath.startsWith(`${prefix}?`)) targetPath = targetPath.slice(prefix.length);
-
-		const upstream = http.request(
-			{ host: "127.0.0.1", port: config.devInternalPort, path: targetPath, method: req.method, headers: req.headers },
-			(upstreamRes) => {
-				const headers = { ...upstreamRes.headers };
-				if (typeof headers.location === "string" && headers.location.startsWith("/") && !headers.location.startsWith(prefix)) {
-					headers.location = prefix + headers.location;
-				}
-				if ((headers["content-type"] || "").includes("text/html")) {
-					const chunks = [];
-					upstreamRes.on("data", (chunk) => chunks.push(chunk));
-					upstreamRes.on("end", () => {
-						const body = rewriteHtmlForPrefix(Buffer.concat(chunks).toString("utf8"), prefix);
-						delete headers["content-length"];
-						res.writeHead(upstreamRes.statusCode, headers);
-						res.end(body);
-					});
-				} else {
-					res.writeHead(upstreamRes.statusCode, headers);
-					upstreamRes.pipe(res);
-				}
-			},
-		);
-		upstream.on("error", (error) => {
-			if (!res.headersSent) res.writeHead(502, { "content-type": "text/plain" });
-			res.end(`Workstation dev server unreachable: ${error.message}`);
-		});
-		req.pipe(upstream);
-	}
-
-	handleGatewayUpgrade(req, clientSocket, head) {
-		const prefix = config.devBase;
-		let targetPath = req.url;
-		if (targetPath.startsWith(prefix)) targetPath = targetPath.slice(prefix.length) || "/";
-
-		const upstreamSocket = net.connect(config.devInternalPort, "127.0.0.1", () => {
-			const headerLines = [`GET ${targetPath} HTTP/1.1`];
-			for (const [key, value] of Object.entries(req.headers)) headerLines.push(`${key}: ${value}`);
-			upstreamSocket.write(`${headerLines.join("\r\n")}\r\n\r\n`);
-			if (head?.length) upstreamSocket.write(head);
-			upstreamSocket.pipe(clientSocket);
-			clientSocket.pipe(upstreamSocket);
-		});
-		upstreamSocket.on("error", () => clientSocket.destroy());
-		clientSocket.on("error", () => upstreamSocket.destroy());
-	}
-
-	stopGateway() {
-		return new Promise((resolve) => {
-			if (!this.gateway) return resolve();
-			const gateway = this.gateway;
-			this.gateway = null;
-			gateway.close(() => resolve());
-			gateway.closeAllConnections?.();
-		});
-	}
-
 	async waitForUrl(url) {
 		const deadline = Date.now() + ASTRO_READY_TIMEOUT_MS;
 		while (Date.now() < deadline) {
@@ -314,10 +219,9 @@ class HostManager extends EventEmitter {
 	}
 
 	async stopDevelopment() {
-		await this.stopGateway();
 		spawnSync("npx", ["astro", "dev", "stop", "--port", String(config.devInternalPort)], { cwd: REPO_ROOT, stdio: "ignore", timeout: 15_000 });
 		spawnSync("fuser", ["-k", `${config.devInternalPort}/tcp`], { stdio: "ignore" });
-		spawnSync("fuser", ["-k", `${config.devPort}/tcp`], { stdio: "ignore" });
+		spawnSync("fuser", ["-k", `${config.legacyDevGatewayPort}/tcp`], { stdio: "ignore" });
 		this.devPid = null;
 		this.setDevState("stopped");
 		return { success: true, message: "Development server stopped" };
@@ -346,11 +250,10 @@ class HostManager extends EventEmitter {
 
 	async status() {
 		const devUnavailable = { ok: false, status: null, error: "stopped" };
-		const [local, publicSite, devLocal, devPublic] = await Promise.all([
+		const [local, publicSite, devLocal] = await Promise.all([
 			probe(config.localUrl),
 			probe(config.publicUrl),
 			this.devState === "running" ? probe(config.devLocalUrl) : Promise.resolve(devUnavailable),
-			this.devState === "running" ? probe(config.devPublicUrl) : Promise.resolve(devUnavailable),
 		]);
 		return {
 			state: this.state,
@@ -362,7 +265,6 @@ class HostManager extends EventEmitter {
 			local,
 			public: publicSite,
 			devLocal,
-			devPublic,
 		};
 	}
 }
@@ -383,17 +285,6 @@ async function probe(url) {
 
 function delay(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// Prefixes root-absolute href/src/action attributes so follow-up browser
-// requests stay under the gateway's path instead of falling through to production.
-function rewriteHtmlForPrefix(html, prefix) {
-	const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	const alreadyPrefixed = new RegExp(`^${escapedPrefix}(/|$)`);
-	return html.replace(/(href|src|action)="(\/[^"]*)"/g, (match, attr, value) => {
-		if (alreadyPrefixed.test(value) || value.startsWith("//")) return match;
-		return `${attr}="${prefix}${value}"`;
-	});
 }
 
 // cloudflared writes everything to stderr, so use its own level tag instead

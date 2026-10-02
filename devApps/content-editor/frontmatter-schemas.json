@@ -1,0 +1,358 @@
+{
+  "blog/content/pages/index.md": {
+    "type": "object",
+    "required": ["seo", "hero", "latest"],
+    "properties": {
+      "seo": {
+        "type": "object",
+        "required": ["title", "description"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "hero": {
+        "type": "object",
+        "required": ["title", "description", "eyebrow"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "eyebrow": { "type": "string" }
+        }
+      },
+      "latest": {
+        "type": "object",
+        "required": ["title", "link"],
+        "properties": {
+          "title": { "type": "string" },
+          "link": { "type": "string" }
+        }
+      }
+    }
+  },
+  "blog/content/pages/blog.md": {
+    "type": "object",
+    "required": ["seo", "title", "description", "allTagsLabel", "postsLabel"],
+    "properties": {
+      "seo": {
+        "type": "object",
+        "required": ["title", "description"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "title": { "type": "string" },
+      "description": { "type": "string" },
+      "allTagsLabel": { "type": "string" },
+      "postsLabel": { "type": "string" }
+    }
+  },
+  "blog/content/pages/about.md": {
+    "type": "object",
+    "required": ["seo", "title", "intro", "hobbies", "projectsTitle"],
+    "properties": {
+      "seo": {
+        "type": "object",
+        "required": ["title", "description"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "title": { "type": "string" },
+      "intro": { "type": "string" },
+      "hobbies": { "type": "string" },
+      "projectsTitle": { "type": "string" }
+    }
+  },
+  "blog/content/pages/dev.md": {
+    "type": "object",
+    "required": ["seo", "title", "description"],
+    "properties": {
+      "seo": {
+        "type": "object",
+        "required": ["title", "description"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "title": { "type": "string" },
+      "description": { "type": "string" }
+    }
+  },
+  "blog/content/posts/*.mdx": {
+    "type": "object",
+    "required": ["title", "pubDate", "description", "author"],
+    "properties": {
+      "title": { "type": "string" },
+      "pubDate": { "type": "string", "format": "date" },
+      "description": { "type": "string" },
+      "author": { "type": "string" },
+      "tags": { "type": "array", "items": { "type": "string" } },
+      "image": {
+        "type": "object",
+        "required": ["url", "alt"],
+        "properties": {
+          "url": { "type": "string" },
+          "alt": { "type": "string" }
+        }
+      }
+    }
+  },
+  "ritesdev/content/pages/index.md": {
+    "type": "object",
+    "required": ["hero", "overview", "services", "projects", "testimonials"],
+    "properties": {
+      "hero": {
+        "type": "object",
+        "required": ["explore", "work", "mentorship"],
+        "properties": {
+          "explore": { "type": "string" },
+          "work": { "type": "string" },
+          "mentorship": { "type": "string" }
+        }
+      },
+      "overview": {
+        "type": "object",
+        "required": ["title", "description", "development", "teaching"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "development": {
+            "type": "object",
+            "required": ["tag", "title", "body", "link"],
+            "properties": {
+              "tag": { "type": "string" },
+              "title": { "type": "string" },
+              "body": { "type": "string" },
+              "link": { "type": "string" }
+            }
+          },
+          "teaching": {
+            "type": "object",
+            "required": ["tag", "title", "body", "link"],
+            "properties": {
+              "tag": { "type": "string" },
+              "title": { "type": "string" },
+              "body": { "type": "string" },
+              "link": { "type": "string" }
+            }
+          }
+        }
+      },
+      "services": {
+        "type": "object",
+        "required": ["title", "description", "link", "items"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "link": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["category"],
+              "properties": {
+                "category": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "projects": {
+        "type": "object",
+        "required": ["title", "description", "link"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "link": { "type": "string" }
+        }
+      },
+      "testimonials": {
+        "type": "object",
+        "required": ["title", "description", "items"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "items": { "type": "array", "items": {} }
+        }
+      }
+    }
+  },
+  "ritesdev/content/pages/about.md": {
+    "type": "object",
+    "required": ["title", "tagline", "intro", "labels", "philosophy", "stats"],
+    "properties": {
+      "title": { "type": "string" },
+      "tagline": { "type": "string" },
+      "intro": { "type": "array", "items": { "type": "string" } },
+      "labels": { "type": "object", "additionalProperties": { "type": "string" } },
+      "philosophy": {
+        "type": "object",
+        "required": ["development", "teaching"],
+        "properties": {
+          "development": {
+            "type": "object",
+            "required": ["title", "body"],
+            "properties": {
+              "title": { "type": "string" },
+              "body": { "type": "string" }
+            }
+          },
+          "teaching": {
+            "type": "object",
+            "required": ["title", "body"],
+            "properties": {
+              "title": { "type": "string" },
+              "body": { "type": "string" }
+            }
+          }
+        }
+      },
+      "stats": { "type": "object", "additionalProperties": { "type": ["string", "number"] } }
+    }
+  },
+  "ritesdev/content/pages/contact.md": {
+    "type": "object",
+    "required": [
+      "title",
+      "description",
+      "directTitle",
+      "emailLabel",
+      "locationLabel",
+      "statusLabel",
+      "faqTitle",
+      "faqs"
+    ],
+    "properties": {
+      "title": { "type": "string" },
+      "description": { "type": "string" },
+      "directTitle": { "type": "string" },
+      "emailLabel": { "type": "string" },
+      "locationLabel": { "type": "string" },
+      "statusLabel": { "type": "string" },
+      "faqTitle": { "type": "string" },
+      "faqs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["question", "answer"],
+          "properties": {
+            "question": { "type": "string" },
+            "answer": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "ritesdev/content/pages/services.md": {
+    "type": "object",
+    "required": ["title", "description", "development", "teaching", "skills", "process"],
+    "properties": {
+      "title": { "type": "string" },
+      "description": { "type": "string" },
+      "development": {
+        "type": "object",
+        "required": ["title", "tag", "description"],
+        "properties": {
+          "title": { "type": "string" },
+          "tag": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "teaching": {
+        "type": "object",
+        "required": ["title", "tag", "description"],
+        "properties": {
+          "title": { "type": "string" },
+          "tag": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "skills": {
+        "type": "object",
+        "required": ["title", "description", "developmentTitle", "teachingTitle"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "developmentTitle": { "type": "string" },
+          "teachingTitle": { "type": "string" }
+        }
+      },
+      "process": {
+        "type": "object",
+        "required": ["title", "description", "steps"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["number", "title", "body"],
+              "properties": {
+                "number": { "type": "string" },
+                "title": { "type": "string" },
+                "body": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "ritesdev/content/pages/pricing.md": {
+    "type": "object",
+    "required": [
+      "title",
+      "description",
+      "intro",
+      "plans",
+      "addonsTitle",
+      "addonsDescription",
+      "addons",
+      "note",
+      "ctaLabel"
+    ],
+    "properties": {
+      "title": { "type": "string" },
+      "description": { "type": "string" },
+      "intro": { "type": "string" },
+      "plans": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "name", "price", "tagline", "features"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "price": { "type": "string" },
+            "priceSuffix": { "type": "string" },
+            "tagline": { "type": "string" },
+            "popular": { "type": "boolean" },
+            "features": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "addonsTitle": { "type": "string" },
+      "addonsDescription": { "type": "string" },
+      "addons": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "name", "price", "description"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "price": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "note": { "type": "string" },
+      "ctaLabel": { "type": "string" }
+    }
+  }
+}

@@ -26,7 +26,7 @@ function findRepoRoot() {
 	}
 }
 
-// Inquiry records live in dev/secure/, outside src/, public/ and dist/: never served or bundled.
+// Inquiry records live outside the production build and static directories; Astro dev explicitly denies dev/.
 // RITESDEV_INQUIRY_FILE overrides the location for every consumer (site, no-JS fallback, Inquiry Manager).
 export function resolveInquiryFile() {
 	const override = process.env.RITESDEV_INQUIRY_FILE;

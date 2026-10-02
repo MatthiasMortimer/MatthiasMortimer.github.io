@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { getContentInventory } from "../../../ritesGlobal/content-inventory.mjs";
+import { discoverGlobalContentFiles, getContentInventory } from "../../../ritesGlobal/content-inventory.mjs";
+import { validateFrontmatter } from "../frontmatter-schema.js";
 import projectRecords from "../../../ritesGlobal/projects.json" with { type: "json" };
 import sharedTags from "../../../ritesGlobal/tags.json" with { type: "json" };
 import { createContentStore } from "../content-store.js";
@@ -18,6 +20,18 @@ test("exposes structured ecosystem global content", () => {
 	assert.deepEqual(global.contentTypes.tags.files, ["tags.json"]);
 	assert.deepEqual(global.contentTypes.versions.files, ["versions.json"]);
 	assert.ok(getContentInventory().some((site) => site.slug === "global"));
+});
+
+test("discovers root-level global JSON files while excluding hidden and package files", async (context) => {
+	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "rites-global-content-"));
+	context.after(() => fs.rm(directory, { recursive: true, force: true }));
+	await fs.writeFile(path.join(directory, "socials.json"), "{}");
+	await fs.writeFile(path.join(directory, "package.json"), "{}");
+	await fs.writeFile(path.join(directory, ".private.json"), "{}");
+	await fs.mkdir(path.join(directory, "nested"));
+	await fs.writeFile(path.join(directory, "nested", "nested.json"), "{}");
+
+	assert.deepEqual(discoverGlobalContentFiles(directory), ["socials.json"]);
 });
 
 test("discovers editable content from top-level websites", () => {
@@ -86,10 +100,9 @@ test("every top-level site route has matching page content", async () => {
 
 test("discovers Blog post bodies and card content", () => {
 	const blog = getContentInventory().find((site) => site.slug === "blog");
-	assert.deepEqual(blog.contentTypes.blog_post.files, [
-		"content/posts/post-1.mdx",
-		"content/posts/post-2.mdx",
-	]);
+	assert.ok(blog.contentTypes.blog_post.files.length >= 2);
+	assert.ok(blog.contentTypes.blog_post.files.includes("content/posts/post-1.mdx"));
+	assert.ok(blog.contentTypes.blog_post.files.includes("content/posts/post-2.mdx"));
 	assert.ok(!blog.contentTypes.config.files.includes("content/posts.json"));
 });
 
@@ -127,5 +140,49 @@ test("uses consistent schemas for repeatable steps and FAQs", async () => {
 	}
 	for (const faq of contact.fields.faqs) {
 		assert.deepEqual(Object.keys(faq), ["question", "answer"]);
+	}
+});
+
+test("rejects invalid page frontmatter before replacing or backing up content", async (context) => {
+	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "rites-content-schema-"));
+	context.after(() => fs.rm(directory, { recursive: true, force: true }));
+
+	const relativePath = "content/pages/contact.md";
+	const sourcePath = path.join(rootDir, "sites/s-ritesdev", relativePath);
+	const filePath = path.join(directory, relativePath);
+	await fs.mkdir(path.dirname(filePath), { recursive: true });
+	await fs.copyFile(sourcePath, filePath);
+
+	const store = createContentStore(() => [
+		{
+			slug: "ritesdev",
+			dir: directory,
+			contentTypes: { page: { files: [relativePath] } },
+		},
+	]);
+	const original = await store.read("ritesdev", relativePath);
+	const invalidFields = structuredClone(original.fields);
+	invalidFields.faqs[0].question = 42;
+
+	await assert.rejects(
+		() => store.save("ritesdev", relativePath, { ...original, fields: invalidFields }),
+		/frontmatter\.faqs\[0\]\.question must be string/,
+	);
+	assert.equal(await fs.readFile(filePath, "utf8"), await fs.readFile(sourcePath, "utf8"));
+	await assert.rejects(fs.access(`${filePath}.bak`));
+});
+
+test("existing RitesDev and Blog page/post frontmatter satisfies its schema", async () => {
+	const inventory = getContentInventory();
+	const store = createContentStore(() => inventory);
+
+	for (const site of inventory.filter((entry) => ["blog", "ritesdev"].includes(entry.slug))) {
+		for (const [type, group] of Object.entries(site.contentTypes)) {
+			if (type !== "page" && !(site.slug === "blog" && type === "blog_post")) continue;
+			for (const relativePath of group.files) {
+				const document = await store.read(site.slug, relativePath);
+				validateFrontmatter(site.slug, relativePath, document.fields);
+			}
+		}
 	}
 });

@@ -4,7 +4,7 @@
   "description": "Edit page copy, site details, data, and Markdown across every RitesDev website",
   "type": "content_manager",
   "runtime": "tab",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "embed": true,
   "tabOrder": 1,
   "manages": ["all"],

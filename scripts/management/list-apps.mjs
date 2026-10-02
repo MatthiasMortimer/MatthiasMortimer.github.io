@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // List and describe all development management apps
 
-import { DEV_APPS_REGISTRY, getActiveApps, getAppsByType, getAppPath } from "../../ritesGlobal/devapps-registry.mjs";
+import { DEV_APPS_REGISTRY, getAppPath } from "../../ritesGlobal/devapps-registry.mjs";
 import fs from "node:fs";
 
 console.log("\n╔════════════════════════════════════════════════════════════════╗");
@@ -12,7 +12,7 @@ const args = process.argv.slice(2);
 const showInactive = args.includes("--all");
 
 // Count apps
-const allApps = Object.values(DEV_APPS_REGISTRY);
+const allApps = Object.entries(DEV_APPS_REGISTRY).map(([id, app]) => ({ id, ...app }));
 const activeApps = allApps.filter((a) => a.active);
 const inactiveApps = allApps.filter((a) => !a.active);
 
@@ -33,7 +33,10 @@ activeApps.forEach((app) => {
 	console.log(`\n${exists} ${app.name}`);
 	console.log(`  ID:           ${app.basePath}`);
 	console.log(`  Type:         ${app.type}`);
-	console.log(`  Port:         ${app.port}`);
+	console.log(`  Port:         ${app.port ?? "—"}`);
+	if (app.runtime) {
+		console.log(`  Runtime:      ${app.runtime}`);
+	}
 	console.log(`  Description:  ${app.description}`);
 	console.log(`  Manages:      ${app.manages.join(", ")}`);
 
@@ -71,7 +74,8 @@ ports.forEach((app) => {
 activeApps
 	.filter((app) => !app.port)
 	.forEach((app) => {
-		console.log(`  (tab)      - ${app.name.padEnd(25)} (${app.basePath})`);
+		const runtime = app.runtime ? `(${app.runtime})` : "(no runtime specified)";
+		console.log(`  ${runtime.padEnd(11)} - ${app.name.padEnd(25)} (${app.basePath})`);
 	});
 
 // Quick start guide
@@ -86,7 +90,6 @@ console.log("  npm run mgmt:status      - Show overall status");
 console.log("\n\n📝 TO ADD A NEW MANAGEMENT APP:");
 console.log("─".repeat(65));
 console.log("  1. Create folder: devApps/your-app-name/");
-console.log("  2. Create devapp.meta.json with app metadata");
-console.log("  3. Register in ritesGlobal/devapps-registry.mjs");
-console.log("  4. Add port: use next available (usually next after " + Math.max(...ports.map((a) => a.port)) + ")");
-console.log("  5. Run: npm run mgmt:status to verify\n");
+console.log("  2. Add devapp.meta.json with the app metadata (apps are auto-discovered)");
+console.log("  3. Set a port in metadata if the app needs one");
+console.log("  4. Run: npm run mgmt:status to verify\n");

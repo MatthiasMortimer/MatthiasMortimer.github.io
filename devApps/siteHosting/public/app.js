@@ -13,7 +13,7 @@ const els = {
 	checkDevLocal: document.getElementById("check-dev-local"),
 	localUrl: document.getElementById("local-url"),
 	publicUrl: document.getElementById("public-url"),
-	devPublicUrl: document.getElementById("dev-public-url"),
+	devLocalUrl: document.getElementById("dev-local-url"),
 	astroPid: document.getElementById("astro-pid"),
 	devPid: document.getElementById("dev-pid"),
 	tunnelPid: document.getElementById("tunnel-pid"),
@@ -41,7 +41,7 @@ async function init() {
 	config = await window.hosting.config();
 	els.localUrl.textContent = config.localUrl;
 	els.publicUrl.textContent = config.publicUrl;
-	els.devPublicUrl.textContent = config.devPublicUrl;
+	els.devLocalUrl.textContent = config.devLocalUrl;
 	els.previewTarget.textContent = config.publicUrl;
 
 	for (const entry of await window.hosting.logs()) appendLog(entry);
@@ -60,7 +60,7 @@ async function init() {
 		refreshStatus();
 	});
 	els.openExternal.addEventListener("click", () => window.hosting.openExternal(config.publicUrl));
-	for (const link of [els.localUrl, els.publicUrl, els.devPublicUrl]) {
+	for (const link of [els.localUrl, els.publicUrl, els.devLocalUrl]) {
 		link.addEventListener("click", (event) => {
 			event.preventDefault();
 			window.hosting.openExternal(link.textContent);
@@ -102,9 +102,9 @@ async function refreshStatus() {
 
 	renderCheck(els.checkLocal, status.local);
 	renderCheck(els.checkPublic, status.public);
-	els.checkDevLocal.dataset.health = status.devPublic.ok ? "ok" : status.devState === "running" ? "bad" : "warn";
+	els.checkDevLocal.dataset.health = status.devLocal.ok ? "ok" : status.devState === "running" ? "bad" : "warn";
 	els.checkDevLocal.querySelector(".check-status").textContent = status.devState === "running"
-		? `${status.devPublic.status ?? "…"} ${status.devPublic.ok ? "OK" : "unreachable"}`
+		? `${status.devLocal.status ?? "…"} ${status.devLocal.ok ? "OK" : "unreachable"}`
 		: status.devState === "starting" ? "Starting…" : status.devState === "error" ? "Error" : "Stopped";
 
 	if (!busy) {
@@ -112,7 +112,7 @@ async function refreshStatus() {
 		els.start.disabled = running;
 		els.stop.disabled = status.state === "stopped";
 		els.restart.disabled = status.state === "stopped";
-		els.devStart.disabled = status.devState === "running" || status.devState === "starting" || status.state !== "running";
+		els.devStart.disabled = status.devState === "running" || status.devState === "starting";
 		els.devStop.disabled = status.devState !== "running" && status.devState !== "starting";
 	}
 

@@ -6,7 +6,7 @@ cleanup() {
     echo -e "\n[System] Stopping processes cleanly..."
     # Kill the background npm/node jobs started by this shell script
     kill $(jobs -p) 2>/dev/null
-    pkill -f "cloudflared tunnel run" 2>/dev/null
+    pkill -f "cloudflared tunnel run astro-site-tunnel" 2>/dev/null
     # Clear port 4321 using your workspace's native strategy
     fuser -k 4321/tcp 2>/dev/null || true
     sleep 0.5
@@ -45,10 +45,17 @@ while true; do
     echo "===================================================="
     echo ""
 
-    # 1. Start Astro using your exact project script settings in the background
-    /usr/bin/npm run dev -- --host 127.0.0.1 --port 4321 --force &
+    # The public hostname always points to the production build, never Astro's dev server.
+    if ! /usr/bin/npm run build; then
+        echo -e "\n[System] Production build failed; public tunnel was not started."
+        echo "Press any key to retry the build."
+        read -r -n 1 -s
+        continue
+    fi
 
-    # Give Astro a 3-second head start to complete sync scripts and bind the port
+    HOST=127.0.0.1 PORT=4321 node dist/server/entry.mjs &
+
+    # Give the production server a 3-second head start to bind the port
     sleep 3
 
     # 2. Start Cloudflared Tunnel in the background

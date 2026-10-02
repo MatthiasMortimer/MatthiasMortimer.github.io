@@ -1,20 +1,20 @@
 {
-  "ecosystem": "7.6.0",
+  "ecosystem": "7.7.2",
   "gitversion": "3.6.2",
   "sites": {
     "blog": {
-      "version": "2.3.0"
+      "version": "2.3.2"
     },
     "ritesdev": {
-      "version": "3.8.0"
+      "version": "3.8.2"
     }
   },
   "devApps": {
     "blog-post-manager": {
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "content-editor": {
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "inquiry-manager": {
       "version": "1.0.1"
@@ -23,7 +23,7 @@
       "version": "1.0.0"
     },
     "siteHosting": {
-      "version": "3.0.0"
+      "version": "3.0.2"
     }
   }
 }

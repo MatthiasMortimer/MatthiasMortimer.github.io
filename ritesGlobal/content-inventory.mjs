@@ -20,13 +20,23 @@ export const CONTENT_TYPES = {
 	SEO: "seo",
 };
 
-export const GLOBAL_CONTENT_FILES = [
-	"ritesGlobal/contact.json",
-	"ritesGlobal/projects.json",
-	"ritesGlobal/tags.json",
-	"ritesGlobal/versions.json",
-	"ritesGlobal/seo.json",
-];
+const GLOBAL_CONTENT_DENYLIST = new Set(["package.json"]);
+
+export function discoverGlobalContentFiles(directory = path.join(ROOT_DIR, "ritesGlobal")) {
+	return fs
+		.readdirSync(directory, { withFileTypes: true })
+		.filter(
+			(entry) =>
+				entry.isFile() &&
+				path.extname(entry.name).toLowerCase() === ".json" &&
+				!entry.name.startsWith(".") &&
+				!GLOBAL_CONTENT_DENYLIST.has(entry.name.toLowerCase()),
+		)
+		.map((entry) => entry.name)
+		.sort();
+}
+
+export const GLOBAL_CONTENT_FILES = discoverGlobalContentFiles().map((file) => `ritesGlobal/${file}`);
 
 const CONTENT_EXTENSIONS = new Set([".json", ".md", ".mdx", ".js", ".mjs", ".astro", ".html", ".txt"]);
 
@@ -102,6 +112,27 @@ function createContentTypes(site) {
 	return groups;
 }
 
+const GLOBAL_FILE_TYPES = new Map([
+	["contact.json", { type: CONTENT_TYPES.IDENTITY, label: "Contact & Identity" }],
+	["projects.json", { type: CONTENT_TYPES.PROJECTS, label: "Projects" }],
+	["tags.json", { type: CONTENT_TYPES.TAGS, label: "Shared Tags" }],
+	["versions.json", { type: CONTENT_TYPES.VERSIONS, label: "Versions" }],
+	["seo.json", { type: CONTENT_TYPES.SEO, label: "SEO Defaults" }],
+]);
+
+function createGlobalContentTypes() {
+	const groups = {};
+	for (const file of GLOBAL_CONTENT_FILES) {
+		const filename = path.basename(file);
+		const knownType = GLOBAL_FILE_TYPES.get(filename);
+		const type = knownType?.type ?? CONTENT_TYPES.CONFIG;
+		const label = knownType?.label ?? "Global JSON";
+		groups[type] ??= { label, files: [] };
+		groups[type].files.push(filename);
+	}
+	return groups;
+}
+
 const SITE_CONTENT_CONFIG = Object.fromEntries(
 	listEditableSites().map((site) => [site.folder, { name: site.label, contentTypes: createContentTypes(site) }]),
 );
@@ -118,13 +149,7 @@ export function getContentInventory() {
 		folder: "ritesGlobal",
 		label: "Ecosystem Global",
 		dir: globalDir,
-		contentTypes: {
-			[CONTENT_TYPES.IDENTITY]: { label: "Contact & Identity", files: ["contact.json"] },
-			[CONTENT_TYPES.PROJECTS]: { label: "Projects", files: ["projects.json"] },
-			[CONTENT_TYPES.TAGS]: { label: "Shared Tags", files: ["tags.json"] },
-			[CONTENT_TYPES.VERSIONS]: { label: "Versions", files: ["versions.json"] },
-			[CONTENT_TYPES.SEO]: { label: "SEO Defaults", files: ["seo.json"] },
-		},
+		contentTypes: createGlobalContentTypes(),
 		metadata: {
 			created: new Date().toISOString(),
 			lastUpdated: getLastModified(globalDir),

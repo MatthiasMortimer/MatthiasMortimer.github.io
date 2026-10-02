@@ -14,8 +14,10 @@ const DEVAPPS_DIR = path.resolve(__dirname, "..", "devApps");
  */
 export const APP_TYPES = {
 	LAUNCHER: "launcher",
-	TUNNEL: "tunnel",
-	CONTENT_EDITOR: "content_editor",
+	TUNNEL: "hosting",
+	HOSTING: "hosting",
+	CONTENT_EDITOR: "content_manager",
+	CONTENT_MANAGER: "content_manager",
 	POST_MANAGER: "post_manager",
 	INQUIRY_MANAGER: "inquiry_manager",
 	ANALYTICS: "analytics",
@@ -23,85 +25,36 @@ export const APP_TYPES = {
 };
 
 /**
- * Central registry of all development management apps
- * Each app can manage specific content types across sites
+ * Discover development apps from their own metadata files.
  */
-export const DEV_APPS_REGISTRY = {
-	// Apps with a devapp.api.mjs run as tabs inside RitesDev App (runtime "tab").
-	// ritesDevApp discovers apps by scanning devApps/ directly (see
-	// devApps/ritesDevApp/server.mjs), so this registry is only used by the
-	// scripts/management/*.mjs CLI tools now.
-	"content-editor": {
-		name: "Website Content Editor",
-		type: APP_TYPES.CONTENT_EDITOR,
-		description: "Edit page copy, site details, data, and Markdown across every RitesDev website",
-		port: null,
-		runtime: "tab",
-		basePath: "content-editor",
-		version: "1.0.0",
-		active: true,
-		manages: ["all"],
-		contentTypes: ["page", "metadata", "config", "blog_post"],
-	},
-	"blog-post-manager": {
-		name: "Blog Post Manager",
-		type: APP_TYPES.POST_MANAGER,
-		description: "Blog post creation and management",
-		port: null,
-		runtime: "tab",
-		basePath: "blog-post-manager",
-		version: "1.0.0",
-		active: true,
-		manages: ["s-blog"],
-		contentTypes: ["blog_post"],
-	},
-	"inquiry-manager": {
-		name: "Inquiry Manager",
-		type: APP_TYPES.INQUIRY_MANAGER,
-		description: "Inbox for contact form inquiries saved by the RitesDev site",
-		port: null,
-		runtime: "tab",
-		basePath: "inquiry-manager",
-		version: "1.0.0",
-		active: true,
-		manages: ["s-ritesdev"],
-		contentTypes: ["inquiry"],
-	},
-	"ritesDevApp": {
-		name: "RitesDev App",
-		type: APP_TYPES.LAUNCHER,
-		description: "Master window hosting every management app as a tab",
-		port: 4605,
-		basePath: "ritesDevApp",
-		version: "1.0.0",
-		active: true,
-		manages: ["all"],
-	},
-	"siteHosting": {
-		name: "Site Hosting",
-		type: APP_TYPES.TUNNEL,
-		description: "Controls the Astro development server and Cloudflare tunnel",
-		port: 4321,
-		runtime: "desktop",
-		basePath: "siteHosting",
-		version: "1.0.0",
-		active: true,
-		manages: ["all"],
-		contentTypes: [],
-	},
-	// Template for new apps to be added:
-	// "new-app-name": {
-	//   name: "App Display Name",
-	//   type: APP_TYPES.NEW_TYPE,
-	//   description: "What this app does",
-	//   port: 4604, // Next available port
-	//   basePath: "new-app-name",
-	//   version: "1.0.0",
-	//   active: true,
-	//   manages: ["s-blog", "s-ritesdev"],
-	//   contentTypes: ["blog_post", "page", "config"],
-	// },
-};
+function discoverDevApps() {
+	if (!fs.existsSync(DEVAPPS_DIR)) return {};
+
+	const apps = {};
+	const directories = fs.readdirSync(DEVAPPS_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+	for (const directory of directories) {
+		const metadataPath = path.join(DEVAPPS_DIR, directory.name, "devapp.meta.json");
+		if (!fs.existsSync(metadataPath)) continue;
+
+		try {
+			const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+			const appId = metadata.slug || directory.name;
+			apps[appId] = {
+				...metadata,
+				port: metadata.port ?? null,
+				basePath: directory.name,
+				active: metadata.active !== false,
+				manages: Array.isArray(metadata.manages) ? metadata.manages : [],
+				contentTypes: Array.isArray(metadata.contentTypes) ? metadata.contentTypes : [],
+			};
+		} catch (error) {
+			console.warn(`Skipping invalid dev app metadata at ${metadataPath}: ${error.message}`);
+		}
+	}
+	return apps;
+}
+
+export const DEV_APPS_REGISTRY = discoverDevApps();
 
 /**
  * Get all active dev apps
@@ -213,10 +166,10 @@ export function appFolderExists(appId) {
  * @returns {Object} Metadata from devapp.meta.json
  */
 export function getAppMetadata(appId) {
-	const appPath = getAppPath(appId);
-	if (!appPath) return null;
+	const app = getApp(appId);
+	if (!app) return null;
 
-	const metaPath = path.join(appPath, "devapp.meta.json");
+	const metaPath = path.join(DEVAPPS_DIR, app.basePath, "devapp.meta.json");
 	if (fs.existsSync(metaPath)) {
 		return JSON.parse(fs.readFileSync(metaPath, "utf8"));
 	}
@@ -260,6 +213,6 @@ export function getAppSummary() {
 // Example usage:
 // const active = getActiveApps(); // Get all running apps
 // const blogApps = getAppsBySite("blog"); // Get apps managing blog
-// const postEditors = getAppsByType(APP_TYPES.CONTENT_EDITOR); // Get content editors
+// const contentManagers = getAppsByType(APP_TYPES.CONTENT_MANAGER); // Get content managers
 // const nextPort = getNextAvailablePort(); // Get next available port for new app
 // const summary = getAppSummary(); // Get overview of all apps

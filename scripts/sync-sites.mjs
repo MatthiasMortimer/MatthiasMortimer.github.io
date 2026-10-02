@@ -11,11 +11,49 @@ import { listSites } from "../ritesGlobal/sites.registry.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PAGES_DIR = path.resolve(__dirname, "..", "src", "pages");
 const PUBLIC_STYLES_DIR = path.resolve(__dirname, "..", "public", "generated");
+const DEV_APPS_DIR = path.resolve(__dirname, "..", "devApps");
+const VERSIONS_PATH = path.resolve(__dirname, "..", "ritesGlobal", "versions.json");
 const TOKENS_PATH = path.resolve(__dirname, "..", "ritesGlobal", "styles", "tokens.css");
 const SITE_SWITCHER_STYLES_PATH = path.resolve(__dirname, "..", "ritesGlobal", "styles", "site-switcher.css");
 const SITE_FOOTER_STYLES_PATH = path.resolve(__dirname, "..", "ritesGlobal", "styles", "site-footer.css");
 
 fs.mkdirSync(PAGES_DIR, { recursive: true });
+
+function syncDevAppVersions() {
+	const source = fs.readFileSync(VERSIONS_PATH, "utf8");
+	const versions = JSON.parse(source);
+	if (!versions || typeof versions !== "object" || Array.isArray(versions)) {
+		throw new Error(`[sync-sites] invalid versions file: ${VERSIONS_PATH}`);
+	}
+
+	const devApps = Object.create(null);
+	for (const entry of fs.readdirSync(DEV_APPS_DIR, { withFileTypes: true })) {
+		if (!entry.isDirectory()) continue;
+		const metadataPath = path.join(DEV_APPS_DIR, entry.name, "devapp.meta.json");
+		if (!fs.existsSync(metadataPath)) continue;
+
+		const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+		if (
+			!metadata ||
+			typeof metadata !== "object" ||
+			typeof metadata.slug !== "string" ||
+			!/^[A-Za-z][A-Za-z0-9_-]*$/.test(metadata.slug) ||
+			typeof metadata.version !== "string" ||
+			!/^\d+\.\d+\.\d+$/.test(metadata.version)
+		) {
+			throw new Error(`[sync-sites] invalid devApp version metadata: ${metadataPath}`);
+		}
+		if (Object.hasOwn(devApps, metadata.slug)) {
+			throw new Error(`[sync-sites] duplicate devApp slug "${metadata.slug}" in ${metadataPath}`);
+		}
+
+		devApps[metadata.slug] = { version: metadata.version };
+	}
+
+	versions.devApps = devApps;
+	const output = `${JSON.stringify(versions, null, 2)}\n`;
+	if (output !== source) fs.writeFileSync(VERSIONS_PATH, output);
+}
 
 function ensureSymlink(targetDir, linkPath) {
 	const relTarget = path.relative(path.dirname(linkPath), targetDir);
@@ -26,6 +64,8 @@ function ensureSymlink(targetDir, linkPath) {
 	}
 	fs.symlinkSync(relTarget, linkPath, "dir");
 }
+
+syncDevAppVersions();
 
 const sites = listSites();
 const managedEntries = new Set();

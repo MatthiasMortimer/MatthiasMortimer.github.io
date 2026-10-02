@@ -4,7 +4,7 @@
   "description": "Create and manage posts for the RitesDev blog",
   "type": "post_manager",
   "runtime": "tab",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "embed": true,
   "tabOrder": 2,
   "manages": ["s-blog"],

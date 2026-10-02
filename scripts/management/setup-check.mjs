@@ -113,7 +113,6 @@ try {
 	const utilities = [
 		"ritesGlobal/content-inventory.mjs",
 		"ritesGlobal/devapps-registry.mjs",
-		"ritesGlobal/content-management.mjs",
 		"ritesGlobal/sites.registry.mjs",
 	];
 
