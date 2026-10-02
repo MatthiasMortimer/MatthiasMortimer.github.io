@@ -1,7 +1,10 @@
 ---
-import { listSites } from "../sites.registry.mjs";
-
-const sites = listSites();
+// Bundled at build time; fs-based listSites() resolves paths relative to dist/ in production.
+const siteMetas = import.meta.glob<{ slug: string; label: string; basePath: string; order?: number }>(
+	"../../sites/s-*/site.meta.json",
+	{ eager: true, import: "default" },
+);
+const sites = Object.values(siteMetas).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 const currentPath = Astro.url.pathname;
 
 function isActive(basePath: string) {

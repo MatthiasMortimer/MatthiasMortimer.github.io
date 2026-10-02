@@ -25,7 +25,6 @@
     "mgmt:setup": "node scripts/management/setup-check.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.3.2",
     "@astrojs/mdx": "^8.0.0",
     "@astrojs/node": "^11.1.6",
     "@astrojs/sitemap": "^3.7.4",

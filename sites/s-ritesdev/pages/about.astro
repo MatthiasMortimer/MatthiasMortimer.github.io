@@ -11,7 +11,7 @@ const about = aboutPage as {
 	philosophy: { development: { title: string; body: string }; teaching: { title: string; body: string } };
 	stats: Record<string, string>;
 };
-const intro = about.intro.map((paragraph) => paragraph.replace("{name}", identity.name).replace("{location}", identity.location));
+const intro = about.intro.map((paragraph) => paragraph.replace("{name}", identity.name).replace("{personalName}", identity.personalName).replace("{location}", identity.location));
 ---
 
 <BaseLayout title="About | RitesDev" description="Learn more about RitesDev, a freelance software developer and technical educator.">

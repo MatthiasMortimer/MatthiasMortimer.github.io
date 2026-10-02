@@ -2,7 +2,7 @@
   {
     "id": "blog",
     "title": "Matt's Dev Log",
-    "description": "A personal website for documenting learning, security work, projects, and ideas.",
+    "description": "The personal blog of Matt, a.k.a. RitesDev: documenting learning, security work, projects, and ideas.",
     "category": "Development",
     "tags": [
       "Astro",
@@ -43,7 +43,7 @@
       "Curriculum"
     ],
     "image": "/media/project-teaching.svg",
-    "summary": "A 16 class hands on curriculum making a small 2D game of the students choice.",
+    "summary": "A 16 class hands on curriculum making a small 2D game of the student's choice.",
     "highlights": [
       "Guided students from zero coding knowledge to market-ready game",
       "100% positive feedback rating from workshop attendees"
@@ -54,7 +54,7 @@
   {
     "id": "astro-starter-kit",
     "title": "Open-Source Astro Tech Starter Website",
-    "description": "A secure website starter (fill details here).",
+    "description": "A secure, open-source Astro website starter with MDX content and CSS Modules styling.",
     "category": "Teaching / Open Source",
     "tags": [
       "Astro",
@@ -62,7 +62,7 @@
       "CSS Modules"
     ],
     "image": "/media/project-teaching.svg",
-    "summary": "A secure website starter (fill details here).",
+    "summary": "A secure, open-source Astro website starter with MDX content and CSS Modules styling.",
     "highlights": [],
     "demoUrl": "https://example.com/astro-starter",
     "githubUrl": "https://github.com/example/astro-starter"

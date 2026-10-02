@@ -2,6 +2,9 @@
 import SiteSwitcher from "@ritesGlobal/components/SiteSwitcher.astro";
 import { media } from "@ritesGlobal/content.js";
 import site from "../content/site.json";
+
+const currentPath = Astro.url.pathname;
+const isCurrent = (href: string) => currentPath === href || currentPath === href.replace(/\/$/, "");
 ---
 
 <nav class="site-nav" aria-label="Main navigation">
@@ -10,7 +13,9 @@ import site from "../content/site.json";
 		<img src={media.blogLogo} alt="" width="48" height="48" />
 	</a>
 	<div class="site-nav__links">
-		{site.navigation.map((item) => <a href={item.href}>{item.label}</a>)}
+		{site.navigation.map((item) => (
+			<a href={item.href} class={isCurrent(item.href) ? "active" : ""} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
+		))}
 		<SiteSwitcher />
 	</div>
 </nav>

@@ -2,7 +2,7 @@
 title: About Me
 tagline: 'Developer by Day, Technical Mentor by __.'
 intro:
-  - 'Hello! I''m {name}, a freelance full-stack developer and computer science educator based in {location}.'
+  - 'Hello! I''m {name} ({personalName} on my personal blog), a freelance full-stack developer and computer science educator based in {location}.'
   - 'My passion lies at the intersection of building clean, efficient web software and demystifying complex technical concepts for developers learning the trade.'
   - 'In my development work, I focus heavily on the modern web stack, building blazingly fast websites with Astro, interactive web applications with React and TypeScript, and reliable backend APIs with Node.js.'
   - 'When teaching, I believe in practical, hands-on learning rather than rote memorization. I help students build real projects, master debugging techniques, and develop engineering intuition that serves them throughout their careers.'

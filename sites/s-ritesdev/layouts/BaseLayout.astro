@@ -1,6 +1,6 @@
 ---
 import SiteNav from "../components/SiteNav.astro";
-import Footer from "../components/Footer.astro";
+import Footer from "@ritesGlobal/components/Footer.astro";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
 
@@ -29,6 +29,6 @@ const { title = site.metadata.title, description = site.metadata.description, im
 		<main>
 			<slot />
 		</main>
-		<Footer />
+		<Footer tagline={site.footer.tagline} />
 	</body>
 </html>

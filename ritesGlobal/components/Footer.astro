@@ -1,0 +1,23 @@
+---
+import { identity } from "../content.js";
+
+interface Props {
+	tagline?: string;
+	owner?: string;
+}
+
+const { tagline, owner = identity.fullName } = Astro.props;
+---
+
+<footer class="site-footer">
+	<div class="site-footer__info">
+		<p>&copy; {new Date().getFullYear()} {owner}. All rights reserved.</p>
+		{tagline && <p class="site-footer__tagline">{tagline}</p>}
+	</div>
+	<div class="site-footer__socials">
+		{identity.socials.github && <a href={identity.socials.github} target="_blank" rel="noopener noreferrer">GitHub</a>}
+		{identity.socials.linkedin && <a href={identity.socials.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+		{identity.socials.twitter && <a href={identity.socials.twitter} target="_blank" rel="noopener noreferrer">Twitter</a>}
+		<a href={`mailto:${identity.email}`}>Email</a>
+	</div>
+</footer>

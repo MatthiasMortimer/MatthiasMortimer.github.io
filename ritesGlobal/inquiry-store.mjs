@@ -7,8 +7,34 @@ import { fileURLToPath } from "node:url";
 import crypto from "node:crypto";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_NAME = "ritesdev-ecosystem";
 
-export const DEFAULT_INQUIRY_FILE = path.resolve(__dirname, "..", "dev", "contact-submissions.jsonl");
+// Walk up from this module to the repo root. Works from source and from the bundled
+// dist/server build, where import.meta.url no longer points at ritesGlobal/.
+function findRepoRoot() {
+	let dir = __dirname;
+	for (;;) {
+		try {
+			const pkg = JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8"));
+			if (pkg.name === REPO_NAME) return dir;
+		} catch {
+			// No readable package.json here; keep walking.
+		}
+		const parent = path.dirname(dir);
+		if (parent === dir) return path.resolve(__dirname, "..");
+		dir = parent;
+	}
+}
+
+// Inquiry records live in dev/secure/, outside src/, public/ and dist/: never served or bundled.
+// RITESDEV_INQUIRY_FILE overrides the location for every consumer (site, no-JS fallback, Inquiry Manager).
+export function resolveInquiryFile() {
+	const override = process.env.RITESDEV_INQUIRY_FILE;
+	if (override) return path.resolve(override);
+	return path.join(findRepoRoot(), "dev", "secure", "contact-submissions.jsonl");
+}
+
+export const DEFAULT_INQUIRY_FILE = resolveInquiryFile();
 export const INQUIRY_STATUSES = ["new", "read", "replied", "archived"];
 
 const LIMITS = { name: 120, email: 160, service: 80, timeline: 120, message: 5000, notes: 5000 };
@@ -61,7 +87,7 @@ function normalize(record, index) {
 	};
 }
 
-export function createInquiryStore(filePath = DEFAULT_INQUIRY_FILE) {
+export function createInquiryStore(filePath = resolveInquiryFile()) {
 	const file = path.resolve(filePath);
 
 	// Reads and rewrites run one at a time: a read during a rewrite used to see a truncated file.
@@ -96,10 +122,10 @@ export function createInquiryStore(filePath = DEFAULT_INQUIRY_FILE) {
 	}
 
 	async function writeAll(records) {
-		await fsp.mkdir(path.dirname(file), { recursive: true });
+		await fsp.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
 		const output = records.map((record) => JSON.stringify(record)).join("\n");
 		const tempFile = `${file}.${process.pid}.tmp`;
-		await fsp.writeFile(tempFile, output ? `${output}\n` : "", "utf8");
+		await fsp.writeFile(tempFile, output ? `${output}\n` : "", { encoding: "utf8", mode: 0o600 });
 		await fsp.rename(tempFile, file);
 	}
 
@@ -121,8 +147,8 @@ export function createInquiryStore(filePath = DEFAULT_INQUIRY_FILE) {
 		};
 
 		await withLock(async () => {
-			await fsp.mkdir(path.dirname(file), { recursive: true });
-			await fsp.appendFile(file, `${JSON.stringify(record)}\n`, "utf8");
+			await fsp.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
+			await fsp.appendFile(file, `${JSON.stringify(record)}\n`, { encoding: "utf8", mode: 0o600 });
 		});
 		return record;
 	}
@@ -132,8 +158,8 @@ export function createInquiryStore(filePath = DEFAULT_INQUIRY_FILE) {
 		const inquiry = validateInquiry(input);
 		const now = new Date().toISOString();
 		const record = { id: crypto.randomUUID(), ...inquiry, status: "new", notes: "", submittedAt: now, updatedAt: now };
-		fs.mkdirSync(path.dirname(file), { recursive: true });
-		fs.appendFileSync(file, `${JSON.stringify(record)}\n`, "utf8");
+		fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+		fs.appendFileSync(file, `${JSON.stringify(record)}\n`, { encoding: "utf8", mode: 0o600 });
 		return record;
 	}
 

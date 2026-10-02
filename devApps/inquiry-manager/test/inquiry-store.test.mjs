@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { createInquiryStore } from "../../../ritesGlobal/inquiry-store.mjs";
+import { createInquiryStore, resolveInquiryFile } from "../../../ritesGlobal/inquiry-store.mjs";
 
 async function withStore(run) {
 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "inquiry-store-"));
@@ -115,4 +115,19 @@ test("concurrent updates never drop records", async () => {
 		assert.equal(stored.length, 5);
 		assert.ok(stored.every((record) => record.notes === "touched"));
 	});
+});
+
+test("default inquiry file lives in dev/secure and honors the env override", () => {
+	const previous = process.env.RITESDEV_INQUIRY_FILE;
+	try {
+		delete process.env.RITESDEV_INQUIRY_FILE;
+		const repoRoot = path.resolve(import.meta.dirname, "..", "..", "..");
+		assert.equal(resolveInquiryFile(), path.join(repoRoot, "dev", "secure", "contact-submissions.jsonl"));
+
+		process.env.RITESDEV_INQUIRY_FILE = "/tmp/custom-inquiries.jsonl";
+		assert.equal(resolveInquiryFile(), "/tmp/custom-inquiries.jsonl");
+	} finally {
+		if (previous === undefined) delete process.env.RITESDEV_INQUIRY_FILE;
+		else process.env.RITESDEV_INQUIRY_FILE = previous;
+	}
 });

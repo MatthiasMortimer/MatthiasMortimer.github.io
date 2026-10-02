@@ -1,5 +1,6 @@
 {
   "name": "RitesDev",
+  "personalName": "Matt",
   "fullName": "Rites Development & Technical Training",
   "title": "Freelance Software Engineer & Technical Educator",
   "tagline": "Building high-performance web applications & empowering developers through 1-on-1 mentorship.",
@@ -11,8 +12,8 @@
   "avatar": "/media/avatar.svg",
   "socials": {
     "github": "https://github.com/MatthiasMortimer",
-    "linkedin": "https://linkedin.com",
-    "twitter": "https://twitter.com",
-    "discord": "https://discord.com"
+    "linkedin": "",
+    "twitter": "",
+    "discord": ""
   }
 }

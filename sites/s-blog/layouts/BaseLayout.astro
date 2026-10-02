@@ -1,5 +1,7 @@
 ---
 import SiteNav from "../components/SiteNav.astro";
+import Footer from "@ritesGlobal/components/Footer.astro";
+import { identity } from "@ritesGlobal/content.js";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
 
@@ -27,12 +29,13 @@ const pageImage = image ?? frontmatter?.image;
 		<link rel="stylesheet" href="/generated/blog.css" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{pageTitle}</title>
-		<SeoMeta title={pageTitle} description={pageDescription} image={pageImage} noindex={noindex} />
+		<SeoMeta title={pageTitle} description={pageDescription} image={pageImage} noindex={noindex} persona="personal" />
 	</head>
 	<body>
 		<SiteNav />
 		<main>
 			<slot />
 		</main>
+		<Footer owner={`${identity.personalName}, a.k.a. ${identity.name}`} tagline={site.metadata.description} />
 	</body>
 </html>

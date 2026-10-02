@@ -2,8 +2,7 @@
   "name": "RitesDev",
   "metadata": {
     "title": "RitesDev | Freelance Development & Technical Teaching",
-    "description": "Professional freelance web development, full-stack consulting, and personalized 1-on-1 coding mentorship.",
-    "url": "https://rites-blog.netlify.app"
+    "description": "Professional freelance web development, full-stack consulting, and personalized 1-on-1 coding mentorship."
   },
   "navigation": [
     { "label": "Home", "href": "/" },

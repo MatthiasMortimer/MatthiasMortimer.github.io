@@ -65,7 +65,7 @@ tags: ["Astro", "Testing"]
 Describe the reproducible behavior, then document the verification.
 ```
 
-The RitesDev contact form (`sites/s-ritesdev/components/ContactForm.astro`) submits JSON to `POST /api/inquiry`, which validates the fields, rejects honeypot submissions, and appends the entry through `ritesGlobal/inquiry-store.mjs` to the gitignored `dev/contact-submissions.jsonl`; the page shows an inline success/error banner. JSON is used because Astro's `security.checkOrigin` rejects form-encoded POSTs without a matching `Origin` header (which happens behind the Cloudflare tunnel). The same-route form POST in `contact.astro` remains as a no-JavaScript fallback. Saved inquiries are reviewed in the Inquiry Manager app; no email is sent.
+The RitesDev contact form (`sites/s-ritesdev/components/ContactForm.astro`) submits JSON to `POST /api/inquiry`, which validates the fields, rejects honeypot submissions, and appends the entry through `ritesGlobal/inquiry-store.mjs` to `dev/secure/contact-submissions.jsonl` (gitignored; the path can be overridden with `RITESDEV_INQUIRY_FILE`, and the site, the no-JavaScript fallback, and the Inquiry Manager all resolve it through the same helper); the page shows an inline success/error banner. JSON is used because Astro's `security.checkOrigin` rejects form-encoded POSTs without a matching `Origin` header (which happens behind the Cloudflare tunnel). The same-route form POST in `contact.astro` remains as a no-JavaScript fallback. Saved inquiries are reviewed in the Inquiry Manager app; no email is sent.
 
 ## Dev Apps
 
@@ -87,7 +87,7 @@ To add an app, create its folder, `package.json`, `devapp.meta.json`, `public/in
 
 ## Dependencies
 
-Root runtime dependencies: Astro 7.3.2, `@astrojs/mdx` 8.0.1, `@astrojs/node` 11.1.6, and `@astrojs/cloudflare` 14.3.2. Node 22.12 or later is required; validation used Node 22.23.1 and npm 10.9.8.
+Root runtime dependencies: Astro 7.3.2, `@astrojs/mdx` 8.0.1, and `@astrojs/node` 11.1.6. Node 22.12 or later is required; validation used Node 22.23.1 and npm 10.9.8.
 
 The Blog Post Manager depends on `gray-matter` and Electron. The Launcher depends on Express and Electron. Site Hosting uses Electron. `npm ls --depth=0` currently reports several extraneous transitive WASM/sharp packages; run `npm install` after dependency changes to reconcile the lockfile and installed tree.
 

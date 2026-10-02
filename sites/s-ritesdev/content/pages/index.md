@@ -30,7 +30,7 @@ services:
   items:
     - id: fullstack-web
       category: Development
-      title: Full-Stack Website Development
+      title: Website Development
       icon: "\U0001F4BB"
       description: >-
         From concept to production deployment, I build fast, SEO-optimized,
@@ -87,7 +87,7 @@ services:
         - Dependency upgrades & security patches
         - Refactoring roadmap & PR execution
         - CI/CD workflow configuration
-      pricing: $800 flat rate audit
+      pricing: $800 flat rate audit for most websites.
     - id: custom-workshops
       category: Teaching
       title: Team Workshops & Bootcamps
@@ -124,12 +124,7 @@ projects:
 testimonials:
   title: Client & Student Feedback
   description: What development clients and mentorship students have to say.
-  items:
-    - id: 1
-      quote: Some Quote
-      author: Alex Morgan
-      role: 'Founder & CTO, SaaS Startup'
-      type: Development Client
+  items: []
 cta:
   title: Have a Project in Mind or Want to Learn?
   description: >-

@@ -4,7 +4,6 @@ dist/
 public/generated/
 coverage/
 .wrangler/
-.netlify/
 
 # Dependencies
 node_modules/
@@ -18,8 +17,8 @@ pnpm-debug.log*
 *.log
 *.pid
 *.pid.lock
-dev/contact-submissions.jsonl
-dev/contact-submissions.jsonl.*
+# Sensitive local data (inquiries, passwords); never served or bundled
+dev/secure/
 *.tmp
 *.temp
 

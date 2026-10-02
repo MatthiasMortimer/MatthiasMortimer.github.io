@@ -26,9 +26,8 @@ npm run build
 
 ```
 RitesDev-ecosystem/
-├── astro.config.mjs      # Astro config (server output, node adapter)
+├── astro.config.mjs      # Astro config (server output, Node standalone adapter; self-hosted behind a Cloudflare Tunnel)
 ├── tsconfig.json         # Path aliases (@blog/*, @components/*, @ritesGlobal/*, ...)
-├── netlify.toml          # Netlify build/publish config
 ├── ritesGlobal/          # Shared modules reused across every site
 │   ├── contact.js/.json      # Shared identity & contact info
 │   ├── versions.js/.json     # Shared site + git version numbers

@@ -1,16 +1,9 @@
 // Shared API routing for this app: used by the launcher's embedded tab and by
 // the standalone Electron window's mobile bridge.
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { createInquiryStore } from "../../ritesGlobal/inquiry-store.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 export function createApiHandler() {
-	const inquiryFile = process.env.RITESDEV_INQUIRY_FILE
-		? path.resolve(process.env.RITESDEV_INQUIRY_FILE)
-		: path.resolve(__dirname, "../../dev/contact-submissions.jsonl");
-	const store = createInquiryStore(inquiryFile);
+	const store = createInquiryStore();
 
 	return async function handleApi({ method, pathname, body }) {
 		if (method === "GET" && pathname === "/api/inquiries") return store.list();
