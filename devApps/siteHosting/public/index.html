@@ -23,9 +23,10 @@
 	</header>
 
 	<main class="layout">
-		<section class="panel">
+		<section class="panel production-panel" aria-label="Production controls and logs" tabindex="0">
 			<div class="controls">
-				<button id="btn-start" class="btn btn-start">Build &amp; start production</button>
+				<button id="btn-start" class="btn btn-start">Start production</button>
+				<button id="btn-rebuild" class="btn btn-restart">Force rebuild + start</button>
 				<button id="btn-restart" class="btn btn-restart">Restart</button>
 				<button id="btn-stop" class="btn btn-stop">Stop</button>
 			</div>
@@ -66,6 +67,9 @@
 
 			<h2 class="section-title">Activity</h2>
 			<ul id="log" class="log"></ul>
+
+			<h2 class="section-title">Traffic</h2>
+			<ul id="traffic" class="log traffic-log"></ul>
 		</section>
 
 		<section class="panel preview-panel">

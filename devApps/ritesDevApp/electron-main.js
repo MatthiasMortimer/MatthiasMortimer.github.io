@@ -1,12 +1,15 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
-const fs = require("fs");
 const net = require("net");
+const runtimeEnv = require("../../ritesGlobal/runtime-env.cjs");
 
 let mainWindow;
 let serverProcess;
+const appPort = runtimeEnv.port(4605);
 const isDev = process.env.NODE_ENV === "development" || process.argv.includes("--dev");
+
+if (runtimeEnv.isTest) app.setPath("userData", `${app.getPath("userData")}-test`);
 
 /**
  * Start the Express server
@@ -17,6 +20,7 @@ function startServer() {
 	// Use node to run the ES module
 	serverProcess = spawn("node", [serverPath], {
 		cwd: __dirname,
+		env: { ...process.env, RITES_ENV: runtimeEnv.name },
 		stdio: ["ignore", "pipe", "pipe"],
 	});
 
@@ -35,7 +39,7 @@ function startServer() {
 
 	console.log("[Main] Server started (PID: " + serverProcess.pid + ")");
 
-	return waitForServer(4605);
+	return waitForServer(appPort);
 }
 
 function waitForServer(port, timeoutMs = 10_000) {
@@ -87,7 +91,7 @@ function createWindow() {
 		height: 900,
 		minWidth: 900,
 		minHeight: 640,
-		title: "RitesDev App",
+		title: runtimeEnv.isTest ? "RitesDev App (TEST)" : "RitesDev App",
 		backgroundColor: "#f7f5fa",
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
@@ -97,12 +101,20 @@ function createWindow() {
 		},
 	});
 
-	// Load the app from the Express server (serves public/ in both dev and prod)
-	const startUrl = "http://localhost:4605";
-
-	mainWindow.loadURL(startUrl).catch((err) => {
-		console.error("[Main] Failed to load URL:", err);
-	});
+	// Load a lightweight shell immediately while the app server starts.
+	mainWindow
+		.loadURL(`data:text/html,${encodeURIComponent(`
+			<!doctype html>
+			<meta charset="utf-8" />
+			<title>RitesDev App</title>
+			<body style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f7f5fa;color:#2f243f;display:grid;place-items:center;height:100vh;margin:0;">
+				<div style="text-align:center">
+					<h1 style="margin:0 0 .5rem">Launching RitesDev App…</h1>
+					<p style="margin:0;color:#5f5374">Starting internal services.</p>
+				</div>
+			</body>
+		`)}`)
+		.catch((err) => console.error("[Main] Failed to show launch screen:", err));
 
 	// Open DevTools in development
 	if (isDev) {
@@ -164,17 +176,17 @@ function createMenu() {
  * App event handlers
  */
 app.on("ready", async () => {
+	createWindow();
+	createMenu();
+
 	try {
 		await startServer();
+		await mainWindow?.loadURL(`http://localhost:${appPort}`);
 	} catch (error) {
 		console.error("[Main] Failed to start server:", error);
 		app.quit();
 		return;
 	}
-
-	// Create the window
-	createWindow();
-	createMenu();
 
 	console.log(
 		"\n╔════════════════════════════════════════════════════════════════╗"

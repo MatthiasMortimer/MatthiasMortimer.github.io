@@ -3,7 +3,7 @@
   "slug": "ritesDevApp",
   "description": "Master window hosting every management app as a tab",
   "type": "launcher",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "port": 4605,
   "command": "npm start",
   "manages": ["all"],

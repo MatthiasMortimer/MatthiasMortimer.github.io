@@ -1,0 +1,64 @@
+---
+import SiteSwitcher from "@ritesGlobal/components/SiteSwitcher.astro";
+
+interface NavItem {
+	label: string;
+	href: string;
+}
+
+interface Action {
+	label: string;
+	href: string;
+}
+
+interface Props {
+	siteName: string;
+	navigation: NavItem[];
+	currentPath: string;
+	brandHref: string;
+	logoSrc?: string;
+	logoAlt?: string;
+	logoWidth?: number;
+	logoHeight?: number;
+	primaryAction?: Action | null;
+	theme?: "ritesdev" | "blog";
+}
+
+const {
+	siteName,
+	navigation,
+	currentPath,
+	brandHref,
+	logoSrc,
+	logoAlt = "",
+	logoWidth = 38,
+	logoHeight = 38,
+	primaryAction = null,
+	theme = "ritesdev",
+} = Astro.props;
+const isCurrent = (href: string) => currentPath === href || currentPath === href.replace(/\/$/, "");
+---
+
+<nav class:list={["site-nav", `site-nav--${theme}`]} aria-label="Main navigation">
+	<a class="site-nav__brand" href={brandHref}>
+		{logoSrc && <img src={logoSrc} alt={logoAlt} width={logoWidth} height={logoHeight} />}
+		<span>{siteName}</span>
+	</a>
+	<div class="site-nav__links">
+		{navigation.map((item) => (
+			<a href={item.href} class={isCurrent(item.href) ? "active" : ""} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
+		))}
+		{primaryAction && <a href={primaryAction.href} class="btn btn-primary btn-sm">{primaryAction.label}</a>}
+		<SiteSwitcher />
+	</div>
+	<details class="site-nav__mobile-menu">
+		<summary>Menu</summary>
+		<div class="site-nav__mobile-panel">
+			{navigation.map((item) => (
+				<a href={item.href} class={isCurrent(item.href) ? "active" : ""} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
+			))}
+			{primaryAction && <a href={primaryAction.href} class="btn btn-primary btn-sm">{primaryAction.label}</a>}
+			<SiteSwitcher />
+		</div>
+	</details>
+</nav>

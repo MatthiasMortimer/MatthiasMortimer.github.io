@@ -8,6 +8,8 @@ if (!window.hosting) {
 
 	window.hosting = {
 		start: () => request("api/host/start", "POST"),
+		rebuild: () => request("api/host/rebuild", "POST"),
+		traffic: () => request("api/host/traffic"),
 		stop: () => request("api/host/stop", "POST"),
 		restart: () => request("api/host/restart", "POST"),
 		startDevelopment: () => request("api/host/dev/start", "POST"),
@@ -19,5 +21,6 @@ if (!window.hosting) {
 		onLog: () => {},
 		onState: () => {},
 		onDevState: () => {},
+		onTraffic: () => {},
 	};
 }

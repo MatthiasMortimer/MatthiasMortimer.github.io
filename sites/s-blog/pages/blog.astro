@@ -35,9 +35,9 @@ const tags = sharedTags.filter((tag) => usedTags.has(tag));
 	<p>{page.description}</p>
 
 	<div class="tag-filter" aria-label="Filter posts by tag">
-		<button class="tag-filter__button is-active" type="button" data-tag-filter="all">{page.allTagsLabel}</button>
+		<button class="tag-filter__button is-active" type="button" data-tag-filter="all" aria-pressed="true">{page.allTagsLabel}</button>
 		{tags.map((tag) => (
-			<button class="tag-filter__button" type="button" data-tag-filter={tag}>{tag}</button>
+			<button class="tag-filter__button" type="button" data-tag-filter={tag} aria-pressed="false">{tag}</button>
 		))}
 	</div>
 
@@ -55,6 +55,7 @@ const tags = sharedTags.filter((tag) => usedTags.has(tag));
 
 				filterButtons.forEach((filterButton) => {
 					filterButton.classList.toggle("is-active", filterButton === button);
+					filterButton.setAttribute("aria-pressed", String(filterButton === button));
 				});
 
 				postCards.forEach((postCard) => {

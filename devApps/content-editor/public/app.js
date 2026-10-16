@@ -1,4 +1,5 @@
 import { createArrayItem, getValueAtPath, setValueAtPath } from "./structured-values.js";
+import { homeCardGroup } from "./home-cards.js";
 
 const siteSelect = document.querySelector("#site-select");
 const fileList = document.querySelector("#file-list");
@@ -72,9 +73,10 @@ function renderFiles() {
 	const total = activeSite.groups.reduce((count, group) => count + group.files.length, 0);
 	document.querySelector("#file-count").textContent = `${total} ${total === 1 ? "file" : "files"}`;
 
-	for (const group of activeSite.groups) {
+	const cards = homeCardGroup(activeSite);
+	for (const group of cards ? [cards, ...activeSite.groups] : activeSite.groups) {
 		const files = group.files.filter((file) =>
-			`${file.name} ${file.relativePath} ${group.label}`.toLowerCase().includes(query),
+			`${file.card?.label || ""} ${file.name} ${file.relativePath} ${group.label}`.toLowerCase().includes(query),
 		);
 		if (!files.length) continue;
 
@@ -87,9 +89,10 @@ function renderFiles() {
 		for (const file of files) {
 			const button = document.createElement("button");
 			button.type = "button";
-			button.className = `file-item${file.relativePath === activeFile?.relativePath ? " active" : ""}`;
+			const selected = file.relativePath === activeFile?.relativePath && file.card?.id === activeFile?.card?.id;
+			button.className = `file-item${selected ? " active" : ""}`;
 			const name = document.createElement("strong");
-			name.textContent = humanize(file.name);
+			name.textContent = file.card?.label || humanize(file.name);
 			const path = document.createElement("span");
 			path.textContent = `${file.extension} · ${file.relativePath}`;
 			button.append(name, path);
@@ -117,21 +120,33 @@ function renderEditor() {
 	emptyState.hidden = true;
 	form.hidden = false;
 	document.querySelector("#document-path").textContent = `${activeSite.label} / ${activeFile.relativePath}`;
-	document.querySelector("#document-title").textContent = getDocumentTitle();
+	document.querySelector("#document-title").textContent = activeFile.card?.label || getDocumentTitle();
+	const help = document.querySelector("#document-help");
+	help.hidden = !activeFile.card;
+	help.textContent = activeFile.card?.help || "";
+	form.classList.toggle("card-editor", Boolean(activeFile.card));
 	fieldsEditor.replaceChildren();
 
 	const hasFields = activeDocument.mode !== "source";
 	fieldsSection.hidden = !hasFields;
-	if (hasFields) renderValue(activeDocument.fields, [], fieldsEditor, true);
+	if (hasFields) {
+		if (activeFile.card) {
+			for (const [key, label] of Object.entries(activeFile.card.fields)) {
+				renderValue(activeDocument.fields[key], [key], fieldsEditor, false, label);
+			}
+		} else {
+			renderValue(activeDocument.fields, [], fieldsEditor, true);
+		}
+	}
 
-	bodySection.hidden = activeDocument.mode === "structured";
+	bodySection.hidden = Boolean(activeFile.card) || activeDocument.mode === "structured";
 	bodyEditor.value = activeDocument.body || "";
 	document.querySelector("#body-label").textContent = activeDocument.mode === "source" ? "Source code" : "Page body";
 	document.querySelector("#body-format").textContent = activeDocument.mode === "source" ? activeFile.extension : "Markdown";
 	bodyEditor.spellcheck = activeDocument.mode !== "source";
 }
 
-function renderValue(value, path, parent, isRoot = false) {
+function renderValue(value, path, parent, isRoot = false, fieldLabel = "") {
 	if (Array.isArray(value)) {
 		renderArray(value, path, parent);
 		return;
@@ -153,7 +168,7 @@ function renderValue(value, path, parent, isRoot = false) {
 	const label = document.createElement("label");
 	label.className = "field";
 	const caption = document.createElement("span");
-	caption.textContent = humanize(path.at(-1) || "Content");
+	caption.textContent = fieldLabel || humanize(path.at(-1) || "Content");
 	const input = createInput(value, path);
 	input.dataset.path = JSON.stringify(path);
 	label.append(caption, input);

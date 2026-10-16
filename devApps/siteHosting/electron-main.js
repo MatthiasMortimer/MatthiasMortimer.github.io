@@ -2,19 +2,25 @@ const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("node:path");
 const { HostManager, config } = require("./host-manager");
 const { startMobileAppServer } = require("../../ritesGlobal/mobile-app-server.cjs");
+const runtimeEnv = require("../../ritesGlobal/runtime-env.cjs");
+
+	// Separate profile so a test copy can run beside the live app.
+if (runtimeEnv.isTest) app.setPath("userData", `${app.getPath("userData")}-test`);
 
 const host = new HostManager();
 let mainWindow = null;
 let quitting = false;
 
 startMobileAppServer({
-	port: 4615,
+	port: runtimeEnv.port(4615),
 	publicDir: path.join(__dirname, "public"),
 	handleApi: async ({ method, pathname }) => {
 		if (method === "GET" && pathname === "/api/host/config") return config;
 		if (method === "GET" && pathname === "/api/host/logs") return host.logs;
 		if (method === "GET" && pathname === "/api/host/status") return host.status();
+		if (method === "GET" && pathname === "/api/host/traffic") return host.traffic();
 		if (method === "POST" && pathname === "/api/host/start") return host.start();
+		if (method === "POST" && pathname === "/api/host/rebuild") return host.start({ forceBuild: true });
 		if (method === "POST" && pathname === "/api/host/stop") return host.stop();
 		if (method === "POST" && pathname === "/api/host/restart") return host.restart();
 		if (method === "POST" && pathname === "/api/host/dev/start") return host.startDevelopment();
@@ -30,7 +36,7 @@ function createWindow() {
 		minWidth: 1020,
 		minHeight: 680,
 		backgroundColor: "#f7f5fa",
-		title: "RitesDev Site Hosting",
+		title: runtimeEnv.isTest ? "RitesDev Site Hosting (TEST)" : "RitesDev Site Hosting",
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
 			contextIsolation: true,
@@ -42,7 +48,7 @@ function createWindow() {
 	mainWindow.loadFile(path.join(__dirname, "public/index.html"));
 	mainWindow.removeMenu();
 	mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-		if (url.startsWith("https://")) shell.openExternal(url);
+		if (url.startsWith("https://") || url.startsWith("http://127.0.0.1:")) shell.openExternal(url);
 		return { action: "deny" };
 	});
 
@@ -60,8 +66,11 @@ function send(channel, payload) {
 host.on("log", (entry) => send("host:log", entry));
 host.on("state", (state) => send("host:state", state));
 host.on("dev-state", (state) => send("host:dev-state", state));
+host.on("traffic", (entry) => send("host:traffic", entry));
 
 ipcMain.handle("host:start", () => host.start());
+ipcMain.handle("host:rebuild", () => host.start({ forceBuild: true }));
+ipcMain.handle("host:traffic", () => host.traffic());
 ipcMain.handle("host:stop", () => host.stop());
 ipcMain.handle("host:restart", () => host.restart());
 ipcMain.handle("host:dev:start", () => host.startDevelopment());
@@ -74,8 +83,9 @@ ipcMain.handle("host:openExternal", (_event, url) => {
 });
 
 app.whenReady().then(() => {
-	host.reapStrays(); // never inherit a duplicate tunnel from a previous session
 	createWindow();
+		// never inherit a duplicate tunnel from a previous session; async so the window shows first
+	host.reapStrays();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});

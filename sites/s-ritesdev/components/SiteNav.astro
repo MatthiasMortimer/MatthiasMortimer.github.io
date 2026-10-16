@@ -1,32 +1,17 @@
 ---
 import { identity } from "@ritesGlobal/content.js";
-import SiteSwitcher from "@ritesGlobal/components/SiteSwitcher.astro";
+import SharedSiteNav from "@ritesGlobal/components/SiteNav.astro";
 import site from "../content/site.json";
 
 const currentPath = Astro.url.pathname;
-const isCurrent = (href: string) => currentPath === href || currentPath === href.replace(/\/$/, "");
 ---
 
-<nav class="site-nav" aria-label="Main navigation">
-	<a class="site-nav__brand" href="/">
-		<img src={identity.logo} alt="" width="38" height="38" />
-		<span>{site.name}</span>
-	</a>
-	<div class="site-nav__links">
-		{site.navigation.map((item) => (
-			<a href={item.href} class={isCurrent(item.href) ? "active" : ""} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
-		))}
-		<a href={site.primaryAction.href} class="btn btn-primary btn-sm">{site.primaryAction.label}</a>
-		<SiteSwitcher />
-	</div>
-	<details class="site-nav__mobile-menu">
-		<summary>Menu</summary>
-		<div class="site-nav__mobile-panel">
-			{site.navigation.map((item) => (
-				<a href={item.href} class={isCurrent(item.href) ? "active" : ""} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
-			))}
-			<a href={site.primaryAction.href} class="btn btn-primary btn-sm">{site.primaryAction.label}</a>
-			<SiteSwitcher />
-		</div>
-	</details>
-</nav>
+<SharedSiteNav
+	siteName={site.name}
+	navigation={site.navigation}
+	currentPath={currentPath}
+	brandHref="/"
+	logoSrc={identity.logo}
+	primaryAction={site.primaryAction}
+	theme="ritesdev"
+/>

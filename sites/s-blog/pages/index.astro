@@ -1,10 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
+import BlogFooter from "../components/BlogFooter.astro";
 import type { MDXInstance } from "astro";
 import { normalizeTags } from "@ritesGlobal/tags.js";
+import { projects } from "@ritesGlobal/projects.js";
 import site from "../content/site.json";
 import { frontmatter as page } from "../content/pages/index.md";
+import { frontmatter as about } from "../content/pages/about.md";
+import homeInfo from "../content/home-info.json";
 
 const { identity } = site;
 interface PostFrontmatter {
@@ -31,22 +35,53 @@ const latestPosts = Object.entries(postModules)
 	.slice(0, 3);
 const heroTitle = page.hero.title.replace("{firstName}", identity.firstName);
 const heroDescription = page.hero.description.replace("{occupation}", identity.occupation);
+const aboutIntro = about.intro
+	.replace("{firstName}", identity.firstName)
+	.replace("{occupation}", identity.occupation)
+	.replace("{country}", identity.country);
+const hobbies = about.hobbies.replace("{hobbies}", identity.hobbies.join(", "));
 ---
 
-<BaseLayout title={page.seo.title} description={page.seo.description}>
-	<section class="hero">
-		<span class="hero__eyebrow">{page.hero.eyebrow}</span>
-		<h1>{heroTitle}</h1>
-		<p>{heroDescription}</p>
-	</section>
+<BaseLayout title={page.seo.title} description={page.seo.description} homeLayout>
+	<div class="home-layout">
+		<aside class="home-info" aria-label={homeInfo.title || "Website information"}>
+			{homeInfo.title && <h2>{homeInfo.title}</h2>}
+			{homeInfo.body && <p>{homeInfo.body}</p>}
+		</aside>
+		<div class="home-content" role="region" aria-label="Blog introduction, latest posts and projects" tabindex="0">
+			<section class="hero">
+				<span class="hero__eyebrow">{page.hero.eyebrow}</span>
+				<h1>{heroTitle}</h1>
+				<p>{heroDescription}</p>
+			</section>
 
-	<section aria-labelledby="latest-title">
-		<div class="section-heading">
-			<h2 id="latest-title">{page.latest.title}</h2>
-			<a href="/blog/blog/">{page.latest.link}</a>
+			<section aria-labelledby="latest-title">
+				<div class="section-heading">
+					<h2 id="latest-title" data-scroll-reveal>{page.latest.title}</h2>
+					<a href="/blog/blog/">{page.latest.link}</a>
+				</div>
+				<div class="post-grid">
+					{latestPosts.map((post) => <PostCard {...post} />)}
+				</div>
+			</section>
+
+			<section class="projects" aria-labelledby="projects-title">
+				<h2 id="projects-title" data-scroll-reveal>{about.projectsTitle}</h2>
+				<ul>
+					{projects.map((project) => (
+						<li data-scroll-reveal>
+							<strong>{project.title}</strong>
+							<p>{project.description}</p>
+						</li>
+					))}
+				</ul>
+			</section>
+			<BlogFooter />
 		</div>
-		<div class="post-grid">
-			{latestPosts.map((post) => <PostCard {...post} />)}
-		</div>
-	</section>
+		<aside class="home-info home-about" aria-labelledby="about-title" tabindex="0">
+			<h2 id="about-title">{about.title}</h2>
+			<p>{aboutIntro}</p>
+			<p>{hobbies}</p>
+		</aside>
+	</div>
 </BaseLayout>

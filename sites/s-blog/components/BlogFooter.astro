@@ -1,0 +1,7 @@
+---
+import Footer from "@ritesGlobal/components/Footer.astro";
+import { identity } from "@ritesGlobal/content.js";
+import site from "../content/site.json";
+---
+
+<Footer owner={`${identity.personalName}, a.k.a. ${identity.name}`} tagline={site.metadata.description} />

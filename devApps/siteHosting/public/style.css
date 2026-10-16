@@ -105,6 +105,14 @@ body {
 	min-height: 0;
 }
 
+.production-panel {
+	overflow-y: auto;
+}
+
+.production-panel > * {
+	flex-shrink: 0;
+}
+
 .controls {
 	display: flex;
 	gap: 0.5rem;
@@ -237,8 +245,8 @@ body {
 	list-style: none;
 	margin: 0;
 	padding: 0.6rem;
-	flex: 1;
-	min-height: 0;
+	flex: 0 0 24rem;
+	height: 24rem;
 	overflow-y: auto;
 	background: #2f2c3a;
 	border-radius: var(--radius-sm);
@@ -341,8 +349,8 @@ body {
 		min-height: 420px;
 	}
 
-	.log {
-		min-height: 180px;
+	.production-panel {
+		height: 80vh;
 	}
 
 	.preview-panel {

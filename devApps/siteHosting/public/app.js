@@ -2,6 +2,7 @@ const els = {
 	statePill: document.getElementById("state-pill"),
 	stateText: document.getElementById("state-text"),
 	start: document.getElementById("btn-start"),
+	rebuild: document.getElementById("btn-rebuild"),
 	stop: document.getElementById("btn-stop"),
 	restart: document.getElementById("btn-restart"),
 	devStart: document.getElementById("btn-dev-start"),
@@ -18,6 +19,7 @@ const els = {
 	devPid: document.getElementById("dev-pid"),
 	tunnelPid: document.getElementById("tunnel-pid"),
 	log: document.getElementById("log"),
+	traffic: document.getElementById("traffic"),
 	preview: document.getElementById("preview"),
 	previewOverlay: document.getElementById("preview-overlay"),
 	previewMessage: document.getElementById("preview-message"),
@@ -45,12 +47,15 @@ async function init() {
 	els.previewTarget.textContent = config.publicUrl;
 
 	for (const entry of await window.hosting.logs()) appendLog(entry);
+	for (const entry of await window.hosting.traffic()) appendTraffic(entry);
 
 	window.hosting.onLog(appendLog);
+	window.hosting.onTraffic(appendTraffic);
 	window.hosting.onState(() => refreshStatus());
 	window.hosting.onDevState(() => refreshStatus());
 
 	els.start.addEventListener("click", () => runAction("start", window.hosting.start));
+	els.rebuild.addEventListener("click", () => runAction("rebuild", window.hosting.rebuild));
 	els.stop.addEventListener("click", () => runAction("stop", window.hosting.stop));
 	els.restart.addEventListener("click", () => runAction("restart", window.hosting.restart));
 	els.devStart.addEventListener("click", () => runAction("dev-start", window.hosting.startDevelopment));
@@ -87,6 +92,7 @@ async function runAction(name, action) {
 
 function setButtonsDisabled(disabled) {
 	els.start.disabled = disabled;
+	els.rebuild.disabled = disabled;
 	els.stop.disabled = disabled;
 	els.restart.disabled = disabled;
 }
@@ -110,6 +116,7 @@ async function refreshStatus() {
 	if (!busy) {
 		const running = status.state === "running" || status.state === "starting";
 		els.start.disabled = running;
+		els.rebuild.disabled = running;
 		els.stop.disabled = status.state === "stopped";
 		els.restart.disabled = status.state === "stopped";
 		els.devStart.disabled = status.devState === "running" || status.devState === "starting";
@@ -160,7 +167,7 @@ function updatePreview(status) {
 	if (status.state === "stopped") {
 		els.previewMessage.textContent = "Hosting is stopped — start it to preview the live site.";
 	} else if (status.state === "starting") {
-		els.previewMessage.textContent = "Starting Astro and the tunnel…";
+		els.previewMessage.textContent = config.tunnelEnabled ? "Starting Astro and the tunnel…" : "Starting local production preview…";
 	} else if (status.public.status) {
 		els.previewMessage.textContent = `${config.publicUrl} returned ${status.public.status} ${httpLabel(status.public.status)}`;
 	} else {
@@ -178,4 +185,17 @@ function appendLog(entry) {
 	els.log.appendChild(li);
 	while (els.log.children.length > 200) els.log.removeChild(els.log.firstChild);
 	els.log.scrollTop = els.log.scrollHeight;
+}
+
+function appendTraffic(entry) {
+	const li = document.createElement("li");
+	li.className = entry.kind === "bot" ? "warn" : "info";
+	const time = document.createElement("span");
+	time.className = "log-time";
+	time.textContent = new Date(entry.time).toLocaleTimeString();
+	const who = entry.kind === "bot" ? `${entry.bot} (visitor ${entry.visitor})` : `Visitor ${entry.visitor}`;
+	li.append(time, document.createTextNode(`${who} → ${entry.path}${entry.status >= 400 ? ` (${entry.status})` : ""}`));
+	els.traffic.appendChild(li);
+	while (els.traffic.children.length > 500) els.traffic.removeChild(els.traffic.firstChild);
+	els.traffic.scrollTop = els.traffic.scrollHeight;
 }

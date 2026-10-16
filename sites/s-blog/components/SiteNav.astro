@@ -1,21 +1,18 @@
 ---
-import SiteSwitcher from "@ritesGlobal/components/SiteSwitcher.astro";
+import SharedSiteNav from "@ritesGlobal/components/SiteNav.astro";
 import { media } from "@ritesGlobal/content.js";
 import site from "../content/site.json";
 
 const currentPath = Astro.url.pathname;
-const isCurrent = (href: string) => currentPath === href || currentPath === href.replace(/\/$/, "");
 ---
 
-<nav class="site-nav" aria-label="Main navigation">
-	<a class="site-nav__brand" href="/blog/">
-		<span>{site.name}</span>
-		<img src={media.blogLogo} alt="" width="48" height="48" />
-	</a>
-	<div class="site-nav__links">
-		{site.navigation.map((item) => (
-			<a href={item.href} class={isCurrent(item.href) ? "active" : ""} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
-		))}
-		<SiteSwitcher />
-	</div>
-</nav>
+<SharedSiteNav
+	siteName={site.name}
+	navigation={site.navigation}
+	currentPath={currentPath}
+	brandHref="/blog/"
+	logoSrc={media.blogLogo}
+	logoWidth={48}
+	logoHeight={48}
+	theme="blog"
+/>

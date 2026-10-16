@@ -5,8 +5,11 @@ const TAGS = require("../../ritesGlobal/tags.json");
 const TAGS_BY_KEY = new Map(TAGS.map((tag) => [tag.toLocaleLowerCase(), tag]));
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const LIST_CACHE_TTL_MS = 10_000;
 
 function createPostStore(postsDirectory) {
+	let listCache = null;
+
 	function postPath(slug) {
 		if (!SLUG_PATTERN.test(slug)) {
 			throw new Error("Slug must contain lowercase letters, numbers, and single hyphens only.");
@@ -34,6 +37,8 @@ function createPostStore(postsDirectory) {
 	}
 
 	async function list() {
+		if (listCache && listCache.expiresAt > Date.now()) return listCache.items;
+
 		await fs.mkdir(postsDirectory, { recursive: true });
 		const entries = await fs.readdir(postsDirectory, { withFileTypes: true });
 		const posts = await Promise.all(
@@ -42,9 +47,11 @@ function createPostStore(postsDirectory) {
 				.map((entry) => read(entry.name.slice(0, -4)))
 		);
 
-		return posts
+		const items = posts
 			.map(({ content, ...summary }) => summary)
 			.sort((first, second) => second.pubDate.localeCompare(first.pubDate));
+		listCache = { items, expiresAt: Date.now() + LIST_CACHE_TTL_MS };
+		return items;
 	}
 
 	async function save(post) {
@@ -88,12 +95,14 @@ function createPostStore(postsDirectory) {
 		if (isRename) {
 			await fs.unlink(originalPath);
 		}
+		listCache = null;
 
 		return read(post.slug);
 	}
 
 	async function remove(slug) {
 		await fs.unlink(postPath(slug));
+		listCache = null;
 		return { slug };
 	}
 

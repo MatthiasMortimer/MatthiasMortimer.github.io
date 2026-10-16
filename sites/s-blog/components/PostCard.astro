@@ -10,7 +10,7 @@ export interface Props {
 const { title, href, date, tags = [], description } = Astro.props;
 ---
 
-<article class="post-card" data-tags={tags.join(",")}>
+<article class="post-card" data-tags={tags.join(",")} data-scroll-reveal>
 	<a class="post-card__link" href={href}>
 		<div>
 			<p class="post-card__date">{date}</p>

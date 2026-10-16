@@ -66,3 +66,6 @@ Desktop.ini
 
 # Local development folder (session notes, runbooks, temporary files)
 dev/
+
+# Local runtime environment marker (test worktrees)
+.rites-env

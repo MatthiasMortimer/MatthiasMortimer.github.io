@@ -340,6 +340,22 @@ h1 {
 	margin-top: 26px;
 }
 
+.document-help {
+	margin-bottom: 1.25rem;
+	color: var(--color-primary);
+	font-family: "Trebuchet MS", sans-serif;
+	line-height: 1.6;
+}
+
+.card-editor .fields-editor {
+	display: grid;
+	gap: 1rem;
+}
+
+.card-editor textarea {
+	min-height: 9rem;
+}
+
 .section-heading {
 	margin-bottom: 12px;
 	padding-bottom: 9px;

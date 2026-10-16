@@ -1,7 +1,6 @@
 ---
 import SiteNav from "../components/SiteNav.astro";
-import Footer from "@ritesGlobal/components/Footer.astro";
-import { identity } from "@ritesGlobal/content.js";
+import BlogFooter from "../components/BlogFooter.astro";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
 
@@ -10,12 +9,13 @@ interface Props {
 	description?: string;
 	image?: string;
 	noindex?: boolean;
+	homeLayout?: boolean;
 	// MDX/Markdown pages with a `layout:` frontmatter field pass their whole
 	// frontmatter object here instead of individual props.
 	frontmatter?: { title?: string; description?: string; image?: string };
 }
 
-const { title, description, image, noindex, frontmatter } = Astro.props;
+const { title, description, image, noindex, frontmatter, homeLayout = false } = Astro.props;
 const pageTitle = title ?? frontmatter?.title ?? site.metadata.title;
 const pageDescription = description ?? frontmatter?.description ?? site.metadata.description;
 const pageImage = image ?? frontmatter?.image;
@@ -31,11 +31,14 @@ const pageImage = image ?? frontmatter?.image;
 		<title>{pageTitle}</title>
 		<SeoMeta title={pageTitle} description={pageDescription} image={pageImage} noindex={noindex} persona="personal" />
 	</head>
-	<body>
+	<body class:list={[{ "blog-home": homeLayout }]}>
 		<SiteNav />
 		<main>
 			<slot />
 		</main>
-		<Footer owner={`${identity.personalName}, a.k.a. ${identity.name}`} tagline={site.metadata.description} />
+		{!homeLayout && <BlogFooter />}
+		<script>
+			import "../scripts/scroll-reveal.js";
+		</script>
 	</body>
 </html>

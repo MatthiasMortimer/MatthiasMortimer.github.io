@@ -5,11 +5,14 @@ import http from "node:http";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const runtimeEnv = require("../../ritesGlobal/runtime-env.cjs");
 const app = express();
-const PORT = 4605;
+const PORT = runtimeEnv.port(4605);
 const GLOBAL_STYLES_DIR = path.resolve(__dirname, "../../ritesGlobal/styles");
 const MEDIA_DIR = path.resolve(__dirname, "../../public/media");
 const DEVAPPS_DIR = path.resolve(__dirname, "..");
@@ -292,16 +295,18 @@ async function discoverApps() {
 			meta.embed !== false &&
 			fs.existsSync(path.join(appPath, "devapp.api.mjs")) &&
 			fs.existsSync(path.join(appPath, "public", "index.html"));
-		const runtimeStatus = canEmbed ? null : await getRuntimeStatus(id, appPath, meta.port || null);
-		const mobileReady = canEmbed ? true : await isPortOpen(meta.mobilePort || null);
+		const resolvedPort = runtimeEnv.port(meta.port || null);
+		const resolvedMobilePort = runtimeEnv.port(meta.mobilePort || null);
+		const runtimeStatus = canEmbed ? null : await getRuntimeStatus(id, appPath, resolvedPort);
+		const mobileReady = canEmbed ? true : await isPortOpen(resolvedMobilePort);
 
 		apps.push({
 			id,
 			name: meta.name || entry.name,
 			type: meta.type || "app",
 			description: meta.description || "",
-			port: meta.port || null,
-			mobilePort: meta.mobilePort || null,
+			port: resolvedPort,
+			mobilePort: resolvedMobilePort,
 			mobileReady,
 			embedded: canEmbed,
 			entryUrl: canEmbed ? `/apps/${encodeURIComponent(entry.name)}/` : null,
