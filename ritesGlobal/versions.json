@@ -1,12 +1,12 @@
 {
-  "ecosystem": "7.9.0",
+  "ecosystem": "7.9.1",
   "gitversion": "3.6.2",
   "sites": {
     "blog": {
-      "version": "2.5.2"
+      "version": "2.5.5"
     },
     "ritesdev": {
-      "version": "3.8.4"
+      "version": "3.8.5"
     }
   },
   "devApps": {

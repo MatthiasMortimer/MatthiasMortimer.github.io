@@ -2,6 +2,7 @@
 .astro/
 dist/
 public/generated/
+ritesGlobal/generated/
 coverage/
 .wrangler/
 

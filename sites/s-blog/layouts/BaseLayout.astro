@@ -3,6 +3,7 @@ import SiteNav from "../components/SiteNav.astro";
 import BlogFooter from "../components/BlogFooter.astro";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
+import styles from "@ritesGlobal/generated/site-styles.json";
 
 interface Props {
 	title?: string;
@@ -26,7 +27,7 @@ const pageImage = image ?? frontmatter?.image;
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="stylesheet" href="/generated/blog.css" />
+		<link rel="stylesheet" href={styles.blog} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{pageTitle}</title>
 		<SeoMeta title={pageTitle} description={pageDescription} image={pageImage} noindex={noindex} persona="personal" />

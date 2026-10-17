@@ -3,6 +3,7 @@ import SiteNav from "../components/SiteNav.astro";
 import Footer from "@ritesGlobal/components/Footer.astro";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
+import styles from "@ritesGlobal/generated/site-styles.json";
 
 export interface Props {
 	title?: string;
@@ -19,7 +20,7 @@ const { title = site.metadata.title, description = site.metadata.description, im
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="/generated/ritesdev.css" />
+		<link rel="stylesheet" href={styles.ritesdev} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<SeoMeta title={title} description={description} image={image} noindex={noindex} />

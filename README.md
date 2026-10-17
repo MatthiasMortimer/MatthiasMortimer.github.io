@@ -24,6 +24,15 @@ npm run build
 
 ## Structure
 
+The sync script combines each site's theme with shared styles and writes
+content-fingerprinted `/generated/<site>.<hash>.css` assets. Layouts read the
+generated stylesheet manifest under `ritesGlobal/generated/`, so browsers and
+Cloudflare request matching styles after a CSS change instead of reusing an older
+fixed URL. Generated assets and the manifest are not source files to edit.
+Run `npm run build` before serving a merged release.
+After building, `node --test scripts/test/production-styles.test.mjs` verifies
+that production pages reference existing fingerprinted stylesheets.
+
 ```
 RitesDev-ecosystem/
 ├── astro.config.mjs      # Astro config (static-first output, Node standalone adapter; self-hosted behind a Cloudflare Tunnel)

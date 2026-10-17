@@ -14,13 +14,22 @@ The Website Content Editor discovers supported files recursively from this direc
 
 Home includes the biography, hobbies, and projects formerly displayed on About.
 Their copy remains editable in `pages/about.md`; the old About URL redirects to
-the Home biography. Home's introduction and latest-post labels remain in
-`pages/index.md`. Edit `home-info.json` under Blog's Reusable Content group in the
+the Home biography. The main content starts with latest posts; its labels remain in
+`pages/index.md`. The former introduction copy is retained there but is no longer
+displayed. Edit `home-info.json` under Blog's Reusable Content group in the
 Website Content Editor to populate the left card. The right About card uses the
 biography and hobbies in `pages/about.md`. On desktop, the side cards stay in place
-while the keyboard-focusable middle column scrolls through the introduction,
-posts, and projects. Longer About content can scroll within its card to stay
-accessible. On narrow screens, the layout stacks with normal page scrolling.
+while the keyboard-focusable middle column scrolls through posts and projects.
+Longer card content can scroll within its card to stay accessible.
+Below 70rem (phones and tablets), Website information and About Me appear as
+two independent, initially collapsed sections above Latest posts, followed by
+projects and the footer. Each section opens with a tap or Enter/Space; opening
+one does not close the other. Card contents use normal page scrolling.
+Editable titles become the expandable section labels, with a Website information
+fallback for a blank left title. Existing editor fields are unchanged.
+Opening the About link expands its section. Resizing within the narrow layout
+keeps open/closed choices; switching to desktop expands both cards.
+Without JavaScript, both native sections start expanded and remain usable.
 Neither side card has hover lift or scroll reveals.
 Home's footer follows the projects inside the middle column and scrolls with it;
 other Blog pages keep their normal page footer.

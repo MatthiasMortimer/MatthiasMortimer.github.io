@@ -4,6 +4,7 @@
 // Run automatically before `dev`/`build` (see package.json) - just add a new "s-<name>"
 // folder with a site.meta.json + pages/ dir and it will show up on the next run.
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { listSites } from "../ritesGlobal/sites.registry.mjs";
@@ -11,6 +12,7 @@ import { listSites } from "../ritesGlobal/sites.registry.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PAGES_DIR = path.resolve(__dirname, "..", "src", "pages");
 const PUBLIC_STYLES_DIR = path.resolve(__dirname, "..", "public", "generated");
+const STYLES_MANIFEST_DIR = path.resolve(__dirname, "..", "ritesGlobal", "generated");
 const DEV_APPS_DIR = path.resolve(__dirname, "..", "devApps");
 const VERSIONS_PATH = path.resolve(__dirname, "..", "ritesGlobal", "versions.json");
 const TOKENS_PATH = path.resolve(__dirname, "..", "ritesGlobal", "styles", "tokens.css");
@@ -95,6 +97,8 @@ const sharedTokens = fs.readFileSync(TOKENS_PATH, "utf8");
 const siteSwitcherStyles = fs.readFileSync(SITE_SWITCHER_STYLES_PATH, "utf8");
 const siteFooterStyles = fs.readFileSync(SITE_FOOTER_STYLES_PATH, "utf8");
 fs.mkdirSync(PUBLIC_STYLES_DIR, { recursive: true });
+fs.mkdirSync(STYLES_MANIFEST_DIR, { recursive: true });
+const stylesManifest = Object.create(null);
 for (const site of sites) {
 	const siteStylesPath = path.join(site.dir, "styles", "global.css");
 	if (!fs.existsSync(siteStylesPath)) continue;
@@ -103,7 +107,12 @@ for (const site of sites) {
 		/^\s*@import\s+["'][^"']*ritesGlobal\/styles\/tokens\.css["'];?\s*/m,
 		"",
 	);
-	fs.writeFileSync(path.join(PUBLIC_STYLES_DIR, `${site.slug}.css`), `${sharedTokens}\n${siteSwitcherStyles}\n${siteFooterStyles}\n${siteStyles}`);
+	const css = `${sharedTokens}\n${siteSwitcherStyles}\n${siteFooterStyles}\n${siteStyles}`;
+	const hash = createHash("sha256").update(css).digest("hex").slice(0, 16);
+	const filename = `${site.slug}.${hash}.css`;
+	fs.writeFileSync(path.join(PUBLIC_STYLES_DIR, filename), css);
+	stylesManifest[site.slug] = `/generated/${filename}`;
 }
+fs.writeFileSync(path.join(STYLES_MANIFEST_DIR, "site-styles.json"), `${JSON.stringify(stylesManifest, null, 2)}\n`);
 
 console.log(`[sync-sites] synced ${sites.length} site(s): ${sites.map((s) => s.label).join(", ")}`);

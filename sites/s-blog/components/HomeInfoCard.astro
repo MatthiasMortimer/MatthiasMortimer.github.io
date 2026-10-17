@@ -1,0 +1,30 @@
+---
+interface Props {
+	title: string;
+	about?: boolean;
+}
+
+const { title, about = false } = Astro.props;
+const label = title || (about ? "About Me" : "Website information");
+---
+
+<aside
+	id={about ? "about-title" : undefined}
+	class:list={["home-info", { "home-about": about }]}
+	aria-label={label}
+	tabindex="0"
+	data-home-card
+>
+	{title && <h2 class="home-card__desktop-title">{title}</h2>}
+	<details open>
+		<summary class="home-card__summary">
+			<h2>{label}</h2>
+			<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+				<path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" />
+			</svg>
+		</summary>
+		<div class="home-card__body">
+			<slot />
+		</div>
+	</details>
+</aside>

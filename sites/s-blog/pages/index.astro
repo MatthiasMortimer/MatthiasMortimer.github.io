@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
 import BlogFooter from "../components/BlogFooter.astro";
+import HomeInfoCard from "../components/HomeInfoCard.astro";
 import type { MDXInstance } from "astro";
 import { normalizeTags } from "@ritesGlobal/tags.js";
 import { projects } from "@ritesGlobal/projects.js";
@@ -33,8 +34,6 @@ const latestPosts = Object.entries(postModules)
 	})
 	.sort((first, second) => second.date.localeCompare(first.date))
 	.slice(0, 3);
-const heroTitle = page.hero.title.replace("{firstName}", identity.firstName);
-const heroDescription = page.hero.description.replace("{occupation}", identity.occupation);
 const aboutIntro = about.intro
 	.replace("{firstName}", identity.firstName)
 	.replace("{occupation}", identity.occupation)
@@ -44,20 +43,17 @@ const hobbies = about.hobbies.replace("{hobbies}", identity.hobbies.join(", "));
 
 <BaseLayout title={page.seo.title} description={page.seo.description} homeLayout>
 	<div class="home-layout">
-		<aside class="home-info" aria-label={homeInfo.title || "Website information"}>
-			{homeInfo.title && <h2>{homeInfo.title}</h2>}
+		<HomeInfoCard title={homeInfo.title}>
 			{homeInfo.body && <p>{homeInfo.body}</p>}
-		</aside>
-		<div class="home-content" role="region" aria-label="Blog introduction, latest posts and projects" tabindex="0">
-			<section class="hero">
-				<span class="hero__eyebrow">{page.hero.eyebrow}</span>
-				<h1>{heroTitle}</h1>
-				<p>{heroDescription}</p>
-			</section>
-
+		</HomeInfoCard>
+		<HomeInfoCard title={about.title} about>
+			<p>{aboutIntro}</p>
+			<p>{hobbies}</p>
+		</HomeInfoCard>
+		<div class="home-content" role="region" aria-label="Latest posts and projects" tabindex="0">
 			<section aria-labelledby="latest-title">
 				<div class="section-heading">
-					<h2 id="latest-title" data-scroll-reveal>{page.latest.title}</h2>
+					<h1 id="latest-title" data-scroll-reveal>{page.latest.title}</h1>
 					<a href="/blog/blog/">{page.latest.link}</a>
 				</div>
 				<div class="post-grid">
@@ -78,10 +74,8 @@ const hobbies = about.hobbies.replace("{hobbies}", identity.hobbies.join(", "));
 			</section>
 			<BlogFooter />
 		</div>
-		<aside class="home-info home-about" aria-labelledby="about-title" tabindex="0">
-			<h2 id="about-title">{about.title}</h2>
-			<p>{aboutIntro}</p>
-			<p>{hobbies}</p>
-		</aside>
 	</div>
+	<script>
+		import "../scripts/home-cards.js";
+	</script>
 </BaseLayout>
