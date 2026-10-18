@@ -3,10 +3,11 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; style-src 'self' file:; script-src 'self'; img-src 'self' data: https:; connect-src 'self'">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; style-src 'self' file:; script-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-src http://127.0.0.1:* http://localhost:*">
 	<title>Website Content Editor</title>
 	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
 	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="live-website-preview.css">
 </head>
 <body>
 	<div class="app-shell">
@@ -62,8 +63,8 @@
 						<p id="document-help" class="document-help" hidden></p>
 						<section id="fields-section" class="edit-section">
 							<div class="section-heading">
-								<h3>Details</h3>
-								<span>Structured fields</span>
+								<h3 id="fields-heading">Details</h3>
+								<span id="fields-subtitle">Structured fields</span>
 							</div>
 							<div id="fields-editor" class="fields-editor"></div>
 						</section>

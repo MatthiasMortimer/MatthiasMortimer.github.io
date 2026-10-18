@@ -1,5 +1,7 @@
 # Ecosystem Guide
 
+> Detailed file contracts and troubleshooting tables for each system live in [docs/](docs/README.md).
+
 ## Architecture
 
 This repository is an Astro multi-site workspace. `ritesGlobal/sites.registry.mjs` discovers every `sites/s-*` directory with a `site.meta.json`. Each site's `basePath` determines where `scripts/sync-sites.mjs` symlinks its `pages/` directory into generated `src/pages/` before `npm run dev` and `npm run build`.

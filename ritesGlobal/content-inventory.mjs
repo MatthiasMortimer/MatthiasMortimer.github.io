@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { listEditableSites } from "./sites.registry.mjs";
+import { getSiteThemeDefinition } from "./site-theme.mjs";
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -18,6 +19,7 @@ export const CONTENT_TYPES = {
 	TAGS: "tags",
 	VERSIONS: "versions",
 	SEO: "seo",
+	THEME: "theme",
 };
 
 const GLOBAL_CONTENT_DENYLIST = new Set(["package.json"]);
@@ -73,6 +75,7 @@ function discoverContentFiles(siteDir, roots = ["content"], extensions = CONTENT
 }
 
 function createContentTypes(site) {
+	const themeDefinition = getSiteThemeDefinition(site.slug);
 	if (site.editor?.groups) {
 		return Object.fromEntries(site.editor.groups.map((group) => [
 			group.type,
@@ -92,6 +95,9 @@ function createContentTypes(site) {
 		if (file === "content/site.json") {
 			type = CONTENT_TYPES.METADATA;
 			label = "Site Settings";
+		} else if (themeDefinition && file === themeDefinition.path) {
+			type = CONTENT_TYPES.THEME;
+			label = themeDefinition.label;
 		} else if (file.startsWith("content/posts/")) {
 			type = CONTENT_TYPES.BLOG_POST;
 			label = "Blog Posts";

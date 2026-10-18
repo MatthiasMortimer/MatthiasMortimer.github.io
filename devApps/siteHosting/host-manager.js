@@ -5,7 +5,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const runtimeEnv = require("../../ritesGlobal/runtime-env.cjs");
-const config = buildConfig(require("./host-config.json"));
+const { buildHostingConfig } = require("../../ritesGlobal/hosting-config.cjs");
+const config = buildHostingConfig();
 
 const REPO_ROOT = path.resolve(__dirname, "../..");
 const ASTRO_BIN = path.join(REPO_ROOT, "node_modules", ".bin", "astro");
@@ -20,25 +21,6 @@ const READY_POLL_MS = 200;
 const BUILD_INPUT_DIRS = ["sites", "ritesGlobal", "public", "scripts", "src"];
 const BUILD_INPUT_FILES = ["astro.config.mjs", "package.json", "package-lock.json", "tsconfig.json"];
 const BUILD_SKIP_DIRS = new Set(["node_modules", "generated", ".astro"]);
-
-// Config
-	// Test copies (see ritesGlobal/runtime-env.cjs) shift ports and never run the public tunnel.
-function buildConfig(base) {
-	const productionPort = runtimeEnv.port(base.productionPort);
-	const devInternalPort = runtimeEnv.port(base.devInternalPort);
-	const localUrl = `http://127.0.0.1:${productionPort}`;
-	return {
-		...base,
-		env: runtimeEnv.name,
-		tunnelEnabled: !runtimeEnv.isTest,
-		productionPort,
-		devInternalPort,
-		legacyDevGatewayPort: runtimeEnv.port(base.legacyDevGatewayPort),
-		localUrl,
-		devLocalUrl: `http://127.0.0.1:${devInternalPort}/`,
-		publicUrl: runtimeEnv.isTest ? localUrl : base.publicUrl,
-	};
-}
 
 class HostManager extends EventEmitter {
 	constructor() {

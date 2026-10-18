@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src http://127.0.0.1:* http://localhost:*">
+	<title>Theme preview</title>
+	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="live-website-preview.css">
+	<link rel="stylesheet" href="theme-preview-window.css">
+</head>
+<body>
+	<header class="preview-toolbar">
+		<div>
+			<h1 id="preview-title">Theme preview</h1>
+			<p>The real dev website. Colors save automatically in the editor. Resize this window or choose a screen size.</p>
+		</div>
+		<button id="reattach-preview" type="button">Reattach to editor</button>
+		<form id="viewport-form">
+			<label>Screen size
+				<select id="viewport-preset">
+					<option value="fit">Fit window</option>
+					<option value="mobile">Mobile (375 x 812)</option>
+					<option value="tablet">Tablet (768 x 1024)</option>
+					<option value="desktop">Desktop (1280 x 800)</option>
+					<option value="custom">Custom</option>
+				</select>
+			</label>
+			<label>Width (px)<input id="viewport-width" type="number" min="240" max="2560" step="1" value="375" required></label>
+			<label>Height (px)<input id="viewport-height" type="number" min="240" max="2160" step="1" value="812" required></label>
+			<button type="submit">Apply size</button>
+			<output id="viewport-size" aria-live="polite"></output>
+		</form>
+		<p id="preview-status" role="status">Waiting for the editor...</p>
+	</header>
+	<main class="preview-workspace">
+		<div id="preview-viewport" class="preview-viewport">
+			<p id="preview-empty">Open Theme colors in the editor to see a preview here.</p>
+		</div>
+	</main>
+	<script type="module" src="theme-preview-window.js"></script>
+</body>
+</html>

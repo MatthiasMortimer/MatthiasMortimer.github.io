@@ -83,6 +83,14 @@ test("discovers site content only from each content folder", () => {
 		assert.ok(files.length > 0, `${site.label} has no discovered content`);
 		assert.ok(files.every((file) => file.startsWith("content/")), `${site.label} has content outside content/`);
 		assert.ok(files.includes("content/site.json"), `${site.label} has no reusable site settings`);
+		assert.ok(files.includes("content/theme.json"), `${site.label} has no editable theme file`);
+	}
+});
+
+test("groups built-in site theme files as theme colors", () => {
+	for (const site of getContentInventory().filter((entry) => ["blog", "ritesdev"].includes(entry.slug))) {
+		assert.equal(site.contentTypes.theme?.label, "Theme colors");
+		assert.deepEqual(site.contentTypes.theme?.files, ["content/theme.json"]);
 	}
 });
 

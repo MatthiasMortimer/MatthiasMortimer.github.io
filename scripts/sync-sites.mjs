@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { listSites } from "../ritesGlobal/sites.registry.mjs";
+import { getSiteThemeDefinition, renderSiteThemeCss } from "../ritesGlobal/site-theme.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PAGES_DIR = path.resolve(__dirname, "..", "src", "pages");
@@ -102,12 +103,22 @@ const stylesManifest = Object.create(null);
 for (const site of sites) {
 	const siteStylesPath = path.join(site.dir, "styles", "global.css");
 	if (!fs.existsSync(siteStylesPath)) continue;
+	const themeDefinition = getSiteThemeDefinition(site.slug);
+	let themeCss = "";
+	if (themeDefinition) {
+		const themePath = path.join(site.dir, themeDefinition.path);
+		if (!fs.existsSync(themePath)) {
+			throw new Error(`[sync-sites] missing theme file for "${site.slug}": ${themePath}`);
+		}
+		const parsedTheme = JSON.parse(fs.readFileSync(themePath, "utf8"));
+		themeCss = renderSiteThemeCss(site.slug, parsedTheme);
+	}
 
 	const siteStyles = fs.readFileSync(siteStylesPath, "utf8").replace(
 		/^\s*@import\s+["'][^"']*ritesGlobal\/styles\/tokens\.css["'];?\s*/m,
 		"",
 	);
-	const css = `${sharedTokens}\n${siteSwitcherStyles}\n${siteFooterStyles}\n${siteStyles}`;
+	const css = `${sharedTokens}\n${siteSwitcherStyles}\n${siteFooterStyles}\n${themeCss}${siteStyles}`;
 	const hash = createHash("sha256").update(css).digest("hex").slice(0, 16);
 	const filename = `${site.slug}.${hash}.css`;
 	fs.writeFileSync(path.join(PUBLIC_STYLES_DIR, filename), css);

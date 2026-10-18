@@ -4,6 +4,8 @@ import Footer from "@ritesGlobal/components/Footer.astro";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
 import styles from "@ritesGlobal/generated/site-styles.json";
+import theme from "../content/theme.json";
+import { renderSiteThemeCss } from "@ritesGlobal/site-theme.mjs";
 
 export interface Props {
 	title?: string;
@@ -21,6 +23,7 @@ const { title = site.metadata.title, description = site.metadata.description, im
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href={styles.ritesdev} />
+		{import.meta.env.DEV && <style is:inline set:html={renderSiteThemeCss("ritesdev", theme)} />}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<SeoMeta title={title} description={description} image={image} noindex={noindex} />

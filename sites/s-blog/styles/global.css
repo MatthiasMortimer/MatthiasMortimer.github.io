@@ -2,20 +2,6 @@
 
 :root {
 	--content-width: 42rem;
-	color-scheme: light;
-	--color-bg: #f4efe5;
-	--color-bg-secondary: #eee6d8;
-	--color-surface: #faf6ee;
-	--color-surface-hover: #e8dece;
-	--color-border: #d4c7b5;
-	--color-border-light: #baa78e;
-	--color-text: #382f27;
-	--color-text-muted: #5e5347;
-	--color-text-dim: #716354;
-	--color-accent: #705039;
-	--color-accent-hover: #503923;
-	--color-accent-secondary: #596347;
-	--color-accent-green: #536246;
 	--blog-accent-2: var(--color-accent-secondary);
 	--shadow-sm: 0 2px 6px rgba(77, 57, 34, 0.05);
 	--shadow-md: 0 8px 24px rgba(77, 57, 34, 0.07);
@@ -456,13 +442,28 @@ a:hover, a:focus-visible {
 	}
 
 	.site-nav__mobile-panel {
-		margin-top: 0.6rem;
+		position: absolute;
+		top: calc(100% + 0.6rem);
+		right: 0;
+		z-index: 10;
 		display: grid;
 		gap: 0.5rem;
+		width: min(18rem, calc(100vw - 2.5rem));
 		padding: 0.75rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
+	}
+
+	.site-nav__mobile-menu {
+		position: relative;
+	}
+
+	@media (max-width: 30rem) {
+		.site-nav__mobile-panel {
+			right: auto;
+			left: 0;
+		}
 	}
 
 	.site-nav__mobile-panel a {

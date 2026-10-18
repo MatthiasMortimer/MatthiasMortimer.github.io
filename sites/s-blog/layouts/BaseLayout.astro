@@ -4,6 +4,8 @@ import BlogFooter from "../components/BlogFooter.astro";
 import SeoMeta from "@ritesGlobal/components/SeoMeta.astro";
 import site from "../content/site.json";
 import styles from "@ritesGlobal/generated/site-styles.json";
+import theme from "../content/theme.json";
+import { renderSiteThemeCss } from "@ritesGlobal/site-theme.mjs";
 
 interface Props {
 	title?: string;
@@ -28,6 +30,7 @@ const pageImage = image ?? frontmatter?.image;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="stylesheet" href={styles.blog} />
+		{import.meta.env.DEV && <style is:inline set:html={renderSiteThemeCss("blog", theme)} />}
 		<meta name="generator" content={Astro.generator} />
 		<title>{pageTitle}</title>
 		<SeoMeta title={pageTitle} description={pageDescription} image={pageImage} noindex={noindex} persona="personal" />

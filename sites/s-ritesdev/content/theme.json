@@ -1,0 +1,22 @@
+{
+  "colorScheme": "dark",
+  "colors": {
+    "bg": "#0b0f19",
+    "surface": "#1f2937",
+    "bgSecondary": "#111827",
+    "surfaceHover": "#374151",
+    "border": "#2d3748",
+    "borderLight": "#4b5563",
+    "mediaFrame": "#0f172a",
+    "text": "#f3f4f6",
+    "textMuted": "#9ca3af",
+    "textDim": "#6b7280",
+    "accent": "#38bdf8",
+    "accentHover": "#0284c7",
+    "buttonHover": "#7dd3fc",
+    "accentContrast": "#000000",
+    "accentSecondary": "#a855f7",
+    "accentSecondaryHover": "#c084fc",
+    "accentGreen": "#10b981"
+  }
+}

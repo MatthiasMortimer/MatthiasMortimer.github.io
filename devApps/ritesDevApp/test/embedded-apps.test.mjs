@@ -51,3 +51,33 @@ test("a missing trailing slash redirects so relative assets resolve", async (con
 	assert.equal(response.status, 302);
 	assert.equal(response.headers.get("location"), "/apps/inquiry-manager/");
 });
+
+test("the embedded content editor exposes each built-in theme and serves its browser helpers", async (context) => {
+	const baseUrl = await withLauncher(context);
+	const editorUrl = `${baseUrl}/apps/content-editor`;
+	const inventoryResponse = await fetch(`${editorUrl}/api/content`);
+	assert.equal(inventoryResponse.status, 200);
+	const inventory = await inventoryResponse.json();
+	for (const slug of ["blog", "ritesdev"]) {
+		const site = inventory.find((entry) => entry.slug === slug);
+		const file = site.groups.flatMap((group) => group.files).find((entry) => entry.relativePath === "content/theme.json");
+		assert.equal(file.editor.kind, "theme");
+		const response = await fetch(`${editorUrl}/api/content/read`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ siteSlug: slug, relativePath: file.relativePath }),
+		});
+		assert.equal(response.status, 200);
+		const document = await response.json();
+		assert.equal(document.editor.kind, "theme");
+		assert.equal(document.editor.simpleFields.length, 5);
+		assert.ok(document.fields.colors.accent);
+	}
+	const helper = await fetch(`${editorUrl}/theme-values.js`);
+	assert.equal(helper.status, 200);
+	assert.match(await helper.text(), /export function isThemeHex/);
+	for (const asset of ["theme-preview.html", "theme-preview.js", "live-website-preview.js", "live-website-preview.css", "theme-preview-window.js", "theme-preview-window.css"]) {
+		const response = await fetch(`${editorUrl}/${asset}`);
+		assert.equal(response.status, 200, `Detached preview asset must be served: ${asset}`);
+	}
+});

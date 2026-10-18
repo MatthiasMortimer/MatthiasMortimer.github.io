@@ -4,7 +4,7 @@
   "description": "Serve the production build publicly with optional workstation development mode",
   "type": "hosting",
   "runtime": "desktop",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "port": null,
   "mobilePort": 4615,
   "command": "npm start",

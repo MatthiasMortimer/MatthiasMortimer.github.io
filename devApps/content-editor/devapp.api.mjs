@@ -2,6 +2,7 @@
 // the standalone Electron window's mobile bridge.
 import { getContentInventory } from "../../ritesGlobal/content-inventory.mjs";
 import { createContentStore } from "./content-store.js";
+import { getLivePreview } from "./live-preview.js";
 
 export function createApiHandler() {
 	let inventoryCache = null;
@@ -22,6 +23,7 @@ export function createApiHandler() {
 
 	return async function handleApi({ method, pathname, body }) {
 		if (method === "GET" && pathname === "/api/content") return contentStore.list();
+		if (method === "POST" && pathname === "/api/theme/preview") return getLivePreview(body?.siteSlug);
 		if (method === "POST" && pathname === "/api/content/read") {
 			return contentStore.read(body.siteSlug, body.relativePath);
 		}

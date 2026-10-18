@@ -2,7 +2,6 @@
 
 :root {
 	--content-width: 58rem;
-	--color-accent-hover: #0284c7;
 }
 
 * {
@@ -139,11 +138,11 @@ a:hover, a:focus-visible {
 
 .btn-primary {
 	background-color: var(--color-accent);
-	color: #000;
+	color: var(--color-accent-contrast, #000);
 }
 
 .btn-primary:hover {
-	background-color: #7dd3fc;
+	background-color: var(--color-button-hover);
 }
 
 .btn-secondary {
@@ -159,11 +158,11 @@ a:hover, a:focus-visible {
 
 .btn-accent {
 	background-color: var(--color-accent-secondary);
-	color: #000;
+	color: var(--color-accent-contrast, #000);
 }
 
 .btn-accent:hover {
-	background-color: #c084fc;
+	background-color: var(--color-accent-secondary-hover, var(--color-accent-secondary));
 }
 
 .btn-sm {
