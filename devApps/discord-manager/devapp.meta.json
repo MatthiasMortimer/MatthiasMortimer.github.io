@@ -1,0 +1,14 @@
+{
+  "name": "Discord Bot Manager",
+  "slug": "discord-manager",
+  "description": "Edit the Discord server setup layout and review bot connection readiness",
+  "type": "discord_manager",
+  "runtime": "tab",
+  "version": "1.0.0",
+  "embed": true,
+  "tabOrder": 4,
+  "manages": ["discord"],
+  "contentTypes": ["discord_config"],
+  "author": "RitesDev",
+  "icon": "chat"
+}

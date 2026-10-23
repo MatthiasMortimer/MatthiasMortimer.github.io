@@ -1,0 +1,54 @@
+{
+  "guildName": "RitesDev | Client & Project Hub",
+  "categories": [
+    {
+      "name": "START HERE",
+      "channels": [
+        { "name": "start-here", "topic": "Welcome and orientation for the RitesDev community." },
+        { "name": "rules", "topic": "Community rules and expectations." },
+        { "name": "server-information", "topic": "Information about RitesDev and this server." },
+        { "name": "announcements", "topic": "Official RitesDev announcements." },
+        { "name": "apply-or-contact", "topic": "How to request access or contact the RitesDev team." },
+        { "name": "introductions", "topic": "Introduce yourself to the community." }
+      ]
+    },
+    {
+      "name": "NETWORK",
+      "channels": ["general", "networking", "opportunities", "project-showcase", "resources", "feedback", "off-topic"]
+    },
+    {
+      "name": "SUPPORT & TICKETS",
+      "channels": ["support-desk", "ticket-log", "bot-status", "staff-notes"]
+    },
+    {
+      "name": "CLIENT PORTAL",
+      "channels": ["client-directory", "client-requests", "client-updates"]
+    },
+    {
+      "name": "PROJECTS",
+      "channels": ["project-directory", "active-projects", "internal-projects", "project-archive"]
+    },
+    {
+      "name": "TEAM",
+      "channels": ["team-chat", "delivery-review", "operations", "moderation-log"]
+    }
+  ],
+  "roles": [
+    { "name": "Admin", "permissions": [] },
+    { "name": "Project Manager", "permissions": ["ManageMessages", "ManageThreads"] },
+    { "name": "Moderator", "permissions": ["ManageMessages", "ModerateMembers", "ViewAuditLog"] },
+    { "name": "Developer", "permissions": [] },
+    { "name": "Client", "permissions": [] },
+    { "name": "Network Member", "permissions": [] },
+    { "name": "Pending", "permissions": [] },
+    { "name": "Bot", "permissions": [] }
+  ],
+  "categoryAccess": {
+    "START HERE": { "everyone": "view" },
+    "NETWORK": { "everyone": "view", "roles": { "Pending": "hidden" } },
+    "SUPPORT & TICKETS": { "everyone": "hidden", "roles": { "Admin": "view", "Project Manager": "view", "Moderator": "view" } },
+    "CLIENT PORTAL": { "everyone": "hidden", "roles": { "Admin": "view", "Project Manager": "view" } },
+    "PROJECTS": { "everyone": "hidden", "roles": { "Admin": "view", "Project Manager": "view" } },
+    "TEAM": { "everyone": "hidden", "roles": { "Admin": "view", "Project Manager": "view", "Moderator": "view", "Developer": "view" } }
+  }
+}

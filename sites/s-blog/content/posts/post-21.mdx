@@ -1,0 +1,28 @@
+---
+title: Static Pages Still Need a Server
+pubDate: '2026-10-02'
+description: >-
+  I changed how the public pages are served while keeping a server for dynamic
+  features.
+author: RitesDev
+tags:
+  - Astro
+  - Business
+---
+# Static Pages Still Need a Server
+
+After launch, I kept working on how the website is built and served.
+
+The public pages and blog posts can be generated ahead of time as static files. That means they don't need to be assembled from scratch for every visit. At the same time, some features still need server-side code, like the contact form.
+
+## Use the right approach for each part
+
+I moved the site from a static-first build while keeping a Node server available for the dynamic endpoints. That gives the regular pages a straightforward path to production without removing the parts that need to respond to a request.
+
+It took me a while to understand that “static site” doesn't mean “no server anywhere.” Different parts of one website can have different jobs.
+
+## Deployment is part of the design
+
+These decisions affect more than build output. They shape how I host the site and how I can add features later.
+
+I'm still learning the trade-offs, but I like having a setup that matches what the site actually needs instead of choosing one model for everything.

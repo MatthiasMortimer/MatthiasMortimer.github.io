@@ -11,8 +11,7 @@ intro:
     the trade.
   - >-
     In my development work, I focus heavily on the modern web stack, building
-    blazingly fast websites with Astro, interactive web applications with React
-    and TypeScript, and reliable backend APIs with Node.js.
+    websites fast with Astro and a privately owned Ecosystem.
   - >-
     When teaching, I believe in practical, hands-on learning rather than rote
     memorization. I help students build real projects, master debugging
@@ -47,7 +46,7 @@ stats:
   Projects Completed: 3+
   Students Mentored: 3
   Average Client Rating: 5.0 / 5.0
-  Primary Tech Stack: 'Astro, Node.js, Python, GoDot'
+  Primary Tech Stack: 'Astro, Html, CSS, Node.js, Python, GoDot'
   Response Time: < 24 hours
 ---
 

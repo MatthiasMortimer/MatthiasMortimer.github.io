@@ -87,7 +87,7 @@ services:
         - Dependency upgrades & security patches
         - Refactoring roadmap & PR execution
         - CI/CD workflow configuration
-      pricing: $800 flat rate audit for most websites.
+      pricing: $400 flat rate audit for most websites.
     - id: custom-workshops
       category: Teaching
       title: Team Workshops & Bootcamps

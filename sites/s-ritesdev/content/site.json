@@ -5,13 +5,31 @@
     "description": "Professional freelance web development, full-stack consulting, and personalized 1-on-1 coding mentorship."
   },
   "navigation": [
-    { "label": "Home", "href": "/" },
-    { "label": "Services & Teaching", "href": "/services/" },
-    { "label": "Portfolio", "href": "/portfolio/" },
-    { "label": "About", "href": "/about/" },
-    { "label": "Contact", "href": "/contact/" }
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Services & Teaching",
+      "href": "/services/"
+    },
+    {
+      "label": "Portfolio",
+      "href": "/portfolio/"
+    },
+    {
+      "label": "About",
+      "href": "/about/"
+    },
+    {
+      "label": "Contact",
+      "href": "/contact/"
+    }
   ],
-  "primaryAction": { "label": "Hire / Book", "href": "/contact/" },
+  "primaryAction": {
+    "label": "Hire / Book",
+    "href": "/contact/"
+  },
   "footer": {
     "tagline": "Freelance Web Development & Technical Mentorship"
   }

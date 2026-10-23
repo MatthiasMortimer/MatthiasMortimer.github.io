@@ -23,13 +23,16 @@
     "mgmt:content": "node scripts/management/content-inventory.mjs",
     "mgmt:apps": "node scripts/management/list-apps.mjs",
     "mgmt:setup": "node scripts/management/setup-check.mjs",
+    "discord:setup": "node scripts/discord/setup.mjs",
     "docs:check": "node --test scripts/test/docs.test.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.0",
     "@astrojs/node": "^11.1.6",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.1"
+    "astro": "^7.3.1",
+    "discord.js": "^14.27.0",
+    "dotenv": "^18.0.8"
   },
   "allowScripts": {
     "esbuild": true

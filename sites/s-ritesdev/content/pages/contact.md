@@ -24,7 +24,7 @@ faqs:
     answer: >-
       Yes! If you have an urgent bug or deadline, mention it in your message and
       I'll endeavor to schedule an expedited consultation or asynchronous PR
-      review within 24 hours.
+      review.
   - question: What timezone are you in and what is your availability?
     answer: >-
       I operate in Central Time (UTC+5), but I regularly accommodate

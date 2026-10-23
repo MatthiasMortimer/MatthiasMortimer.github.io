@@ -23,7 +23,7 @@ test("apps with a devapp.api.mjs are reported as embedded tabs", async (context)
 
 	assert.deepEqual(
 		apps.filter((app) => app.embedded).map((app) => app.id),
-		["content-editor", "blog-post-manager", "inquiry-manager"],
+		["content-editor", "blog-post-manager", "inquiry-manager", "discord-manager"],
 	);
 });
 

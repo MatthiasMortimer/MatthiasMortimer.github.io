@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'">
+	<title>Discord Bot Manager</title>
+	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<main class="shell">
+		<header class="topbar">
+			<div><p class="eyebrow">RitesDev Studio</p><h1>Discord Bot Manager</h1></div>
+			<div class="status-wrap"><span id="connection-dot" class="status-dot"></span><span id="connection-status">Checking setup…</span></div>
+		</header>
+		<section class="intro card">
+			<div><p class="eyebrow">Server configuration</p><h2>Edit your setup layout</h2><p>Update categories, channels, roles, and category access. Saving changes the setup configuration; it does not apply them to Discord.</p></div>
+			<button id="check-connection" class="button secondary" type="button">Check Discord connection</button>
+		</section>
+		<section class="credentials card">
+			<div class="editor-heading"><div><h2>Bot credentials</h2><p>Stored in this computer’s ignored `.env` file</p></div><button id="save-credentials" class="button primary" type="button">Save credentials</button></div>
+			<div id="credential-fields" class="credential-fields">
+				<label>Bot token<input id="bot-token" type="text" autocomplete="off" spellcheck="false"></label>
+				<label>Server ID<input id="guild-id" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"></label>
+			</div>
+			<p id="credential-feedback" class="feedback" role="status" aria-live="polite"></p>
+		</section>
+		<section class="editor card">
+			<div class="editor-heading"><div><h2>Server layout</h2><p>JSON configuration</p></div><div class="actions"><button id="reload" class="button secondary" type="button">Reload</button><button id="save" class="button primary" type="button">Save layout</button></div></div>
+			<textarea id="layout" spellcheck="false" aria-label="Discord server layout JSON" placeholder="Loading server layout…"></textarea>
+			<p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+		</section>
+		<section id="connection-details" class="note card"><strong>Connection check not run.</strong><span>It will use read-only Discord API requests. No server changes or messages are sent.</span></section>
+	</main>
+	<script src="app.js"></script>
+</body>
+</html>

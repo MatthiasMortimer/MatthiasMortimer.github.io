@@ -17,8 +17,8 @@ const SITE_THEME_DEFINITIONS = {
 					{ key: "surface", cssVar: "--color-surface", label: "Card background", default: "#faf6ee", simple: true },
 					{ key: "bgSecondary", cssVar: "--color-bg-secondary", label: "Section background", default: "#eee6d8" },
 					{ key: "surfaceHover", cssVar: "--color-surface-hover", label: "Hover surface", default: "#e8dece" },
-					{ key: "border", cssVar: "--color-border", label: "Border", default: "#d4c7b5" },
-					{ key: "borderLight", cssVar: "--color-border-light", label: "Strong border", default: "#baa78e" },
+					{ key: "border", cssVar: "--color-border", label: "Border", default: "#94836b" },
+					{ key: "borderLight", cssVar: "--color-border-light", label: "Strong border", default: "#7b6c56" },
 				],
 			},
 			{

@@ -1,0 +1,27 @@
+---
+title: What MDX Gives the Blog
+pubDate: '2026-08-23'
+description: Moving posts into MDX files gave the blog a more reusable structure.
+author: RitesDev
+tags:
+  - Astro
+  - MDX
+  - Blog
+---
+# What MDX Gives the Blog
+
+As I worked on the next version of the site, I wanted blog posts to be content the website could load and render in a consistent way.
+
+I'm using MDX files for the posts. Each file can hold the information needed for the blog listing, followed by the article itself. That means the same content can appear in the blog without me building a separate page by hand for every post.
+
+## A small change to how I think about posts
+
+When a post lives in a consistent format, the site can treat it like part of a collection. It can show the title, description, and date in a listing, then render the full content on its own page.
+
+The writing is still just writing. The format is there to help the site organize it.
+
+## Better structure, more things to maintain
+
+Moving to MDX gives me a cleaner way to add posts, but it also means the website needs to understand those files and their metadata. I have to keep the format consistent so listings and individual post pages can both use it.
+
+For now, this feels like a good foundation for the kind of blog I want to build.

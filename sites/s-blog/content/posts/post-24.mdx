@@ -1,0 +1,26 @@
+---
+title: 'Changing the Site Colors Without Editing CSS'
+pubDate: '2026-10-18'
+description: 'I made the site palettes editable as content and added a live preview.'
+author: RitesDev
+tags:
+  - Astro
+  - CSS Modules
+---
+# Changing the Site Colors Without Editing CSS
+
+I wanted to be able to adjust the site's colors without hunting through stylesheets every time.
+
+The blog and RitesDev now have theme color settings stored as editable content. The content editor can show the palette, save valid color changes, and preview the actual local website.
+
+## A safer way to experiment
+
+The editor gives me a few main colors up front and keeps the more detailed choices in an advanced section. It also checks the color values before saving, so an incomplete value doesn't end up in the theme file.
+
+Seeing the local site update makes this much easier to work with. I can change a color and judge it in the real layout instead of guessing from a small swatch.
+
+## Keep the source of truth clear
+
+The theme file is still the real data. The editor is a more convenient way to change it, not a separate temporary version of the design.
+
+That fits the direction I'm taking with the rest of RitesDev: make the common changes easier while keeping the underlying content understandable.
