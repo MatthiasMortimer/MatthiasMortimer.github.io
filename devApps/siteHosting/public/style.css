@@ -264,6 +264,20 @@ body {
 .log li.warn { color: #e8c18a; }
 .log li.error { color: #f0a49a; }
 
+.traffic-note {
+	margin: 0 0 0.6rem;
+}
+
+.traffic-title {
+	margin: 0.6rem 0 0.4rem;
+	font-size: 0.85rem;
+}
+
+.traffic-log {
+	flex-basis: 12rem;
+	height: 12rem;
+}
+
 .log-time {
 	color: #8d87a3;
 	margin-right: 0.4rem;

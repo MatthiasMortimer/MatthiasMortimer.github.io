@@ -27,6 +27,8 @@ dev/secure/
 .env*
 !.env.example
 !.env.*.example
+scripts/discord/guild-config.json
+scripts/discord/layout-drafts.json
 .npmrc
 !.npmrc.example
 secrets/

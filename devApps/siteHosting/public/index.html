@@ -69,7 +69,11 @@
 			<ul id="log" class="log"></ul>
 
 			<h2 class="section-title">Traffic</h2>
-			<ul id="traffic" class="log traffic-log"></ul>
+			<p class="muted traffic-note">Separate user and bot counts for the latest 500 requests. Bot detection is based on user agent, not verified identity.</p>
+			<h3 class="traffic-title" id="traffic-users-title">Users: 0 visitors · 0 views</h3>
+			<ul id="traffic-users" class="log traffic-log" aria-labelledby="traffic-users-title"></ul>
+			<h3 class="traffic-title" id="traffic-bots-title">Bots: 0 bots · 0 requests</h3>
+			<ul id="traffic-bots" class="log traffic-log" aria-labelledby="traffic-bots-title"></ul>
 		</section>
 
 		<section class="panel preview-panel">

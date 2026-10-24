@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, shell } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const net = require("net");
@@ -99,6 +99,18 @@ function createWindow() {
 			contextIsolation: true,
 			enableRemoteModule: false,
 		},
+	});
+
+	// Open links such as the Discord bot authorization page in the user's default
+	// browser, where they may already be signed in, instead of in a new Electron
+	// window that can trigger Discord's desktop-app handoff.
+	mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+		if (/^https?:\/\//iu.test(url)) {
+			shell.openExternal(url).catch((error) => {
+				console.error("[Main] Failed to open external link:", error);
+			});
+		}
+		return { action: "deny" };
 	});
 
 	// Load a lightweight shell immediately while the app server starts.

@@ -15,6 +15,7 @@ For everyday how-to guides (editing colors, adding a site), see the [project REA
 | [Theme colors](systems/theme-colors.md) | `theme.json`, `site-theme.mjs`, dev live colors, editor autosave and preview |
 | [Dev apps](systems/dev-apps.md) | `devapp.meta.json`, `devapp.api.mjs`, launcher tabs, when a launcher restart is needed |
 | [Hosting and ports](systems/hosting-and-ports.md) | Dev/production/launcher ports, test mode, shared hosting config |
+| [Discord bot and manager](systems/discord-manager.md) | RitesBot runtime, layout/draft/config JSON, dashboard API, tickets, `/riteserver` |
 
 ## Something broke?
 
@@ -26,6 +27,7 @@ For everyday how-to guides (editing colors, adding a site), see the [project REA
 | Theme preview can't connect | [Theme colors](systems/theme-colors.md#when-it-breaks), [Hosting and ports](systems/hosting-and-ports.md#when-it-breaks) |
 | App tab missing, or API returns 404 or old data | [Dev apps](systems/dev-apps.md#when-it-breaks) |
 | Unexpected ports (44xx/47xx) or the tunnel won't start | [Hosting and ports](systems/hosting-and-ports.md#when-it-breaks) |
+| Discord bot offline, layout won't load or apply, tickets misbehave | [Discord bot and manager](systems/discord-manager.md#when-it-breaks) |
 
 ## Keeping docs accurate
 

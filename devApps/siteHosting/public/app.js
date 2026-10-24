@@ -19,7 +19,10 @@ const els = {
 	devPid: document.getElementById("dev-pid"),
 	tunnelPid: document.getElementById("tunnel-pid"),
 	log: document.getElementById("log"),
-	traffic: document.getElementById("traffic"),
+	trafficUsers: document.getElementById("traffic-users"),
+	trafficBots: document.getElementById("traffic-bots"),
+	trafficUsersTitle: document.getElementById("traffic-users-title"),
+	trafficBotsTitle: document.getElementById("traffic-bots-title"),
 	preview: document.getElementById("preview"),
 	previewOverlay: document.getElementById("preview-overlay"),
 	previewMessage: document.getElementById("preview-message"),
@@ -36,6 +39,7 @@ const STATE_LABELS = {
 let config = null;
 let busy = false;
 let previewLoaded = false;
+let trafficEntries = [];
 
 init();
 
@@ -47,7 +51,7 @@ async function init() {
 	els.previewTarget.textContent = config.publicUrl;
 
 	for (const entry of await window.hosting.logs()) appendLog(entry);
-	for (const entry of await window.hosting.traffic()) appendTraffic(entry);
+	renderTraffic(await window.hosting.traffic());
 
 	window.hosting.onLog(appendLog);
 	window.hosting.onTraffic(appendTraffic);
@@ -98,7 +102,8 @@ function setButtonsDisabled(disabled) {
 }
 
 async function refreshStatus() {
-	const status = await window.hosting.status();
+	const [status, traffic] = await Promise.all([window.hosting.status(), window.hosting.traffic()]);
+	renderTraffic(traffic);
 
 	els.statePill.dataset.state = status.state;
 	els.stateText.textContent = STATE_LABELS[status.state] || status.state;
@@ -188,14 +193,29 @@ function appendLog(entry) {
 }
 
 function appendTraffic(entry) {
+	renderTraffic([...trafficEntries, entry]);
+}
+
+function renderTraffic(entries) {
+	trafficEntries = entries.slice(-500);
+	const users = trafficEntries.filter((entry) => entry.kind !== "bot");
+	const bots = trafficEntries.filter((entry) => entry.kind === "bot");
+	els.trafficUsersTitle.textContent = `Users: ${new Set(users.map((entry) => entry.visitor)).size} visitors · ${users.length} views`;
+	els.trafficBotsTitle.textContent = `Bots: ${new Set(bots.map((entry) => entry.visitor)).size} bots · ${bots.length} requests`;
+	for (const [list, visits] of [[els.trafficUsers, users], [els.trafficBots, bots]]) {
+		list.replaceChildren(...visits.map(trafficRow));
+		list.scrollTop = list.scrollHeight;
+	}
+}
+
+function trafficRow(entry) {
 	const li = document.createElement("li");
 	li.className = entry.kind === "bot" ? "warn" : "info";
 	const time = document.createElement("span");
 	time.className = "log-time";
 	time.textContent = new Date(entry.time).toLocaleTimeString();
-	const who = entry.kind === "bot" ? `${entry.bot} (visitor ${entry.visitor})` : `Visitor ${entry.visitor}`;
-	li.append(time, document.createTextNode(`${who} → ${entry.path}${entry.status >= 400 ? ` (${entry.status})` : ""}`));
-	els.traffic.appendChild(li);
-	while (els.traffic.children.length > 500) els.traffic.removeChild(els.traffic.firstChild);
-	els.traffic.scrollTop = els.traffic.scrollHeight;
+	const who = entry.kind === "bot" ? `Bot ${entry.visitor} (${entry.bot})` : `User ${entry.visitor}${entry.local ? " (local)" : ""}`;
+	const pathname = entry.path === "/" ? "/home" : entry.path;
+	li.append(time, document.createTextNode(`${who} → ${pathname}${entry.status >= 400 ? ` (${entry.status})` : ""}`));
+	return li;
 }

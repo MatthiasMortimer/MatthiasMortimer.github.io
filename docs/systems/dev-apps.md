@@ -16,7 +16,7 @@ Embedded apps are served at `/apps/<folder-name>/`:
 - `/apps/<folder>/api/...` is passed to the handler returned by `createApiHandler()`.
 - Everything else is served as a static file from `devApps/<folder>/public/`.
 
-**The API module is imported once per launcher process and cached.** Changes to `devapp.api.mjs`, or to anything it imports, need a **launcher restart**. Changes to files in `public/` take effect on page reload.
+**The API module is cached, but reloaded when `devapp.api.mjs` itself changes.** On the next API request, the launcher calls the old module's optional `disposeApiHandler()` export and imports the new file. Changes to files that `devapp.api.mjs` imports are **not** detected and need a **launcher restart**. Changes to files in `public/` take effect on page reload.
 
 ## Files
 
@@ -73,7 +73,7 @@ The returned value is sent as JSON. A thrown error becomes `{ success: false, me
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| A new or changed API route returns 404 or an old response | The launcher has the old `devapp.api.mjs` cached | Restart the launcher |
+| A new or changed API route returns 404 or an old response | A file imported by `devapp.api.mjs` changed, which the launcher does not detect | Save `devapp.api.mjs` again or restart the launcher |
 | The app tab is missing | `devapp.meta.json`, `devapp.api.mjs`, or `public/index.html` is missing, or `"embed": false` | Add the missing file or fix the flag |
 | Assets 404 inside the tab | Absolute paths (`/app.js`) used instead of relative paths | Use relative paths |
 | The tab shows a 500 error with an import error | A syntax or import error in `devapp.api.mjs` or its imports | Check the launcher console |

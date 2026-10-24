@@ -1,7 +1,7 @@
 {
   "name": "Discord Bot Manager",
   "slug": "discord-manager",
-  "description": "Edit the Discord server setup layout and review bot connection readiness",
+  "description": "Manage Discord servers, server setup, support tickets, and announcements",
   "type": "discord_manager",
   "runtime": "tab",
   "version": "1.0.0",

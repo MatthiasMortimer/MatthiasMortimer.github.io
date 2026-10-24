@@ -162,6 +162,8 @@ function renderMobileMode() {
 	const summary = document.getElementById("mobile-mode-summary");
 	const panel = document.getElementById("mobile-address-panel");
 	const address = document.getElementById("mobile-address");
+	const alternatePanel = document.getElementById("mobile-alternate-addresses");
+	const addressList = document.getElementById("mobile-address-list");
 
 	toggle.checked = mobileMode.enabled;
 	control.hidden = !mobileMode.canConfigure;
@@ -173,6 +175,15 @@ function renderMobileMode() {
 	panel.hidden = !mobileMode.enabled || !mobileMode.url;
 	address.textContent = mobileMode.url || "";
 	address.href = mobileMode.url || "#";
+	addressList.replaceChildren();
+	const alternatives = (mobileMode.addresses || []).filter((item) => item.url && item.url !== mobileMode.url);
+	for (const item of alternatives) {
+		const link = document.createElement("a");
+		link.href = item.url; link.target = "_blank"; link.rel = "noreferrer";
+		link.textContent = `${item.url} · ${item.interfaceName}`;
+		addressList.append(link);
+	}
+	alternatePanel.hidden = !mobileMode.enabled || alternatives.length === 0;
 }
 
 /**

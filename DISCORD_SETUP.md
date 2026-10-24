@@ -1,3 +1,30 @@
+
+
+
+# RitesDev Discord Bot
+
+The **Discord Bot Manager** in the RitesDev app launcher is the configuration dashboard and bot runtime. It discovers all servers the bot has joined; there is no server ID to enter. Read the [Discord manager guide](docs/social-bots/discord-bot-setup.md) for token setup, permissions, ticket setup, announcements, and the `/riteserver` command.
+
+## First run
+
+1. Open the Discord Bot Manager and save the bot token under **Bot token**. The token is saved in this repository's ignored `.env` file.
+2. Choose **Add bot to a server** in the manager and invite it. Repeat for your other servers.
+3. In a server, run `/riteserver`. Its ephemeral controls can apply the saved layout, set the current channel as the default announcement channel, post the ticket panel, or send an announcement to the default channels across servers.
+4. Configure the visual server layout, ticket workflow, and announcement destinations in the manager.
+
+The bot registers `/riteserver` globally when it connects. Discord can take time to show global commands in every server. The command requires **Manage Server** permission.
+
+## Optional legacy CLI setup
+
+`npm run discord:setup` remains available for applying `scripts/discord/server-layout.json` to one server. This older CLI requires `DISCORD_GUILD_ID` in the shell environment and is separate from the multi-server dashboard. Use the manager for normal setup and ongoing edits.
+
+Never commit or share a bot token. Keep the launcher running for slash commands, ticket buttons, and dashboard announcements to work.
+
+
+What it needs to be able to create: DO NOT REMOVE FROM THIS POINT ONWARD, only make small edits to check completed work!.
+
+---
+
 # RitesDev Discord Community Setup
 
 Professional networking, private client collaboration, and project delivery. 
@@ -140,17 +167,17 @@ Give access only to the client, assigned `Project Manager`, assigned `Developer`
 
 ## Ticket Bot Contract
 
-Use `#support-desk` as the public ticket entry point. Your custom bot should:
+Use `#support-desk` as the public ticket entry point. The current bot uses private threads under that channel. It should:
 
 1. Show buttons for `New Client Inquiry`, `Project Support`, `Billing`, and `Partnership`.
-2. Create a private channel under a separate `TICKETS` category.
+2. Create a private thread for the requester under `#support-desk`.
 3. Permit only the requestor, assigned staff, and the bot.
 4. Name tickets with `ticket-1042-project-support-acme`.
 5. Send a transcript to `#ticket-log` when a ticket closes.
 6. Create or link a relevant `#client-requests` forum post after triage.
 7. Remove requester access after the configured ticket retention period.
 
-Grant ticket bots only the permissions they need, such as **Manage Channels**, **Manage Threads**, **Send Messages**, **Read Message History**, and **Attach Files**. Do not grant Administrator.
+RitesBot (the Discord Bot Manager) is invited with Administrator so it can build and maintain the whole layout. Grant any other ticket bots only the permissions they need, such as **Manage Channels**, **Manage Threads**, **Send Messages**, **Read Message History**, and **Attach Files**.
 
 ## Copy-Ready Channel Messages
 
@@ -211,12 +238,26 @@ Start in #start-here, then use #support-desk for any private inquiry or project 
 
 ## Discord Community Configuration Checklist
 
-- [ ] Enable **Community** and choose `#rules` as the Rules or Guidelines Channel.
-- [ ] Enable **Membership Screening** using the rules above.
-- [ ] Set verification level to at least **Medium**.
-- [ ] Require 2FA for moderation-capable roles.
-- [ ] Create forum channels and add their tags and post templates.
-- [ ] Lock private categories down at `@everyone` before inviting clients.
-- [ ] Configure your bots with least-privilege permissions.
-- [ ] Send ticket, client-forum, and project-forum tests using a non-admin account.
-- [ ] Add a server icon, banner, and an invite with an expiration or usage limit for client onboarding.
+### Bot Features
+
+- [x] Connect one bot to multiple servers and save the token locally. *(Implemented; untested.)*
+- [x] Create and update roles, categories, text/announcement/forum channels, forum tags, category access, and per-channel role overrides from the manager. *(Implemented; untested.)*
+- [x] Save separate layouts, announcement destinations, and ticket settings per server. *(Implemented; untested.)*
+- [x] Post ticket panels, open private ticket threads, close tickets, and deliver HTML transcripts to the ticket log. *(Implemented; untested.)*
+- [x] Send announcements to configured servers/channels and register `/riteserver`. *(Implemented; untested.)*
+
+### Bot Implementation Follow-up (note that these are default template options in the manager, and can be freely edited)
+
+- [x] Optimize the Discord manager for Mobile Mode with a stacked narrow-screen layout and touch-friendly controls. *(Implemented; full tests and docs checks pass.)*
+- [x] Make Mobile Mode advertise a likely reachable LAN address and show alternate addresses plus connection diagnostics. *(Implemented; LAN reachability not verified on a phone.)*
+- [x] Address the Discord manager mobile review: the invite action was already visible at phone widths; collapse optional access/description controls, preserve open sections and focus after rerenders, and keep the editor clear of the mobile tabs while typing. *(Implemented; needs phone-width review.)*
+- [x] Finish a polished phone-first Discord manager experience with a compact navigation/header, comfortable editing, and keyboard-aware controls. *(Implemented; `node --test` passes 63/63 and `npm run docs:check` passes 2/2; physical phone/safe-area behavior still needs a device check.)*
+- [x] Add per-channel role overrides and make `#support-desk` read-only for `@everyone` under the private support category. *(Implemented; untested.)*
+- [x] Apply the role-based defaults that do not require individual assignments: read-only START HERE and announcement channels, public read-only ticket entry, Developer access to `#internal-projects`, and Developer restrictions on `#operations` and `#moderation-log`. The manager bot gets explicit access only to channels it needs. *(Implemented in the starter layout; untested.)*
+- [x] Add channel/category access for named members and remove their overrides to revoke access after handoff. *(Implemented; untested.)*
+- [ ] Apply named-member grants for actual client/project assignments and verify the full matrix, ticket entry, and private logs with non-admin accounts.
+- [x] Define the manager's top-to-bottom role order; add layout role assignment and the Pending-to-Network Member approval flow. New members receive Pending after an applied layout. *(Implemented; untested.)*
+- [x] Add copy-ready message templates and a safe way to post the `#start-here`, `#rules`, `#server-information`, `#apply-or-contact`, and launch messages into their channels without duplicating them. *(Implemented; untested.)*
+- [x] Implement the ticket contract using private threads: editable ticket types; requester/staff/bot access; `ticket-1042-project-support-acme` naming; transcript delivery to `#ticket-log`; a linked client-request forum post after triage; and requester removal after configurable retention. *(Implemented; untested.)*
+- [x] Retain the private-thread ticket design instead of switching to private channels under `TICKETS`.
+- [x] Add an explicit, permission-checked option for `@everyone` and other role mentions in announcements; mentions remain suppressed by default. *(Implemented; untested.)*

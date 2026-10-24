@@ -23,8 +23,8 @@ let mobileModeEnabled = false;
 // Store running processes
 const processes = new Map();
 
-// Embedded apps run inside this process: their handler and static server are
-// created once and reused, so switching tabs never starts another app.
+// Embedded apps run inside this process. Keep handlers cached until their API
+// module changes, then reload the handler without restarting the launcher.
 const embeddedApps = new Map();
 
 function getAppDir(appId) {
@@ -34,22 +34,30 @@ function getAppDir(appId) {
 }
 
 async function getEmbeddedApp(appId) {
-	if (embeddedApps.has(appId)) return embeddedApps.get(appId);
-
 	const appDir = getAppDir(appId);
 	if (!appDir) return null;
+	const apiPath = path.join(appDir, "devapp.api.mjs");
+	const stat = fs.statSync(apiPath, { bigint: true });
+	const version = `${stat.mtimeNs}:${stat.size}`;
+	const cached = embeddedApps.get(appId);
+	if (cached?.version === version) return cached.loading;
 
-	const loading = import(pathToFileURL(path.join(appDir, "devapp.api.mjs")).href)
-		.then((module) => ({
+	let entry;
+	const loading = (async () => {
+		const previous = cached ? await cached.loading.catch(() => null) : null;
+		await previous?.dispose?.();
+		const module = await import(`${pathToFileURL(apiPath).href}?v=${encodeURIComponent(version)}`);
+		return {
 			handleApi: module.createApiHandler(),
+			dispose: module.disposeApiHandler,
 			static: express.static(path.join(appDir, "public"), { index: "index.html" }),
-		}))
-		.catch((error) => {
-			embeddedApps.delete(appId);
-			throw error;
-		});
-
-	embeddedApps.set(appId, loading);
+		};
+	})().catch((error) => {
+		if (embeddedApps.get(appId) === entry) embeddedApps.delete(appId);
+		throw error;
+	});
+	entry = { version, loading };
+	embeddedApps.set(appId, entry);
 	return loading;
 }
 
@@ -155,21 +163,35 @@ function isLoopbackRequest(req) {
 	return address === "127.0.0.1" || address === "::1" || address === "::ffff:127.0.0.1";
 }
 
-function getLanAddress() {
-	for (const interfaces of Object.values(os.networkInterfaces())) {
+function getLanAddresses() {
+	const candidates = [];
+	for (const [interfaceName, interfaces] of Object.entries(os.networkInterfaces())) {
 		for (const address of interfaces || []) {
-			if (address.family === "IPv4" && !address.internal) return address.address;
+			if ((address.family !== "IPv4" && address.family !== 4) || address.internal || address.address.startsWith("169.254.")) continue;
+			const name = interfaceName.toLowerCase();
+			const virtual = /(docker|podman|veth|virbr|^br-|tun|tap|wg|tailscale|zerotier|vmnet|vbox|wsl|ham|kube|lxc)/u.test(name);
+			const wifi = /(^wl|wlan|wi-?fi)/u.test(name);
+			const ethernet = /^(en|eth|ethernet)/u.test(name);
+			const priority = virtual ? 100 : wifi ? 0 : ethernet ? 1 : 10;
+			candidates.push({ address: address.address, interfaceName, priority });
 		}
 	}
-	return null;
+	const unique = new Map();
+	for (const candidate of candidates.sort((a, b) => a.priority - b.priority)) {
+		if (!unique.has(candidate.address)) unique.set(candidate.address, { address: candidate.address, interfaceName: candidate.interfaceName });
+	}
+	return [...unique.values()];
 }
 
 function getMobileModeStatus() {
-	const lanAddress = getLanAddress();
+	const addresses = getLanAddresses();
+	const lanAddress = addresses[0]?.address ?? null;
 	return {
 		enabled: mobileModeEnabled,
 		lanAddress,
 		url: mobileModeEnabled && lanAddress ? `http://${lanAddress}:${PORT}` : null,
+		addresses: addresses.map(({ address, interfaceName }) => ({ address, interfaceName, url: mobileModeEnabled ? `http://${address}:${PORT}` : null })),
+		port: PORT,
 	};
 }
 
@@ -562,11 +584,12 @@ app.get("/api/status", (req, res) => {
 	});
 });
 
-export function startLauncherServer(port = PORT) {
-	return app.listen(port, () => {
-		const actualPort = this?.address?.()?.port || port;
+export function startLauncherServer(port = PORT, host = "0.0.0.0") {
+	const server = app.listen(port, host, () => {
+		const actualPort = server.address()?.port || port;
 		console.log(`RitesDev App ready at http://localhost:${actualPort}`);
 	});
+	return server;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

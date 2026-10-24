@@ -89,6 +89,7 @@ try {
 
 	const existingChannels = await guild.channels.fetch();
 	for (const categorySpec of layout.categories) {
+		const categoryOverwrites = await makeCategoryOverwrites(categorySpec.name, everyone, roles, layout.categoryAccess, guild);
 		let category = existingChannels.find((channel) =>
 			channel?.type === ChannelType.GuildCategory && channel.name.toLowerCase() === categorySpec.name.toLowerCase(),
 		);
@@ -96,29 +97,32 @@ try {
 			category = await guild.channels.create({
 				name: categorySpec.name,
 				type: ChannelType.GuildCategory,
-				permissionOverwrites: makeCategoryOverwrites(categorySpec.name, everyone, roles, layout.categoryAccess),
+				permissionOverwrites: categoryOverwrites,
 			});
 			console.log(`Created category: ${category.name}`);
 		} else {
-			await category.permissionOverwrites.set(makeCategoryOverwrites(categorySpec.name, everyone, roles, layout.categoryAccess));
+			await category.permissionOverwrites.set(categoryOverwrites);
 			console.log(`Using category: ${category.name}`);
 		}
 
 		for (const channelSpec of categorySpec.channels) {
-			const config = typeof channelSpec === "string" ? { name: channelSpec } : channelSpec;
+			const config = typeof channelSpec === "string" ? { name: channelSpec, type: "text", tags: [] } : { ...channelSpec, type: channelSpec.type ?? "text", tags: channelSpec.tags ?? [] };
 			const existing = existingChannels.find((channel) =>
 				channel?.parentId === category.id && channel.name.toLowerCase() === config.name.toLowerCase(),
 			);
 			if (existing) {
+				await applyChannelAccess(existing, category, config.access, everyone, roles, guild, client.user.id);
 				console.log(`  Exists: #${existing.name}`);
 				continue;
 			}
 			const created = await guild.channels.create({
 				name: config.name,
-				type: ChannelType.GuildText,
+				type: config.type === "forum" ? ChannelType.GuildForum : config.type === "announcement" ? ChannelType.GuildAnnouncement : ChannelType.GuildText,
 				parent: category.id,
 				...(config.topic ? { topic: config.topic } : {}),
+				...(config.type === "forum" ? { availableTags: config.tags.slice(0, 20).map((name) => ({ name: String(name).trim().slice(0, 20), moderated: false })) } : {}),
 			});
+			await applyChannelAccess(created, category, config.access, everyone, roles, guild, client.user.id);
 			existingChannels.set(created.id, created);
 			console.log(`  Created: #${created.name}`);
 		}
@@ -132,20 +136,52 @@ try {
 	client?.destroy();
 }
 
-function makeCategoryOverwrites(categoryName, everyone, roles, accessConfig) {
+async function makeCategoryOverwrites(categoryName, everyone, roles, accessConfig, guild) {
 	const access = accessConfig[categoryName] ?? { everyone: "hidden" };
 	const visible = { ViewChannel: true, SendMessages: true, ReadMessageHistory: true, Connect: true, Speak: true };
 	const hidden = { ViewChannel: false };
-	const overwrites = [{ id: everyone.id, ...permissionsFor(access.everyone) }];
+	const overwrites = [{ id: everyone.id, type: 0, ...permissionsFor(access.everyone) }];
 	for (const [roleName, rule] of Object.entries(access.roles ?? {})) {
 		const role = roles.get(roleName);
 		if (!role) throw new Error(`Category "${categoryName}" references unknown role "${roleName}".`);
-		overwrites.push({ id: role.id, ...permissionsFor(rule) });
+		overwrites.push({ id: role.id, type: 0, ...permissionsFor(rule) });
+	}
+	for (const [memberId, rule] of Object.entries(access.members ?? {})) {
+		const member = await guild.members.fetch(memberId).catch(() => null);
+		if (!member) throw new Error(`Member ${memberId} is no longer in the server; remove their category access before setup.`);
+		overwrites.push({ id: member.id, type: 1, ...permissionsFor(rule) });
 	}
 	return overwrites;
 
 	function permissionsFor(rule) {
 		return rule === "view" ? visible : hidden;
 	}
+}
+
+async function applyChannelAccess(channel, category, access, everyone, roles, guild, botId) {
+	const roleRules = access?.roles ?? {};
+	const memberRules = access?.members ?? {};
+	const hasRules = [access?.everyone, access?.bot, ...Object.values(roleRules), ...Object.values(memberRules)].some((rule) => rule && rule !== "inherit");
+	if (!hasRules) { await channel.lockPermissions(); return; }
+	const visible = ["ViewChannel", "ReadMessageHistory", "SendMessages"];
+	const readOnly = ["ViewChannel", "ReadMessageHistory"];
+	const overwrites = new Map(category.permissionOverwrites.cache.map((item) => [item.id, { id: item.id, type: item.type, allow: item.allow.bitfield, deny: item.deny.bitfield }]));
+	const putRule = (id, type, rule) => {
+		if (!rule || rule === "inherit") return;
+		overwrites.set(id, { id, type, allow: rule === "view" ? visible : rule === "read" ? readOnly : [], deny: rule === "hidden" ? ["ViewChannel"] : rule === "read" ? ["SendMessages"] : [] });
+	};
+	putRule(everyone.id, 0, access?.everyone);
+	putRule(botId, 1, access?.bot);
+	for (const [roleName, rule] of Object.entries(roleRules)) {
+		const role = roles.get(roleName);
+		if (!role) throw new Error(`Channel "#${channel.name}" references unknown role "${roleName}".`);
+		putRule(role.id, 0, rule);
+	}
+	for (const [memberId, rule] of Object.entries(memberRules)) {
+		const member = await guild.members.fetch(memberId).catch(() => null);
+		if (!member) throw new Error(`Member ${memberId} is no longer in the server; remove their channel access before setup.`);
+		putRule(member.id, 1, rule);
+	}
+	await channel.permissionOverwrites.set([...overwrites.values()]);
 }
 

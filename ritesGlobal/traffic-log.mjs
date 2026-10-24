@@ -1,12 +1,13 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { finished } from "node:stream/promises";
 
 // Traffic log
 	// One JSONL file per day: { time, visitor, kind, bot?, path, status, local? }.
 	// Nothing identifying is stored. Visitors get sequential numbers; the IP+UA hash used to
 	// group a person's page views stays in memory only (salted per process, pruned after a day).
-	// Known bots are grouped by bot name, so every Googlebot hit is the same visitor number.
+	// Users and bots have separate numbering; known bots are grouped by name.
 
 // Known crawlers, most specific first
 const KNOWN_BOTS = [
@@ -66,36 +67,40 @@ export function isTrackedPath(pathname) {
 }
 
 export function describeVisit(entry) {
-	const who = entry.kind === "bot" ? `${entry.bot} (bot, visitor ${entry.visitor})` : `Visitor ${entry.visitor} (person${entry.local ? ", local" : ""})`;
-	return `${who} viewed ${entry.path}${entry.status >= 400 ? ` → ${entry.status}` : ""}`;
+	const who = entry.kind === "bot" ? `${entry.bot} (bot ${entry.visitor})` : `User ${entry.visitor} (person${entry.local ? ", local" : ""})`;
+	return `${who} viewed ${entry.path === "/" ? "/home" : entry.path}${entry.status >= 400 ? ` → ${entry.status}` : ""}`;
 }
 
 export function createTrafficLogger({ dir, now = () => new Date(), log = console.log } = {}) {
 	const salt = crypto.randomBytes(16);
 	const visitors = new Map();
 	const statePath = path.join(dir, "state.json");
-	let nextVisitor = 1;
+	const nextVisitor = { human: 1, bot: 1 };
 	let stream = null;
 	let streamDay = null;
 
 	fs.mkdirSync(dir, { recursive: true });
 	try {
 		const state = JSON.parse(fs.readFileSync(statePath, "utf8"));
-		if (Number.isInteger(state.nextVisitor) && state.nextVisitor > 0) nextVisitor = state.nextVisitor;
-	} catch {
-		// First run, or unreadable state: start from 1.
+		for (const kind of ["human", "bot"]) {
+			const next = state[kind === "human" ? "nextHuman" : "nextBot"] ?? (kind === "human" ? state.nextVisitor : 1);
+			if (!Number.isInteger(next) || next < 1) throw new Error(`Invalid ${kind} traffic counter in ${statePath}`);
+			nextVisitor[kind] = next;
+		}
+	} catch (error) {
+		if (error.code !== "ENOENT") throw error;
 	}
 
-	function visitorNumber(key, time) {
-		const hash = crypto.createHmac("sha256", salt).update(key).digest("hex");
+	function visitorNumber(kind, key, time) {
+		const hash = crypto.createHmac("sha256", salt).update(`${kind}:${key}`).digest("hex");
 		const known = visitors.get(hash);
 		if (known) {
 			known.lastSeen = time;
 			return known.id;
 		}
-		const id = nextVisitor++;
+		const id = nextVisitor[kind]++;
 		visitors.set(hash, { id, lastSeen: time });
-		fs.writeFile(statePath, JSON.stringify({ nextVisitor }), () => {});
+		fs.writeFileSync(statePath, JSON.stringify({ nextHuman: nextVisitor.human, nextBot: nextVisitor.bot }));
 		return id;
 	}
 
@@ -136,7 +141,7 @@ export function createTrafficLogger({ dir, now = () => new Date(), log = console
 		const { kind, bot } = classifyUserAgent(userAgent);
 		const key = kind === "bot" && !bot.startsWith("Other bot") && !bot.startsWith("Unknown") ? `bot:${bot}` : `${clientIp}|${userAgent}`;
 
-		const entry = { time: date.toISOString(), visitor: visitorNumber(key, date.getTime()), kind };
+		const entry = { time: date.toISOString(), visitor: visitorNumber(kind, key, date.getTime()), kind };
 		if (bot) entry.bot = bot;
 		entry.path = pathname;
 		entry.status = status;
@@ -156,9 +161,11 @@ export function createTrafficLogger({ dir, now = () => new Date(), log = console
 			});
 		},
 		close() {
-			stream?.end();
+			const closing = stream;
+			closing?.end();
 			stream = null;
 			streamDay = null;
+			return closing ? finished(closing) : Promise.resolve();
 		},
 	};
 }

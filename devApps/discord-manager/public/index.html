@@ -2,37 +2,77 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' https://cdn.discordapp.com https://media.discordapp.net data:; connect-src 'self'">
 	<title>Discord Bot Manager</title>
 	<link rel="stylesheet" href="../../../ritesGlobal/styles/app-theme.css">
+	<link rel="stylesheet" href="/theme/app-theme.css">
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-	<main class="shell">
+	<div class="app-shell">
 		<header class="topbar">
 			<div><p class="eyebrow">RitesDev Studio</p><h1>Discord Bot Manager</h1></div>
-			<div class="status-wrap"><span id="connection-dot" class="status-dot"></span><span id="connection-status">Checking setup…</span></div>
+			<div class="top-actions"><span id="bot-status" class="save-state">Connecting…</span><div class="token-actions"><button id="settings-button" class="button secondary" type="button">Bot token</button><button id="invite-menu-button" class="invite-menu-button" type="button">Invite bot</button></div></div>
 		</header>
-		<section class="intro card">
-			<div><p class="eyebrow">Server configuration</p><h2>Edit your setup layout</h2><p>Update categories, channels, roles, and category access. Saving changes the setup configuration; it does not apply them to Discord.</p></div>
-			<button id="check-connection" class="button secondary" type="button">Check Discord connection</button>
-		</section>
-		<section class="credentials card">
-			<div class="editor-heading"><div><h2>Bot credentials</h2><p>Stored in this computer’s ignored `.env` file</p></div><button id="save-credentials" class="button primary" type="button">Save credentials</button></div>
-			<div id="credential-fields" class="credential-fields">
-				<label>Bot token<input id="bot-token" type="text" autocomplete="off" spellcheck="false"></label>
-				<label>Server ID<input id="guild-id" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"></label>
-			</div>
-			<p id="credential-feedback" class="feedback" role="status" aria-live="polite"></p>
-		</section>
-		<section class="editor card">
-			<div class="editor-heading"><div><h2>Server layout</h2><p>JSON configuration</p></div><div class="actions"><button id="reload" class="button secondary" type="button">Reload</button><button id="save" class="button primary" type="button">Save layout</button></div></div>
-			<textarea id="layout" spellcheck="false" aria-label="Discord server layout JSON" placeholder="Loading server layout…"></textarea>
-			<p id="feedback" class="feedback" role="status" aria-live="polite"></p>
-		</section>
-		<section id="connection-details" class="note card"><strong>Connection check not run.</strong><span>It will use read-only Discord API requests. No server changes or messages are sent.</span></section>
-	</main>
+		<main class="workspace">
+			<aside class="server-sidebar">
+				<div class="section-heading"><div><h2>Servers</h2><span id="server-count">Loading…</span></div><button id="refresh" class="icon-button" type="button" aria-label="Refresh servers">↻</button></div>
+				<div id="server-list" class="server-list"></div>
+				<div id="mobile-sections" hidden></div>
+				<div class="sidebar-note">Invite the bot to another server using this link. Connected servers appear here automatically.<a id="invite-bot" href="#" target="_blank" rel="noreferrer" hidden> Add bot to a server ↗</a></div>
+			</aside>
+			<section class="main-panel">
+				<div id="no-server" class="empty-state"><div class="empty-mark">R</div><h2>Connect a Discord server</h2><p>Invite the bot to a server and it will appear in this list. No server IDs needed.</p></div>
+				<div id="server-workspace" hidden>
+					<div class="server-heading"><div><p class="eyebrow">Server manager</p><h2 id="active-server-name"></h2></div><button id="sync-command" class="button secondary" type="button">Register /riteserver</button></div>
+					<nav id="section-tabs" class="tabs" aria-label="Discord manager sections">
+						<button class="tab active" type="button" data-panel="layout-panel" aria-controls="layout-panel" aria-pressed="true">Server setup</button><button class="tab" type="button" data-panel="tickets-panel" aria-controls="tickets-panel" aria-pressed="false">Tickets</button><button class="tab" type="button" data-panel="announcements-panel" aria-controls="announcements-panel" aria-pressed="false">Announcements</button><button class="tab" type="button" data-panel="messages-panel" aria-controls="messages-panel" aria-pressed="false">Messages</button>
+					</nav>
+					<section id="layout-panel" class="panel active">
+						<div class="panel-intro"><div><h3>Server layout</h3><p>Edit a working draft of this server's categories, channels, and roles. Save the draft as often as you like; nothing changes in Discord until you choose Apply setup.</p></div><div class="toolbar-actions"><button id="save-layout" class="button primary">Save draft</button><button id="apply-layout" class="button">Apply setup</button></div></div>
+						<div class="template-bar"><label class="field">Load a template<select id="layout-source"><option value="draft">Saved draft</option><option value="default">Rites default setup</option><option value="applied">Current server setup</option></select></label><div class="template-actions"><button id="load-layout" class="button secondary" type="button">Load</button><button id="discard-draft" class="button secondary" type="button">Discard draft</button></div><span id="layout-status" class="layout-status" role="status"></span></div>
+						<div class="field-grid compact"><label class="field">Default announcement channel<select id="default-announcement"></select><span class="field-hint">Choose the channel for announcements when no individual channel is selected. You can also change it in Discord with <b>/riteserver</b>.</span></label></div>
+						<details id="roles-section" class="layout-details">
+							<summary><h4>Roles</h4><span class="field-hint">Manage server roles and member assignments</span></summary>
+							<div class="subheading"><div><p>Existing roles with matching names are reused. The list order is top to bottom; the bot must rank above these roles.</p></div><button id="add-role" class="button secondary" type="button">Add role</button></div>
+							<div id="roles" class="role-list"></div>
+							<div class="subheading"><div><h4>Member roles</h4><p>New members receive Pending after setup is applied. Assign saved layout roles or approve a member into Network Member.</p></div></div>
+							<div class="member-role-tools"><label class="field">Server member<select id="managed-member"></select></label><div id="managed-member-roles" class="role-checklist"></div><div class="ticket-actions"><button id="save-member-roles" class="button secondary" type="button">Save member roles</button><button id="approve-member" class="button" type="button">Approve as Network Member</button><span id="member-role-feedback" class="feedback" role="status"></span></div></div>
+						</details>
+						<div class="subheading"><div><h4>Categories and channels</h4><p>Changes apply to the selected server when you choose Apply setup.</p></div><button id="add-category" class="button secondary">Add category</button></div>
+						<div id="categories" class="category-list"></div>
+					</section>
+					<section id="tickets-panel" class="panel">
+						<div class="panel-intro"><div><h3>Ticket setup</h3><p>Members open private threads using one of four ticket types. Moderators can triage, close with a resolution note, and deliver an HTML transcript to the ticket log.</p></div><button id="save-tickets" class="button primary">Save ticket setup</button></div>
+						<div class="field-grid"><label class="field">Ticket panel channel<select id="ticket-support"></select><span class="field-hint">Choose a regular text channel first. The Post support panel button saves this setup before posting.</span></label><label class="field">Ticket log channel<select id="ticket-log"></select><span class="field-hint">Choose #ticket-log, or leave unset to use a channel with that name.</span></label><label class="field">Requester access after closing<input id="ticket-retention" type="number" min="1" max="8760" step="1"><span class="field-hint">Hours before the requester is removed from the private thread (1–8,760).</span></label><div class="field"><span>Moderator roles</span><div id="ticket-staff" class="role-checklist"></div><span class="field-hint">Selected roles can close and triage tickets and are added to private threads.</span></div><label class="field wide">Opening panel message<textarea id="ticket-opening" rows="3"></textarea></label><label class="field wide">Welcome message<textarea id="ticket-welcome" rows="3"></textarea><span class="field-hint">Shown when a member opens a ticket.</span></label><div class="field wide"><div class="subheading"><div><h4>Ticket types</h4><p>Customize the button labels or add/remove types. Discord supports up to 25 buttons per panel.</p></div><button id="add-ticket-type" class="button secondary" type="button">Add type</button></div><div id="ticket-types" class="ticket-type-list"></div></div></div>
+						<div class="ticket-actions"><button id="post-ticket-panel" class="button">Post support panel</button><span id="ticket-feedback" class="feedback" role="status"></span></div>
+					</section>
+					<section id="announcements-panel" class="panel">
+						<div class="panel-intro"><div><h3>Mass message</h3><p>Write an announcement and choose its destinations. Server default channels are used when no individual channel is selected.</p></div></div>
+						<div class="field message-field"><span>Announcement</span><div class="font-toolbar"><label for="announcement-font">Font style</label><select id="announcement-font" aria-label="Font style"><option value="normal">Normal</option><option value="bold">Bold</option><option value="italic">Italic</option><option value="boldItalic">Bold italic</option><option value="monospace">Monospace</option><option value="doubleStruck">Double-struck</option></select><button id="apply-announcement-font" class="small-button" type="button">Apply to selection</button></div><div class="mention-composer"><textarea id="announcement-message" rows="6" placeholder="Write your announcement…" aria-autocomplete="list" aria-controls="role-suggestions"></textarea><div id="role-suggestions" class="role-suggestions" role="listbox" hidden></div></div><span class="field-hint">The selected style applies to new typing. Select existing text and choose Apply to selection to change or remove its style. Discord displays these as Unicode characters.</span><span id="announcement-count" class="field-hint" aria-live="polite">0 / 2,000 characters</span></div>
+						<div class="send-options"><label class="check-field"><input id="all-servers" type="checkbox"><span>All connected servers</span></label><label class="check-field"><input id="all-channels" type="checkbox"><span>All writable text channels in selected servers</span></label><label class="check-field"><input id="allow-announcement-mentions" type="checkbox"><span>Allow role, @everyone, and @here mentions</span></label></div>
+						<p class="field-hint">Mentions are suppressed unless enabled. When enabled, the bot must have Mention Everyone permission in every destination channel.</p>
+						<div id="destination-servers" class="destination-servers"></div>
+						<div class="ticket-actions"><button id="send-announcement" class="button primary">Send announcement</button><span id="announcement-feedback" class="feedback" role="status"></span></div>
+						<div id="send-results" class="results"></div>
+					</section>
+					<section id="messages-panel" class="panel">
+						<div class="panel-intro"><div><h3>Copy-ready messages</h3><p>Copy a setup message or post it to a channel. Reposting a template updates the message this manager previously created for that template and channel.</p></div></div>
+						<div class="field-grid">
+							<label class="field">Message template<select id="message-template"><option value="">Choose a message…</option></select></label>
+							<label class="field">Destination channel<select id="message-channel"><option value="">Choose a destination channel…</option></select></label>
+							<label class="field wide">Preview<textarea id="message-preview" rows="12" readonly></textarea><span class="field-hint">The launch post includes a written @everyone label, but mentions are disabled when the template is posted.</span></label>
+						</div>
+						<div class="ticket-actions"><button id="copy-message-template" class="button secondary" type="button" disabled>Copy message</button><button id="post-message-template" class="button primary" type="button" disabled>Post or update message</button><span id="message-feedback" class="feedback" role="status"></span></div>
+					</section>
+				</div>
+			</section>
+		</main>
+	</div>
+	<dialog id="token-dialog"><form id="token-form" method="dialog"><div class="dialog-heading"><div><p class="eyebrow">Connection</p><h2>Bot token</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div><p>Saved locally in the ignored <code>.env</code> file. It is never shown after saving.</p><label class="field">Discord bot token<input id="bot-token" type="password" autocomplete="new-password" required></label><button class="button primary" type="submit">Save and connect</button><span id="token-feedback" class="feedback" role="status"></span></form></dialog>
+	<dialog id="invite-dialog"><form id="server-invite-form"><div class="dialog-heading"><div><p class="eyebrow">Add to a server</p><h2>Invite the bot</h2></div><button id="close-invite-dialog" class="icon-button" type="button" aria-label="Close">×</button></div><p>Paste a server invite link or code. Discord will ask you to authorize the bot for that server.</p><label class="field">Server invite link or code<input id="server-invite-link" type="text" inputmode="url" autocomplete="url" placeholder="https://discord.gg/… or invite code" required></label><button id="resolve-server-invite" class="button secondary" type="submit">Find server</button><span id="invite-feedback" class="feedback" role="status"></span><a id="authorize-bot" class="button primary authorize-button" href="#" target="_blank" rel="noopener noreferrer" hidden>Continue to Discord ↗</a></form></dialog>
+	<div id="toast" class="toast" role="status" aria-live="polite"></div>
 	<script src="app.js"></script>
 </body>
 </html>

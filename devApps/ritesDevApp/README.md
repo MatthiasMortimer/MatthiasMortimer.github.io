@@ -62,7 +62,7 @@ bash launch.sh
 3. Open the address displayed in the Mobile Mode panel on the phone.
 4. Select an app. The launcher opens its desktop window and opens the browser version in a new phone tab.
 
-Mobile mode turns off whenever the launcher exits. App browser servers listen on loopback only and are available to the local network solely through the launcher while mobile mode is enabled. If the displayed address does not connect, allow TCP port `4605` through the PC firewall for the private network.
+Mobile mode turns off whenever the launcher exits. The launcher listens on the network interfaces and blocks non-loopback requests until Mobile Mode is enabled. Use the primary address shown in the Mobile Mode panel; if it does not connect, try another listed address. Keep the phone and PC on the same Wi-Fi, avoid guest Wi-Fi or router device isolation, disconnect VPNs, and allow TCP port `4605` through the PC firewall for the private network.
 
 ## Launcher Interface
 

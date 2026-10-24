@@ -516,6 +516,33 @@ button {
 	color: var(--color-primary);
 }
 
+.mobile-alternate-addresses {
+	display: grid;
+	gap: 0.45rem;
+}
+
+.mobile-alternate-addresses[hidden] {
+	display: none;
+}
+
+.mobile-alternate-addresses div {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.mobile-alternate-addresses a {
+	font-family: "Monaco", "Menlo", monospace;
+	font-size: 0.75rem;
+	color: var(--color-dark);
+	overflow-wrap: anywhere;
+}
+
+.mobile-network-help {
+	font-size: 0.78rem;
+	line-height: 1.45;
+	color: var(--color-muted);
+}
+
 .switch {
 	position: relative;
 	width: 46px;

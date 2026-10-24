@@ -4,11 +4,11 @@
     {
       "name": "START HERE",
       "channels": [
-        { "name": "start-here", "topic": "Welcome and orientation for the RitesDev community." },
-        { "name": "rules", "topic": "Community rules and expectations." },
-        { "name": "server-information", "topic": "Information about RitesDev and this server." },
-        { "name": "announcements", "topic": "Official RitesDev announcements." },
-        { "name": "apply-or-contact", "topic": "How to request access or contact the RitesDev team." },
+        { "name": "start-here", "topic": "Welcome and orientation for the RitesDev community.", "access": { "everyone": "read", "bot": "view", "roles": { "Admin": "view", "Project Manager": "view" } } },
+        { "name": "rules", "topic": "Community rules and expectations.", "access": { "everyone": "read", "bot": "view", "roles": { "Admin": "view", "Project Manager": "view" } } },
+        { "name": "server-information", "topic": "Information about RitesDev and this server.", "access": { "everyone": "read", "bot": "view", "roles": { "Admin": "view", "Project Manager": "view" } } },
+        { "name": "announcements", "topic": "Official RitesDev announcements.", "type": "announcement", "access": { "everyone": "read", "bot": "view", "roles": { "Admin": "view", "Project Manager": "view" } } },
+        { "name": "apply-or-contact", "topic": "How to request access or contact the RitesDev team.", "access": { "everyone": "read", "bot": "view", "roles": { "Admin": "view", "Project Manager": "view" } } },
         { "name": "introductions", "topic": "Introduce yourself to the community." }
       ]
     },
@@ -18,24 +18,43 @@
     },
     {
       "name": "SUPPORT & TICKETS",
-      "channels": ["support-desk", "ticket-log", "bot-status", "staff-notes"]
+      "channels": [
+        { "name": "support-desk", "topic": "Read the support options and open a private ticket using the panel.", "access": { "everyone": "read", "bot": "view" } },
+        { "name": "ticket-log", "access": { "bot": "view" } },
+        { "name": "bot-status", "access": { "bot": "view" } },
+        "staff-notes"
+      ]
     },
     {
       "name": "CLIENT PORTAL",
-      "channels": ["client-directory", "client-requests", "client-updates"]
+      "channels": [
+        "client-directory",
+        { "name": "client-requests", "topic": "One post per client request. Keep discussion and files in its thread.", "type": "forum", "tags": ["New Request", "In Review", "Scheduled", "Waiting on Client", "Complete"], "access": { "bot": "view" } },
+        { "name": "client-updates", "topic": "Client project updates and decisions.", "type": "forum", "tags": ["Update", "Decision Needed", "Waiting on Client", "Complete"] }
+      ]
     },
     {
       "name": "PROJECTS",
-      "channels": ["project-directory", "active-projects", "internal-projects", "project-archive"]
+      "channels": [
+        "project-directory",
+        { "name": "active-projects", "topic": "One post per project or scoped feature. Pin scope, owner, timeline, and repository links.", "type": "forum", "tags": ["Planning", "In Progress", "Blocked", "Review Needed", "Client Input", "Complete"] },
+        { "name": "internal-projects", "topic": "Private internal project discussions.", "type": "forum", "tags": ["Planning", "In Progress", "Blocked", "Review Needed", "Complete"], "access": { "roles": { "Developer": "view" } } },
+        { "name": "project-archive", "topic": "Completed and archived projects.", "type": "forum", "tags": ["Complete", "Cancelled", "On Hold"] }
+      ]
     },
     {
       "name": "TEAM",
-      "channels": ["team-chat", "delivery-review", "operations", "moderation-log"]
+      "channels": [
+        "team-chat",
+        "delivery-review",
+        { "name": "operations", "access": { "roles": { "Developer": "hidden" } } },
+        { "name": "moderation-log", "access": { "bot": "view", "roles": { "Developer": "hidden" } } }
+      ]
     }
   ],
   "roles": [
-    { "name": "Admin", "permissions": [] },
-    { "name": "Project Manager", "permissions": ["ManageMessages", "ManageThreads"] },
+    { "name": "Admin", "permissions": ["ManageGuild", "ManageChannels", "ManageRoles", "ManageMessages", "ManageThreads", "ManageEvents"] },
+    { "name": "Project Manager", "permissions": ["ManageChannels", "ManageMessages", "ManageThreads"] },
     { "name": "Moderator", "permissions": ["ManageMessages", "ModerateMembers", "ViewAuditLog"] },
     { "name": "Developer", "permissions": [] },
     { "name": "Client", "permissions": [] },

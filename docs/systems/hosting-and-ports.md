@@ -23,6 +23,17 @@ Which port each local server uses, how test mode shifts them, and where other ap
 | [ritesGlobal/hosting-config.cjs](../../ritesGlobal/hosting-config.cjs) | `buildHostingConfig()`: the one place final URLs are computed |
 | [devApps/siteHosting/host-manager.js](../../devApps/siteHosting/host-manager.js) | Starts and stops dev, production, and tunnel processes |
 | [devApps/content-editor/live-preview.js](../../devApps/content-editor/live-preview.js) | Uses `devLocalUrl` plus the site `basePath` for the preview |
+| [ritesGlobal/traffic-log.mjs](../../ritesGlobal/traffic-log.mjs) | Production page-request logging and separate user/bot numbering |
+| [devApps/siteHosting/public/app.js](../../devApps/siteHosting/public/app.js) | Separate user/bot traffic lists and recent-request counts |
+
+### Traffic logs
+
+- Production requests are stored as daily JSONL files in `dev/traffic/`. `state.json` persists independent `nextHuman` and `nextBot` counters. Legacy `nextVisitor` state is accepted as the next human number until the history is reset.
+- Bot detection uses known crawler names and user-agent patterns. It is an estimate, not proof that a visitor is human. Known crawlers are grouped by name; human numbers group IP + user agent with an in-memory salted hash, not a permanent identity.
+- Site Hosting shows separate user and bot lists, unique visitor counts, and request counts within the latest 500 requests (not lifetime totals). Both desktop and browser views refresh from the hosting API.
+- The homepage is displayed as `/home`; the stored path remains `/` and site routing is unchanged. Other paths are displayed unchanged.
+- Restart Site Hosting and production hosting after logger changes. Browser assets only require reloading.
+- To reset history, stop production first, back up the daily JSONL files and `state.json` outside `dev/traffic/`, then remove only those originals and restart Site Hosting/production. Never clear files while the production logger is running: it still holds its stream and counters in memory.
 
 ## Rules
 
@@ -43,5 +54,6 @@ Which port each local server uses, how test mode shifts them, and where other ap
 
 ```bash
 node -e 'console.log(require("./ritesGlobal/hosting-config.cjs").buildHostingConfig())'
+npm --prefix devApps/siteHosting test      # traffic numbering, persistence, and UI counts
 npm --prefix devApps/content-editor test   # includes port-offset tests for the preview
 ```
